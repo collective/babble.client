@@ -3,7 +3,7 @@
 
  <!-- Portlet type registrations -->
  <portlet
-   addview="slc.onlinecontacts.portlets.OnlineContacts"
+   addview="slc.onlinecontacts.OnlineContacts"
    title="Online Contacts"
    description="This product provides a portlet which shows you a list of all online users and enables you to contact them."
    />

@@ -1,0 +1,27 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="slc.onlinecontacts">
+
+    <browser:resource
+        name="chat.js"
+        file="resources/chat.js"
+        />
+
+    <browser:resource
+        name="chat.css"
+        file="resources/chat.css"
+        />
+        
+    <browser:resource
+        name="screen.css"
+        file="resources/screen.css"
+        />
+
+    <browser:resource
+        name="screen_ie.css"
+        file="resources/screen_ie.css"
+        />
+
+</configure>

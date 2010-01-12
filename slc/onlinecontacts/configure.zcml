@@ -6,31 +6,15 @@
     i18n_domain="slc.onlinecontacts">
 
     <five:registerPackage package="." initialize=".initialize" />
+    <include package=".browser" />
+    <include package=".portlets" />   
 
     <genericsetup:registerProfile
-       name="default"
-       title="Example portlet"
-       directory="profiles/default"
-       description="This product provides a portlet which shows you a list of all online users and enables you to contact them."
-       provides="Products.GenericSetup.interfaces.EXTENSION"
-       />
-
-     <!-- Register the portlet -->
-
-     <!-- If the portlet has no configurable parameters, you can remove
-          the EditForm declaration in portlets/onlinecontacts.py and delete
-          the 'editview' attribute from this statement.
-       -->
-
-     <plone:portlet
-         name="slc.onlinecontacts.OnlineContacts"
-         interface=".portlets.onlinecontacts.IExamplePortlet"
-         assignment=".portlets.onlinecontacts.Assignment"
-         view_permission="zope2.View"
-         edit_permission="cmf.ManagePortal"
-         renderer=".portlets.onlinecontacts.Renderer"
-         addview=".portlets.onlinecontacts.AddForm"
-         editview=".portlets.onlinecontacts.EditForm"
-         />
+        name="default"
+        title="slc.onlinecontacts"
+        directory="profiles/default"
+        description="This product provides a portlet which shows you a list of all online users and enables you to contact them."
+        provides="Products.GenericSetup.interfaces.EXTENSION"
+        />
 
 </configure>

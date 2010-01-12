@@ -1,0 +1,22 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="slc.onlinecontacts">
+
+    <!-- If the portlet has no configurable parameters, you can remove
+        the EditForm declaration in portlets/onlinecontacts.py and delete
+        the 'editview' attribute from this statement.
+    -->
+    <plone:portlet
+        name="slc.onlinecontacts.OnlineContacts"
+        interface=".onlinecontacts.IOnlineContacts"
+        assignment=".onlinecontacts.Assignment"
+        view_permission="zope2.View"
+        edit_permission="cmf.ManagePortal"
+        renderer=".onlinecontacts.Renderer"
+        addview=".onlinecontacts.AddForm"
+        editview=".onlinecontacts.EditForm"
+        />
+
+</configure>

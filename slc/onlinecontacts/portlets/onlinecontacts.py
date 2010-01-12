@@ -3,12 +3,8 @@ from zope.interface import implements
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.portlets import base
 
-from zope import schema
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-
-from slc.onlinecontacts import ExamplePortletMessageFactory as _
-
 
 class IOnlineContacts(IPortletDataProvider):
     """A portlet
@@ -53,7 +49,8 @@ class Assignment(base.Assignment):
         """This property is used to give the title of the portlet in the
         "manage portlets" screen.
         """
-        return "Example portlet"
+        return "Who's online?"
+
 
 
 class Renderer(base.Renderer):
@@ -64,7 +61,11 @@ class Renderer(base.Renderer):
     of this class. Other methods can be added and referenced in the template.
     """
 
-    render = ViewPageTemplateFile('exampleportlet.pt')
+    render = ViewPageTemplateFile('onlinecontacts.pt')
+    
+    def get_online_contacts(self):
+        """ """
+        return ['apilz', 'jcbrand', 'do3cc']
 
 
 class AddForm(base.AddForm):
@@ -74,7 +75,7 @@ class AddForm(base.AddForm):
     zope.formlib which fields to display. The create() method actually
     constructs the assignment that is being added.
     """
-    form_fields = form.Fields(IExamplePortlet)
+    form_fields = form.Fields(IOnlineContacts)
 
     def create(self, data):
         return Assignment(**data)
@@ -101,4 +102,4 @@ class EditForm(base.EditForm):
     This is registered with configure.zcml. The form_fields variable tells
     zope.formlib which fields to display.
     """
-    form_fields = form.Fields(IExamplePortlet)
+    form_fields = form.Fields(IOnlineContacts)

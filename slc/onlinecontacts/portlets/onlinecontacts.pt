@@ -3,17 +3,25 @@
 
     <dt class="portletHeader">
         <span class="portletTopLeft"></span>
-        Header
+        Who's online?
         <span class="portletTopRight"></span>
     </dt>
 
-    <dd class="portletItem odd">
-        Body text
-    </dd>
+    <tal:items tal:repeat="contact view/get_online_contacts">
+        <dd class="portletItem"
+            tal:define="oddrow repeat/contact/odd;"
+            tal:attributes="class python:oddrow and  'portletItem even' or 'portletItem odd'">
+            <a  tal:content="contact" 
+                style="cursor: pointer;"
+                tal:attributes="onclick string:jQuery.noConflict();; chatWith('$contact')"> i
+                Contact Name 
+            </a>
+        </dd>
+    </tal:items>
 
     <dd class="portletFooter">
         <span class="portletBottomLeft"></span>
-        Footer
+            Footer
         <span class="portletBottomRight"></span>
     </dd>
 
