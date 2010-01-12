@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<portlets>
+
+ <!-- Portlet type registrations -->
+ <portlet
+   addview="slc.onlinecontacts.portlets.OnlineContacts"
+   title="Online Contacts"
+   description="This product provides a portlet which shows you a list of all online users and enables you to contact them."
+   />
+
+</portlets>
