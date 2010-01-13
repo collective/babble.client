@@ -24,4 +24,28 @@
         file="resources/screen_ie.css"
         />
 
+    <browser:page
+        for="*"
+        attribute="send_chat"
+        class=".chat.Chat"
+        name="send_chat"
+        permission="zope2.View"
+        /> 
+
+    <browser:page
+        for="*"
+        attribute="poll"
+        class=".chat.Chat"
+        name="poll"
+        permission="zope2.View"
+        /> 
+
+    <browser:page
+        for="*"
+        attribute="start_session"
+        class=".chat.Chat"
+        name="start_session"
+        permission="zope2.View"
+        /> 
+
 </configure>
