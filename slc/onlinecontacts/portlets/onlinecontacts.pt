@@ -1,3 +1,16 @@
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        doc_title = document.title;
+        initialize(username);
+        jQuery([window, document]).blur(function(){
+            window_focus = false;
+        }).focus(function(){
+            window_focus = true;
+            document.title = doc_title;
+        });
+    });
+</script>
+
 <dl class="portlet portletExamplePortlet"
     i18n:domain="slc.onlinecontacts">
 
@@ -13,7 +26,7 @@
             tal:attributes="class python:oddrow and  'portletItem even' or 'portletItem odd'">
             <a  tal:content="contact" 
                 style="cursor: pointer;"
-                tal:attributes="onclick string:jQuery.noConflict();; chatWith('$contact')"> i
+                tal:attributes="onclick string:jQuery.noConflict();; startChat('$contact')"> 
                 Contact Name 
             </a>
         </dd>
