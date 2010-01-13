@@ -1,0 +1,7 @@
+<layers>
+    <layer
+        name="slc.onlinecontacts"
+        interface="slc.onlinecontacts.interfaces.IOnlineContactsLayer"
+     />
+</layers>
+
