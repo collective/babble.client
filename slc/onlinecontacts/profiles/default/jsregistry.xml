@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <object name="portal_javascripts" meta_type="JavaScripts Registry">
-
     <javascript 
         cacheable="True" 
         compression="safe" 
@@ -11,5 +10,14 @@
         insert-after="++resource++jquery-1.3.2.min.js"
         insert-before="jquery-integration.js"
         />
-
+    <javascript 
+        cacheable="True" 
+        compression="safe" 
+        cookable="True"
+        enabled="1" 
+        expression="" 
+        id="++resource++quicksearch.js"
+        insert-after="++resource++chat.js"
+        insert-before="jquery-integration.js"
+        />
 </object>
