@@ -1,3 +1,20 @@
+div.online-contacts {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-left:1px solid #8CACBB;
+}
+
+div.online-contacts-max {
+    height: 18em;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-left:1px solid #8CACBB;
+}
+
+div.online-contacts .portletItem, div.online-contacts-max .portletItem {
+    border-left:0px;
+}
+
 .chatbox {
 	position: fixed;
 	position:expression("absolute");
@@ -73,6 +90,18 @@
 	font-weight: bold;
 }
 
+.chat-message-me {
+	margin-left:-1em;
+	font-weight: bold;
+    color: #436976;
+}
+
+.chat-message-them {
+	margin-left:-1em;
+	font-weight: bold;
+    color: #F62817;
+}
+
 .chat-message-content {
 }
 
@@ -91,3 +120,5 @@
 .chat-title {
 	float: left;
 }
+
+
