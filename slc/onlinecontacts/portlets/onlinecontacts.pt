@@ -1,4 +1,6 @@
-<script type="text/javascript">
+<tal:get define="portlet_id view/get_id">
+<tal:script replace="structure string: 
+<script type='text/javascript'>
     jQuery(document).ready(function(){
         doc_title = document.title;
         initialize(username);
@@ -8,34 +10,40 @@
             window_focus = true;
             document.title = doc_title;
         });
+        jQuery('dl#$portlet_id div#online-contacts dd').quicksearch({
+            position: 'prepend',
+            attached: 'dl#$portlet_id dd#online-contacts-footer',
+            loaderText: '',
+            delay: 100
+        })
     });
-</script>
+</script>"/>
 
-<dl class="portlet portletExamplePortlet"
+<dl class="portlet online-contacts" 
+    tal:attributes="id portlet_id"
     i18n:domain="slc.onlinecontacts">
-
     <dt class="portletHeader">
         <span class="portletTopLeft"></span>
         Who's online?
         <span class="portletTopRight"></span>
     </dt>
 
-    <tal:items tal:repeat="contact view/get_online_contacts">
+    <div id="online-contacts"
+         tal:define="contacts view/get_online_contacts"
+         tal:attributes="class python:contacts > 5 and 'online-contacts-max' or 'online-contacts'">
+    <tal:items tal:repeat="contact contacts">
         <dd class="portletItem"
-            tal:define="oddrow repeat/contact/odd;"
+            tal:define="oddrow repeat/contact/odd;
+                        fullname python:contact.getProperty('fullname') or contact.id"
             tal:attributes="class python:oddrow and  'portletItem even' or 'portletItem odd'">
-            <a  tal:content="contact" 
+            <a  tal:content="fullname" 
                 style="cursor: pointer;"
-                tal:attributes="onclick string:jQuery.noConflict();; startChat('$contact')"> 
+                tal:attributes="onclick string:jQuery.noConflict();; startChat('${contact/id}')"> 
                 Contact Name 
             </a>
         </dd>
     </tal:items>
-
-    <dd class="portletFooter">
-        <span class="portletBottomLeft"></span>
-            Footer
-        <span class="portletBottomRight"></span>
-    </dd>
-
+    </div>
+    <dd class="portletFooter" id="online-contacts-footer"></dd>
 </dl>
+</tal:get>
