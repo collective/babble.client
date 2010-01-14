@@ -24,6 +24,8 @@ setup(name='slc.onlinecontacts',
       zip_safe=False,
       install_requires=[
           'setuptools',
+          'simplejson',
+          'chat.server',
       ],
       entry_points="""
       [z3c.autoinclude.plugin]
