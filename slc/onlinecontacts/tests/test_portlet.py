@@ -8,9 +8,9 @@ from plone.portlets.interfaces import IPortletRenderer
 
 from plone.app.portlets.storage import PortletAssignmentMapping
 
-from slc.onlinecontacts import exampleportlet
+from babble.client import exampleportlet
 
-from slc.onlinecontacts.tests.base import TestCase
+from babble.client.tests.base import TestCase
 
 
 class TestPortlet(TestCase):
@@ -21,9 +21,9 @@ class TestPortlet(TestCase):
     def test_portlet_type_registered(self):
         portlet = getUtility(
             IPortletType,
-            name='slc.onlinecontacts.ExamplePortlet')
+            name='babble.client.ExamplePortlet')
         self.assertEquals(portlet.addview,
-                          'slc.onlinecontacts.ExamplePortlet')
+                          'babble.client.ExamplePortlet')
 
     def test_interfaces(self):
         # TODO: Pass any keyword arguments to the Assignment constructor
@@ -34,7 +34,7 @@ class TestPortlet(TestCase):
     def test_invoke_add_view(self):
         portlet = getUtility(
             IPortletType,
-            name='slc.onlinecontacts.ExamplePortlet')
+            name='babble.client.ExamplePortlet')
         mapping = self.portal.restrictedTraverse(
             '++contextportlets++plone.leftcolumn')
         for m in mapping.keys():

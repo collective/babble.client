@@ -2,14 +2,14 @@
     xmlns="http://namespaces.zope.org/zope"
     xmlns:browser="http://namespaces.zope.org/browser"
     xmlns:plone="http://namespaces.plone.org/plone"
-    i18n_domain="slc.onlinecontacts">
+    i18n_domain="babble.client">
 
     <!-- If the portlet has no configurable parameters, you can remove
         the EditForm declaration in portlets/onlinecontacts.py and delete
         the 'editview' attribute from this statement.
     -->
     <plone:portlet
-        name="slc.onlinecontacts.OnlineContacts"
+        name="babble.client.OnlineContacts"
         interface=".onlinecontacts.IOnlineContacts"
         assignment=".onlinecontacts.Assignment"
         view_permission="zope2.View"

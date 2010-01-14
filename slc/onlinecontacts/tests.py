@@ -10,14 +10,14 @@ from Products.PloneTestCase import PloneTestCase as ptc
 from Products.PloneTestCase.layer import PloneSite
 ptc.setupPloneSite()
 
-import slc.onlinecontacts
+import babble.client
 
 class TestCase(ptc.PloneTestCase):
     class layer(PloneSite):
         @classmethod
         def setUp(cls):
             fiveconfigure.debug_mode = True
-            ztc.installPackage(slc.onlinecontacts)
+            ztc.installPackage(babble.client)
             fiveconfigure.debug_mode = False
 
         @classmethod
@@ -30,21 +30,21 @@ def test_suite():
 
         # Unit tests
         #doctestunit.DocFileSuite(
-        #    'README.txt', package='slc.onlinecontacts',
+        #    'README.txt', package='babble.client',
         #    setUp=testing.setUp, tearDown=testing.tearDown),
 
         #doctestunit.DocTestSuite(
-        #    module='slc.onlinecontacts.mymodule',
+        #    module='babble.client.mymodule',
         #    setUp=testing.setUp, tearDown=testing.tearDown),
 
 
         # Integration tests that use PloneTestCase
         #ztc.ZopeDocFileSuite(
-        #    'README.txt', package='slc.onlinecontacts',
+        #    'README.txt', package='babble.client',
         #    test_class=TestCase),
 
         #ztc.FunctionalDocFileSuite(
-        #    'browser.txt', package='slc.onlinecontacts',
+        #    'browser.txt', package='babble.client',
         #    test_class=TestCase),
 
         ])

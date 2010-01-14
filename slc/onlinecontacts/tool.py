@@ -7,7 +7,7 @@ from AccessControl import ClassSecurityInfo
 from Products.CMFCore.utils import UniqueObject
 from Products.CMFCore.utils import SimpleItemWithProperties
 
-log = logging.getLogger('slc.onlinecontacts/tool.py')
+log = logging.getLogger('babble.client/tool.py')
 
 class MessageTool(UniqueObject, SimpleItemWithProperties):
     meta_type = 'Chat Tool'

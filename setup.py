@@ -3,7 +3,7 @@ import os
 
 version = '1.0'
 
-setup(name='slc.onlinecontacts',
+setup(name='babble.client',
       version=version,
       description="This product provides a portlet labeled 'Who's online?' which shows you a list of all online users and enables you to contact them.",
       long_description=open("README.txt").read() + "\n" +

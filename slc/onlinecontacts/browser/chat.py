@@ -3,7 +3,7 @@ import xmlrpclib
 import simplejson as json
 from Products.CMFCore.utils import getToolByName
 
-log = logging.getLogger('slc.onlinecontacts/browser/chat.py')
+log = logging.getLogger('babble.client/browser/chat.py')
 
 class Chat:
 

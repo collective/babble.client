@@ -17,21 +17,21 @@ def setup_product():
     # Load the ZCML configuration for this package and its dependencies
 
     fiveconfigure.debug_mode = True
-    import slc.onlinecontacts
-    zcml.load_config('configure.zcml', slc.onlinecontacts)
+    import babble.client
+    zcml.load_config('configure.zcml', babble.client)
     fiveconfigure.debug_mode = False
 
     # We need to tell the testing framework that these products
     # should be available. This can't happen until after we have loaded
     # the ZCML.
 
-    ztc.installPackage('slc.onlinecontacts')
+    ztc.installPackage('babble.client')
 
 # The order here is important: We first call the deferred function and then
 # let PloneTestCase install it during Plone site setup
 
 setup_product()
-ptc.setupPloneSite(products=['slc.onlinecontacts'])
+ptc.setupPloneSite(products=['babble.client'])
 
 class TestCase(ptc.PloneTestCase):
     """Base class used for test cases
