@@ -113,7 +113,7 @@ function createChat(title, minimize) {
     '<div class="chat-head">' +
         '<div class="chat-title">'+title+'</div>' +
         '<div class="chat-options">' +
-            '<a href="javascript:void(0)" onclick="javascript:toggleChatGrowth(\''+title+'\')">-</a>' +
+            '<a href="javascript:void(0)" onclick="javascript:toggleChat(\''+title+'\')">-</a>' +
             '<a href="javascript:void(0)" onclick="javascript:closeChat(\''+title+'\')">X</a>' +
         '</div>' + 
         '<br clear="all"/>' +
@@ -183,7 +183,6 @@ function createChat(title, minimize) {
 }
 
 function poll(){
-    var chats_found = 0;
     if (window_focus == false) {
         var blink_number = 0;
         var title_changed = 0;
@@ -218,56 +217,76 @@ function poll(){
             }
         }
     }
+    var messages_found = poll_server();
+
+    poll_count++;
+    if (messages_found > 0) {
+        poll_time = poll_min;
+        poll_count = 1;
+    } 
+    else if (poll_count >= 10) {
+        poll_time *= 2;
+        poll_count = 1;
+        if (poll_time > poll_max) {
+            poll_time = poll_max;
+        }
+    }
+    setTimeout('poll();', poll_time);
+}
+
+function poll_server() {
+    var messages_found = 0;
     jQuery.ajax({
         url: "@@poll",
         cache: false,
         dataType: "json",
         data: {user: username},
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            for (i=0; i<chats.length; i++) {
+                user = chats[i]
+                content = jQuery("#chatbox_"+user+" .chat-content");
+                content.append(
+                    '<div class="chat-message">' + 
+                        '<span class="chat-message-error">Connection Error</span>' + 
+                    '</div>'
+                );
+                content.scrollTop(content[0].scrollHeight);
+                poll_count += 10; // Dramatically increase the poll count to prevent the screen filling up with errrors.
+            }
+        },
         success: function(data) {
             jQuery.each(data.items, function(i,item){
                 if (item)	{ // fix IE bug
                     user = item.user;
                     if (item.messages.length) {
+                        messages_found++;
                         has_messages[user] = true;
                         new_chats[user] = true;
-                        chats_found += 1;
-                        if (jQuery("#chatbox_"+user).length <= 0) {
+                        var chat = jQuery("#chatbox_"+user);
+                        if (chat.length <= 0) {
                             createChat(user);
                         }
-                        if (jQuery("#chatbox_"+user).css('display') == 'none') {
-                            jQuery("#chatbox_"+user).css('display','block');
+                        if (chat.css('display') == 'none') {
+                            chat.css('display','block');
                             reorderChats();
                         }
+                        var chat_content = jQuery("#chatbox_"+user+" .chat-content");
                         for (i=0; i<item.messages.length; i++) {
                             message = item.messages[i]
-                            jQuery("#chatbox_"+user+" .chat-content")
-                            .append(
+                            chat_content.append(
                                 '<div class="chat-message">' + 
                                     '<span class="chat-message-them">'+user+' '+message[1]+':&nbsp;&nbsp;</span>' + 
                                     '<span class="chat-message-content">'+message[2]+'</span>' + 
                                 '</div>'
                             );
                         }
-                        jQuery("#chatbox_"+user+" .chat-content").scrollTop(jQuery("#chatbox_"+user+" .chat-content")[0].scrollHeight);
+                        chat_content.scrollTop(chat_content[0].scrollHeight);
                     }
                 }
             });
-            poll_count++;
-
-            if (chats_found > 0) {
-                poll_time = poll_min;
-                poll_count = 1;
-            } 
-            else if (poll_count >= 10) {
-                poll_time *= 2;
-                poll_count = 1;
-                if (poll_time > poll_max) {
-                    poll_time = poll_max;
-                }
-            }
-            setTimeout('poll();', poll_time);
         }
     });
+    return messages_found;
 }
 
 function keypressed(event, textarea, title, username) {
@@ -308,7 +327,7 @@ function keypressed(event, textarea, title, username) {
 	}
 }
 
-function toggleChatGrowth(title) {
+function toggleChat(title) {
 	if (jQuery('#chatbox_'+title+' .chat-content').css('display') == 'none') {  
 		var minimized_chats = new Array();
 		if (jQuery.cookie('chatbox_minimized')) {

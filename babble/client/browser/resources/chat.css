@@ -102,7 +102,11 @@ div.online-contacts .portletItem, div.online-contacts-max .portletItem {
     color: #F62817;
 }
 
-.chat-message-content {
+.chat-message-error {
+	margin-left:-1em;
+    color:#76797C;
+    font-size:90%;
+    font-weight:normal;
 }
 
 .chat-options {
