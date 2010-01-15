@@ -19,13 +19,12 @@ setup(name='babble.client',
       url='http://plone.org',
       license='GPL',
       packages=find_packages(exclude=['ez_setup']),
-      namespace_packages=['slc'],
+      namespace_packages=['babble'],
       include_package_data=True,
       zip_safe=False,
       install_requires=[
           'setuptools',
           'simplejson',
-          'chat.server',
       ],
       entry_points="""
       [z3c.autoinclude.plugin]
