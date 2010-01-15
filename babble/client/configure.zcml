@@ -7,8 +7,6 @@
 
     <five:registerPackage package="." initialize=".initialize" />
 
-    <include package="chat.server" />
-
     <include package=".browser" />
     <include package=".portlets" />   
 
