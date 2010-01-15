@@ -20,10 +20,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 var blink_order = 0;
 var doc_title;
 var poll_count = 0;         // The amount of server polls that have been made
-var poll_max = 30001;       // The maximum polling period
-var poll_min = 1000;        // The minimum polling period
+var poll_max = 33000;       // The maximum polling period
+var poll_min = 2000;        // The minimum polling period
 var poll_time = poll_min;   // The initial polling period
 var username;
+var messages_found = 0;
 var window_focus = true;
 var chat_focus = new Array();
 var has_messages = new Array();
@@ -217,14 +218,15 @@ function poll(){
             }
         }
     }
-    var messages_found = poll_server();
+    poll_server();
 
     poll_count++;
     if (messages_found > 0) {
         poll_time = poll_min;
         poll_count = 1;
+        messages_found = 0;
     } 
-    else if (poll_count >= 10) {
+    else if ((poll_count >= 10) && (poll_time < poll_max)) {
         poll_time *= 2;
         poll_count = 1;
         if (poll_time > poll_max) {
@@ -235,7 +237,6 @@ function poll(){
 }
 
 function poll_server() {
-    var messages_found = 0;
     jQuery.ajax({
         url: "@@poll",
         cache: false,
@@ -259,7 +260,7 @@ function poll_server() {
                 if (item)	{ // fix IE bug
                     user = item.user;
                     if (item.messages.length) {
-                        messages_found++;
+                        messages_found += 1;
                         has_messages[user] = true;
                         new_chats[user] = true;
                         var chat = jQuery("#chatbox_"+user);
@@ -286,7 +287,6 @@ function poll_server() {
             });
         }
     });
-    return messages_found;
 }
 
 function keypressed(event, textarea, title, username) {
