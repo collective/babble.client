@@ -45,4 +45,15 @@ class Chat:
         """ """
         log.info('start_session called')
         member = self._authenticated_member()
-        return json.dumps({'username': member.id, 'items': []})
+
+        server = self._getConnection()
+        try:
+            messages = server.getAllMessages(member.id, True) # register=True
+        except xmlrpclib.Fault, e:
+            err_msg = e.faultString.strip('\n').split('\n')[-1]
+            log.error('Error from chat.service: send_message: %s' % err_msg)
+            raise err_msg 
+
+        return json.dumps({'username': member.id, 'items': messages})
+
+

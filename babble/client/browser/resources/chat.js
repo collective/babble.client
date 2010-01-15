@@ -37,39 +37,40 @@ function initialize(){
 	  cache: false,
 	  dataType: "json",
 	  success: function(data) {
-		username = data.username;
-		jQuery.each(data.items, function(i,item) {
-			if (item)	{ // fix strange ie bug
-                title = item.f;
-                if (jQuery("#chatbox_"+title).length <= 0) {
-                    createChat(title, 1);
+            jQuery.each(data.items, function(i,item){
+                if (item)	{ // fix IE bug
+                    user = item.user;
+                    if (item.messages.length) {
+                        messages_found += 1;
+                        has_messages[user] = true;
+                        new_chats[user] = true;
+                        var chat = jQuery("#chatbox_"+user);
+                        if (chat.length <= 0) {
+                            createChat(user, 1);
+                        }
+                        if (chat.css('display') == 'none') {
+                            chat.css('display','block');
+                            reorderChats();
+                        }
+                        var chat_content = jQuery("#chatbox_"+user+" .chat-content");
+                        for (i=0; i<item.messages.length; i++) {
+                            message = item.messages[i]
+                            chat_content.append(
+                                '<div class="chat-message">' + 
+                                    '<span class="chat-message-them">'+user+' '+message[1]+':&nbsp;&nbsp;</span>' + 
+                                    '<span class="chat-message-content">'+message[2]+'</span>' + 
+                                '</div>'
+                            );
+                        }
+                        chat_content.scrollTop(chat_content[0].scrollHeight);
+                        // yet another strange ie bug
+                        setTimeout('jQuery("#chatbox_"+user+" .chat-content").scrollTop(jQuery("#chatbox_"+user+" .chat-content")[0].scrollHeight);', 100); 
+                    }
                 }
-                if (item.s == 1) {
-                    item.f = username;
-                }
-                if (item.s == 2) {
-                    jQuery("#chatbox_"+title+" .chat-content").append(
-                        '<div class="chat-message">' + 
-                            '<span class="chat-info">'+item.m+'</span>' +
-                        '</div>');
-                } 
-                else {
-                    jQuery("#chatbox_"+title+" .chat-content").append(
-                        '<div class="chat-message">' + 
-                            '<span class="chat-message-from">'+item.f+':&nbsp;&nbsp;</span>' + 
-                            '<span class="chat-message-content">'+item.m+'</span>' + 
-                        '</div>');
-                }
-            }
-		});
-		for (i=0; i<chats.length; i++) {
-			title = chats[i];
-			jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
-            // yet another strange ie bug
-			setTimeout('jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);', 100); 
-		}
-	setTimeout('poll();', poll_time);
-	}});
+            });
+        }
+	});
+    setTimeout('poll();', poll_time);
 }
 
 function reorderChats() {
