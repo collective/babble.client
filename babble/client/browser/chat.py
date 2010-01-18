@@ -1,6 +1,7 @@
 import logging
 import xmlrpclib
 import simplejson as json
+from Acquisition import aq_inner
 from Products.CMFCore.utils import getToolByName
 
 log = logging.getLogger('babble.client/browser/chat.py')
@@ -9,12 +10,14 @@ class Chat:
 
     def _getConnection(self):
         """ Return a connection to the chat service """
-        mtool = getToolByName(self.context, 'portal_chat')
+        context = aq_inner(self.context)
+        mtool = getToolByName(context, 'portal_chat')
         return mtool.getConnection()
 
     def _authenticated_member(self):
         """ Return the currently logged in member object """
-        pm = getToolByName(self, 'portal_membership')
+        context = aq_inner(self.context)
+        pm = getToolByName(context, 'portal_membership')
         return pm.getAuthenticatedMember()
 
     def send_message(self, user, to, message):
@@ -43,8 +46,8 @@ class Chat:
 
     def start_session(self):
         """ """
-        log.info('start_session called')
         member = self._authenticated_member()
+        log.info('start_session called, member: %s' % member.getId())
 
         server = self._getConnection()
         try:
@@ -54,6 +57,6 @@ class Chat:
             log.error('Error from chat.service: send_message: %s' % err_msg)
             raise err_msg 
 
-        return json.dumps({'username': member.id, 'items': messages})
+        return json.dumps({'username': member.getId(), 'items': messages})
 
 
