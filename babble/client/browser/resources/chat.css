@@ -123,6 +123,7 @@ div.online-contacts .portletItem, div.online-contacts-max .portletItem {
 
 .chat-title {
 	float: left;
+	font-weight: bold;
 }
 
 
