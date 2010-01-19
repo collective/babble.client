@@ -30,33 +30,38 @@ class Chat:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: send_message: %s' % err_msg)
             raise err_msg 
-        return u''
 
     def poll(self, user):
         """ Polling to retrieve online users and chat messages """
         server = self._getConnection()
         try:
-            messages = server.getAllMessages(user, True) # register=True
+            messages = server.getUnreadMessages(user, None, True, True) 
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: send_message: %s' % err_msg)
+            log.error('Error from chat.service: getUnreadMessages: %s' % err_msg)
             raise err_msg 
-
+                
         return json.dumps({'items': messages})
 
-    def start_session(self):
+    def start_session(self, open_chats):
         """ """
-        member = self._authenticated_member()
-        log.info('start_session called, member: %s' % member.getId())
+        member = self._authenticated_member().getId()
+        log.info('start_session called, member: %s' % member)
+        open_chats = open_chats.split('|')
+        for s in ['', member]:
+            if s in open_chats:
+                open_chats.remove(s)
 
         server = self._getConnection()
-        try:
-            messages = server.getAllMessages(member.id, True) # register=True
-        except xmlrpclib.Fault, e:
-            err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: send_message: %s' % err_msg)
-            raise err_msg 
+        messages = []
+        for user in open_chats:
+            try:
+                messages = \
+                    server.getUnclearedMessages(member, user, True,  True, False) 
+            except xmlrpclib.Fault, e:
+                err_msg = e.faultString.strip('\n').split('\n')[-1]
+                log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
+                raise err_msg 
 
-        return json.dumps({'username': member.getId(), 'items': messages})
-
+        return json.dumps({'username': member, 'items': messages})
 
