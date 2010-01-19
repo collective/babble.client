@@ -33,12 +33,13 @@ var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
 function initialize(){  
+    var open_chats = Array();
     var cookie = jQuery.cookie('chats_open');
     jQuery.cookie('chats_open', '');
     if (cookie) {
-        var cookie_chats = cookie.split('|');
-        for (var i=0; i<cookie_chats.length; i++) {
-            var user = cookie_chats[i];
+        open_chats = cookie.split('|');
+        for (var i=0; i<open_chats.length; i++) {
+            var user = open_chats[i];
             if (user) { 
                 createChat(user);
             }
@@ -48,8 +49,9 @@ function initialize(){
         url: "@@start_session",
         cache: false,
         dataType: "json",
+        data: {open_chats: cookie},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            setTimeout('initialize();', 10000); // If an error occured, call initialize again after 10 seconds.
+            setTimeout('initialize();', 20000); // If an error occured, call initialize again after 10 seconds.
         },
         success: function(data) {
             username = data.username;
@@ -71,15 +73,25 @@ function initialize(){
                         var chat_content = jQuery("#chatbox_"+user+" .chat-content");
                         for (var i=0; i<item.messages.length; i++) {
                             message = item.messages[i]
-                            chat_content.append(
-                                '<div class="chat-message">' + 
-                                    '<span class="chat-message-them">'+user+' '+message[1]+':&nbsp;&nbsp;</span>' + 
-                                    '<span class="chat-message-content">'+message[2]+'</span>' + 
-                                '</div>'
-                            );
+                            if (message[0] == user) {
+                                chat_content.append(
+                                    '<div class="chat-message">' + 
+                                        '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                                        '<span class="chat-message-content">'+message[3]+'</span>' + 
+                                    '</div>'
+                                );
+                            }
+                            else {
+                                chat_content.append(
+                                    '<div class="chat-message">' + 
+                                        '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                                        '<span class="chat-message-content">'+message[3]+'</span>' + 
+                                    '</div>'
+                                );
+                            }
                         }
                         chat_content.scrollTop(chat_content[0].scrollHeight);
-                        setTimeout('chat_content.scrollTop(chat_content[0].scrollHeight);', 100); // IE bug
+                        //setTimeout('chat_content.scrollTop(chat_content[0].scrollHeight);', 100); // IE bug
                     }
                 }
             });
@@ -151,7 +163,7 @@ function createChat(title, minimize) {
     '<div class="chat-content"></div>'+ 
     '<div class="chat-input">' +
         '<textarea class="chat-textarea"' + 
-            'onkeydown="javascript:return keypressed(event, this,\''+title+'\', \''+username+'\');">' +
+            'onkeydown="javascript:return keypressed(event, this,\''+title+'\');">' +
         '</textarea>' + 
     '</div>')
     .appendTo(jQuery( "body" ));
@@ -272,7 +284,7 @@ function poll_server() {
         data: {user: username},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             for (var i=0; i<chats.length; i++) {
-                user = chats[i]
+                var user = chats[i];
                 content = jQuery("#chatbox_"+user+" .chat-content");
                 content.append(
                     '<div class="chat-message">' + 
@@ -280,13 +292,13 @@ function poll_server() {
                     '</div>'
                 );
                 content.scrollTop(content[0].scrollHeight);
-                poll_count += 10; // Dramatically increase the poll count to prevent the screen filling up with errrors.
+                poll_time = 20000; 
             }
         },
         success: function(data) {
             jQuery.each(data.items, function(i,item){
                 if (item)	{ // fix IE bug
-                    user = item.user;
+                    var user = item.user;
                     if (item.messages.length) {
                         messages_found += 1;
                         has_messages[user] = true;
@@ -302,13 +314,24 @@ function poll_server() {
                         var chat_content = jQuery("#chatbox_"+user+" .chat-content");
                         for (var i=0; i<item.messages.length; i++) {
                             message = item.messages[i]
-                            chat_content.append(
-                                '<div class="chat-message">' + 
-                                    '<span class="chat-message-them">'+user+' '+message[1]+':&nbsp;&nbsp;</span>' + 
-                                    '<span class="chat-message-content">'+message[2]+'</span>' + 
-                                '</div>'
-                            );
+                            if (message[0] == user) {
+                                chat_content.append(
+                                    '<div class="chat-message">' + 
+                                        '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                                        '<span class="chat-message-content">'+message[3]+'</span>' + 
+                                    '</div>'
+                                );
+                            }
+                            else {
+                                chat_content.append(
+                                    '<div class="chat-message">' + 
+                                        '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                                        '<span class="chat-message-content">'+message[3]+'</span>' + 
+                                    '</div>'
+                                );
+                            }
                         }
+                        var chat_content = jQuery("#chatbox_"+user+" .chat-content");
                         chat_content.scrollTop(chat_content[0].scrollHeight);
                     }
                 }
@@ -317,7 +340,7 @@ function poll_server() {
     });
 }
 
-function keypressed(event, textarea, title, username) {
+function keypressed(event, textarea, title) {
 	if(event.keyCode == 13 && event.shiftKey == 0)  {
 		message = jQuery(textarea).val();
 		message = message.replace(/^\s+|\s+jQuery/g,"");
@@ -325,20 +348,34 @@ function keypressed(event, textarea, title, username) {
 		jQuery(textarea).focus();
 		jQuery(textarea).css('height','44px');
 		if (message != '') {
-			jQuery.post("@@send_message", {user: username, to: title, message: message} , function() {
-				message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
-                var now = new Date();
-                var time = now.getHours()+':'+now.getMinutes();
-				jQuery("#chatbox_"+title+" .chat-content").append(
-                    '<div class="chat-message">' + 
-                        '<span class="chat-message-me">'+username+' '+time+':&nbsp;&nbsp;</span>' + 
-                        '<span class="chat-message-content">'+message+'</span>' + 
-                    '</div>');
-				jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
-			});
+            jQuery.ajax({
+                url: "@@send_message",
+                cache: false,
+                data: {user: username, to: title, message: message}, 
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    content = jQuery("#chatbox_"+to+" .chat-content");
+                    content.append(
+                        '<div class="chat-message">' + 
+                            '<span class="chat-message-error">Connection Error</span>' + 
+                        '</div>'
+                    );
+                },
+                success: function(data) { 
+                    message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
+                    var now = new Date();
+                    var time = now.getHours()+':'+now.getMinutes();
+                    jQuery("#chatbox_"+title+" .chat-content").append(
+                        '<div class="chat-message">' + 
+                            '<span class="chat-message-me">'+username+' '+time+':&nbsp;&nbsp;</span>' + 
+                            '<span class="chat-message-content">'+message+'</span>' + 
+                        '</div>');
+                    jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
+                }
+            });
 		}
 		poll_time = poll_min;
 		poll_count = 1;
+        setTimeout('poll();', poll_time);
 		return false;
 	}
 	var adjustedHeight = textarea.clientHeight;
