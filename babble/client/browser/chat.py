@@ -46,6 +46,9 @@ class Chat:
     def start_session(self, open_chats):
         """ """
         member = self._authenticated_member().getId()
+        if member == None:
+            return json.dumps({'username': '', 'items': []})
+
         log.info('start_session called, member: %s' % member)
         open_chats = open_chats.split('|')
         for s in ['', member]:

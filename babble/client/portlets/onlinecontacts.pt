@@ -3,7 +3,6 @@
 <script type='text/javascript'>
     jQuery(document).ready(function(){
         doc_title = document.title;
-        initialize(username);
         jQuery([window, document]).blur(function(){
             window_focus = false;
         }).focus(function(){
