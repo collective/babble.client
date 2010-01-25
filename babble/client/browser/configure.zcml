@@ -5,6 +5,11 @@
     i18n_domain="babble.client">
 
     <browser:resource
+        name="chat_init.js"
+        file="resources/chat_init.js"
+        />
+
+    <browser:resource
         name="chat.js"
         file="resources/chat.js"
         />
@@ -15,10 +20,15 @@
         />
 
     <browser:resource
+        name="jquery.cookie.js"
+        file="resources/jquery.cookie.js"
+        />
+
+    <browser:resource
         name="chat.css"
         file="resources/chat.css"
         />
-        
+
     <browser:page
         for="*"
         attribute="send_message"
