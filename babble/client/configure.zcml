@@ -3,6 +3,7 @@
     xmlns:five="http://namespaces.zope.org/five"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     xmlns:plone="http://namespaces.plone.org/plone"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
     i18n_domain="babble.client">
 
     <five:registerPackage package="." initialize=".initialize" />
@@ -10,11 +11,15 @@
     <include package=".browser" />
     <include package=".portlets" />   
 
+    <include 
+        zcml:condition="installed collective.js.blackbird"
+        package="collective.js.blackbird" />
+
     <genericsetup:registerProfile
         name="default"
         title="babble.client"
         directory="profiles/default"
-        description="This product provides a portlet which shows you a list of all online users and enables you to contact them."
+        description="Instant messaging client for Plone"
         provides="Products.GenericSetup.interfaces.EXTENSION"
         />
 
