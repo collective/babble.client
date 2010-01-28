@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<object name="portal_skins"
+        meta_type="Plone Skins Tool"
+        allow_any="False"
+        cookie_persistence="False"
+        request_varname="plone_skin">
+
+    <object name="babble_javascripts"
+        meta_type="Filesystem Directory View"
+        directory="babble.client:skins/babble_javascripts"/>
+
+    <skin-path name="Plone Default">
+    <layer name="babble_javascripts"
+        insert-after="custom"/>
+    </skin-path>
+
+</object>

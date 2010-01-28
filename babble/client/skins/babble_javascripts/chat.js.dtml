@@ -21,10 +21,12 @@ var blink_order = 0;
 var doc_title;
 var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
-var poll_max = 33000;       // The maximum polling period
+var poll_max = 32000;       // The maximum polling period
 var poll_min = 2000;        // The minimum polling period
 var poll_time = poll_min;   // The initial polling period
-var username;
+<dtml-let member="portal_membership.getAuthenticatedMember()">
+var username = "&dtml-member;";
+</dtml-let>
 
 var window_focus = true;
 var chat_focus = new Array();
@@ -34,11 +36,12 @@ var chats = new Array();    // Records new chat windows being opened.
 
 function initialize(){  
     var open_chats = Array();
-    var cookie = jQuery.cookie('chats_open');
-    jQuery.cookie('chats_open', '');
+    var cookie = jQuery.cookie('chats-open-'+username);
+    log.info('initialize: cookie = ' + cookie);
+    jQuery.cookie('chats-open-'+username, null, {path: '/'});
     if (cookie) {
         open_chats = cookie.split('|');
-        for (var i=0; i<open_chats.length; i++) {
+    for (var i=0; i<open_chats.length; i++) {
             var user = open_chats[i];
             if (user) { 
                 createChat(user);
@@ -46,15 +49,14 @@ function initialize(){
         }
     }
     jQuery.ajax({
-        url: "@@start_session",
+        url: "@@initialize",
         cache: false,
         dataType: "json",
-        data: {open_chats: cookie},
+        data: {user: username, open_chats: cookie},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             setTimeout('initialize();', 20000); // If an error occured, call initialize again after 10 seconds.
         },
         success: function(data) {
-            username = data.username;
             jQuery.each(data.items, function(i,item) {
                 if (item)	{ // IE bug
                     var user = item.user;
@@ -123,25 +125,91 @@ function closeChat(title) {
     jQuery('#chatbox_'+title).css('display','none');
     reorderChats();
 
-    var open_chats = jQuery.cookie('chats_open').split('|');
+    var open_chats = jQuery.cookie('chats-open-'+username).split('|');
     var new_chats = Array();
     for (var i=0; i < open_chats.length; i++) {
         if (open_chats[i] != title) {
             new_chats.push(open_chats[i]);
         }
     }
-    jQuery.cookie('chats_open', new_chats.join('|'));
+    log.info('closeChat: cookie');
+    if (new_chats.length) {
+        jQuery.cookie('chats-open-'+username, new_chats.join('|'), {path: '/'});
+    }
+    else {
+        jQuery.cookie('chats-open-'+username, null, {path: '/'});
+    }
+    jQuery.ajax({
+        url: "@@clear_messages",
+        cache: false,
+        data: {user: username, chat_buddy: title},
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            log.error(errorThrown);
+        },
+        success: function() {
+            log.info(title + "'s messages succesfully cleared.");
+        }
+    });
 }
 
 function startChat(contact) {
     createChat(contact);
     jQuery("#chatbox_"+contact+" .chat-textarea").focus();
+    jQuery.ajax({
+        url: "@@get_last_conversation",
+        cache: false,
+        dataType: "json",
+        data: {user: username, chat_buddy: contact},
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            log.error(errorThrown);
+        },
+        success: function(data) {
+            var chat = jQuery("#chatbox_"+contact);
+            var chat_content = jQuery("#chatbox_"+contact+" .chat-content");
+            var messages = data.messages;
+            for (var i=0; i<messages.length; i++) {
+                message = messages[i]
+                if (message[0] == contact) {
+                    chat_content.append(
+                        '<div class="chat-message">' + 
+                            '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                            '<span class="chat-message-content">'+message[3]+'</span>' + 
+                        '</div>'
+                    );
+                }
+                else {
+                    chat_content.append(
+                        '<div class="chat-message">' + 
+                            '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                            '<span class="chat-message-content">'+message[3]+'</span>' + 
+                        '</div>'
+                    );
+                }
+            }
+            chat_content.scrollTop(chat_content[0].scrollHeight);
+            //setTimeout('chat_content.scrollTop(chat_content[0].scrollHeight);', 100); // IE bug
+        }
+    });
+    poll_time = poll_min;
+    poll_count = 1;
+    messages_found = 0;
+    setTimeout('poll();', poll_time);
 }
 
 function createChat(title, minimize) {
-    var open_chats = jQuery.cookie('chats_open').split('|');
+    var cookie = jQuery.cookie('chats-open-'+username);
+    if (cookie) {
+        var open_chats = cookie.split('|');
+    }
+    else {
+        var open_chats = Array();
+    }
     open_chats.push(title);
-    jQuery.cookie('chats_open', open_chats.join('|'));
+    log.info('createChat: cookie = ' + open_chats.toString());
+    log.info('createChat: cookie = ' + open_chats.toString());
+    var new_cookie = open_chats.join('|');
+    jQuery.cookie('chats-open-'+username, new_cookie, {path: '/'});
+    log.info('createChat: cookie = ' + new_cookie);
 
     if (jQuery("#chatbox_"+title).length > 0) {
         if (jQuery("#chatbox_"+title).css('display') == 'none') {
@@ -226,7 +294,7 @@ function createChat(title, minimize) {
 }
 
 function poll(){
-    log.info('Poll: poll_time: ' + poll_time);
+    // log.info('Poll: poll_time: ' + poll_time);
     if (window_focus == false) {
         var blink_number = 0;
         var title_changed = 0;
