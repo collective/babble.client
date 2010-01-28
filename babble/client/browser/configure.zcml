@@ -9,10 +9,12 @@
         file="resources/chat_init.js"
         />
 
+    <!--
     <browser:resource
         name="chat.js"
         file="resources/chat.js"
         />
+    -->
 
     <browser:resource
         name="quicksearch.js"
@@ -47,9 +49,25 @@
 
     <browser:page
         for="*"
-        attribute="start_session"
+        attribute="initialize"
         class=".chat.Chat"
-        name="start_session"
+        name="initialize"
+        permission="zope2.View"
+        /> 
+
+    <browser:page
+        for="*"
+        attribute="clear_messages"
+        class=".chat.Chat"
+        name="clear_messages"
+        permission="zope2.View"
+        /> 
+
+    <browser:page
+        for="*"
+        attribute="get_last_conversation"
+        class=".chat.Chat"
+        name="get_last_conversation"
         permission="zope2.View"
         /> 
 
