@@ -7,7 +7,7 @@
         cookable="True"
         enabled="1" 
         expression="" 
-        id="++resource++chat.js"
+        id="chat.js"
         insert-after="++resource++jquery-1.3.2.min.js"
         insert-before="jquery-integration.js"
         />
@@ -19,7 +19,7 @@
         enabled="1" 
         expression="" 
         id="++resource++jquery.cookie.js"
-        insert-after="++resource++chat.js"
+        insert-after="chat.js"
         />
 
     <javascript 
@@ -29,7 +29,7 @@
         enabled="1" 
         expression="" 
         id="++resource++quicksearch.js"
-        insert-after="++resource++chat.js"
+        insert-after="chat.js"
         insert-before="jquery-integration.js"
         />
 
@@ -38,9 +38,9 @@
         compression="safe" 
         cookable="True"
         enabled="1" 
-        expression="" 
+        expression="python: not here.restrictedTraverse('@@plone_portal_state').anonymous()"
         id="++resource++chat_init.js"
-        insert-after="++resource++chat.js"
+        insert-after="chat.js"
         inline="True"
         />
 
