@@ -3,9 +3,7 @@ import os
 
 version = '1.0'
 
-tests_require=[
-    'collective.js.blackbird',
-]
+tests_require=[]
 
 setup(
     name='babble.client',
@@ -30,6 +28,7 @@ setup(
     install_requires=[
         'setuptools',
         'simplejson',
+        'collective.js.blackbird',
     ],
     tests_require=tests_require,
     extras_require=dict(tests=tests_require),
