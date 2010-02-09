@@ -26,7 +26,7 @@ class Chat:
 
 
     def initialize(self, user, open_chats):
-        """ Initializion by fetching all open chat sessions and their uncleared 
+        """ Initializion by fetching all open chat sessions and their uncleared
             and unread chat messages
         """
         log.info('initialize called, user: %s' % user)
@@ -41,30 +41,32 @@ class Chat:
             try:
                 # passed pars: (username, sender, auto_register, read, clear)
                 messages = \
-                    server.getUnclearedMessages(user, chat_buddy, True,  True, False) 
+                    server.getUnclearedMessages(user, chat_buddy, True,  True, False)
             except xmlrpclib.Fault, e:
-                err_msg = e.faultString.strip('\n').split('\n')[-1]
+                err_msg = e.faultString
+                # .strip('\n').split('\n')[-1]  was returning " "
+                # because I hadn't added the /chatservice tool to my instance
                 log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
-                raise err_msg 
+                raise err_msg
 
         return json.dumps({'username': user, 'items': messages})
 
 
     def poll(self, user):
-        """ Poll the chat server to retrieve new online users and chat 
-            messages 
+        """ Poll the chat server to retrieve new online users and chat
+            messages
         """
         if not user:
             return
 
         server = self._getConnection()
         try:
-            messages = server.getUnreadMessages(user, None, True, True) 
+            messages = server.getUnreadMessages(user, None, True, True)
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: getUnreadMessages: %s' % err_msg)
-            raise err_msg 
-                
+            raise err_msg
+
         return json.dumps({'items': messages})
 
 
@@ -77,40 +79,38 @@ class Chat:
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: sendMessage: %s' % err_msg)
-            raise err_msg 
+            raise err_msg
 
 
     def get_last_conversation(self, user, chat_buddy):
-        """ Get all the uncleared messages between user and chat_buddy 
+        """ Get all the uncleared messages between user and chat_buddy
         """
         log.info('get_last_conversation')
         server = self._getConnection()
         try:
             # passed pars: (username, sender, auto_register, read, clear)
             mlist = \
-                server.getUnclearedMessages(user, chat_buddy, True, True, False) 
+                server.getUnclearedMessages(user, chat_buddy, True, True, False)
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: clearMessages: %s' % err_msg)
-            raise err_msg 
+            raise err_msg
 
         messages = mlist and mlist[0]['messages'] or []
         return json.dumps({'messages': messages})
 
 
     def clear_messages(self, user, chat_buddy):
-        """ Mark the messages in a chat contact's messagebox as cleared. 
-            This means that they won't be loaded and displayed again next time 
+        """ Mark the messages in a chat contact's messagebox as cleared.
+            This means that they won't be loaded and displayed again next time
             that chat box is opened.
         """
         log.info('clear messages sent to buddy: %s' % (chat_buddy))
         server = self._getConnection()
         try:
             # passed pars: (username, sender, auto_register, read, clear)
-            server.getUnclearedMessages(user, chat_buddy, True, True, True) 
+            server.getUnclearedMessages(user, chat_buddy, True, True, True)
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: clearMessages: %s' % err_msg)
-            raise err_msg 
-
-
+            raise err_msg
