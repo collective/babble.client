@@ -8,6 +8,16 @@ from interfaces import IChat
 
 log = logging.getLogger('babble.client/browser/chat.py')
 
+class BabbleException(Exception):
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+
 class Chat:
     implements(IChat)
 
@@ -47,7 +57,7 @@ class Chat:
                 # .strip('\n').split('\n')[-1]  was returning " "
                 # because I hadn't added the /chatservice tool to my instance
                 log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
-                raise err_msg
+                raise BabbleException(err_msg)
 
         return json.dumps({'username': user, 'items': messages})
 
@@ -65,8 +75,8 @@ class Chat:
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: getUnreadMessages: %s' % err_msg)
-            raise err_msg
-
+            raise BabbleException(err_msg)
+                
         return json.dumps({'items': messages})
 
 
@@ -79,7 +89,7 @@ class Chat:
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: sendMessage: %s' % err_msg)
-            raise err_msg
+            raise BabbleException(err_msg)
 
 
     def get_last_conversation(self, user, chat_buddy):
@@ -94,7 +104,7 @@ class Chat:
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: clearMessages: %s' % err_msg)
-            raise err_msg
+            raise BabbleException(err_msg)
 
         messages = mlist and mlist[0]['messages'] or []
         return json.dumps({'messages': messages})
@@ -113,4 +123,4 @@ class Chat:
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: clearMessages: %s' % err_msg)
-            raise err_msg
+            raise BabbleException(err_msg)
