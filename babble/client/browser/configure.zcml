@@ -71,4 +71,12 @@
         permission="zope2.View"
         /> 
 
+    <browser:page
+        for="*"
+        attribute="get_online_users"
+        class=".chat.Chat"
+        name="get_online_users"
+        permission="zope2.View"
+        /> 
+
 </configure>

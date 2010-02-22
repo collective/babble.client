@@ -4,7 +4,7 @@ import simplejson as json
 from zope.interface import implements
 from Acquisition import aq_inner
 from Products.CMFCore.utils import getToolByName
-from interfaces import IChat
+from babble.client.browser.interfaces import IChat
 
 log = logging.getLogger('babble.client/browser/chat.py')
 
@@ -35,6 +35,20 @@ class Chat:
         return pm.getAuthenticatedMember()
 
 
+    def get_online_users(self):
+        """ """
+        server = self._getConnection()
+        try:
+            online_users = server.getOnlineUsers()
+        except xmlrpclib.Fault, e:
+            err_msg = e.faultString.strip('\n').split('\n')[-1]
+            log.error('Error from chat.service: getOnlineUsers: %s' % err_msg)
+            raise BabbleException(err_msg)
+
+        log.info("online_users: %s" % str(online_users))
+        return online_users
+
+
     def initialize(self, user, open_chats):
         """ Initializion by fetching all open chat sessions and their uncleared
             and unread chat messages
@@ -49,9 +63,10 @@ class Chat:
         messages = []
         for chat_buddy in open_chats:
             try:
-                # passed pars: (username, sender, auto_register, read, clear)
-                messages = \
-                    server.getUnclearedMessages(user, chat_buddy, True,  True, False)
+                # username, sender, auto_register, read, clear, confirm_online
+                messages = server.getUnclearedMessages(
+                                    user, chat_buddy, True, True, False, True)
+
             except xmlrpclib.Fault, e:
                 err_msg = e.faultString
                 # .strip('\n').split('\n')[-1]  was returning " "
@@ -59,7 +74,7 @@ class Chat:
                 log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
                 raise BabbleException(err_msg)
 
-        return json.dumps({'username': user, 'items': messages})
+        return json.dumps({'username': user, 'items': messages,})
 
 
     def poll(self, user):
@@ -71,13 +86,14 @@ class Chat:
 
         server = self._getConnection()
         try:
-            messages = server.getUnreadMessages(user, None, True, True)
+            # pars: username, sender, register, read, confirm_online
+            messages = server.getUnreadMessages(user, None, True, True, True)
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: getUnreadMessages: %s' % err_msg)
             raise BabbleException(err_msg)
-                
-        return json.dumps({'items': messages})
+
+        return json.dumps({'items': messages })
 
 
     def send_message(self, user, to, message):
@@ -98,9 +114,10 @@ class Chat:
         log.info('get_last_conversation')
         server = self._getConnection()
         try:
-            # passed pars: (username, sender, auto_register, read, clear)
-            mlist = \
-                server.getUnclearedMessages(user, chat_buddy, True, True, False)
+            #pars: username, sender, auto_register, read, clear, confirm_online
+            mlist = server.getUnclearedMessages(
+                                user, chat_buddy, True, True, False, True)
+
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: clearMessages: %s' % err_msg)
