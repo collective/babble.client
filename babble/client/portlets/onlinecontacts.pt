@@ -9,9 +9,9 @@
             window_focus = true;
             document.title = doc_title;
         });
-        jQuery('dl#$portlet_id div#online-contacts dd').quicksearch({
+        jQuery('dl#$portlet_id div#$portlet_id-contacts dd').quicksearch({
             position: 'prepend',
-            attached: 'dl#$portlet_id dd#online-contacts-footer',
+            attached: 'dl#$portlet_id dd#$portlet_id-footer',
             loaderText: '',
             delay: 100
         })
@@ -27,22 +27,25 @@
         <span class="portletTopRight"></span>
     </dt>
 
-    <div id="online-contacts"
-         tal:define="contacts view/get_online_contacts"
-         tal:attributes="class python:contacts > 5 and 'online-contacts-max' or 'online-contacts'">
-    <tal:items tal:repeat="contact contacts">
-        <dd class="portletItem"
-            tal:define="oddrow repeat/contact/odd;
-                        fullname python:contact.getProperty('fullname') or contact.id"
-            tal:attributes="class python:oddrow and  'portletItem even' or 'portletItem odd'">
-            <a  tal:content="fullname" 
-                style="cursor: pointer;"
-                tal:attributes="onclick string:jQuery.noConflict();; startChat('${contact/id}')"> 
-                Contact Name 
-            </a>
-        </dd>
-    </tal:items>
+    <metal:macro define-macro="current-online-contacts">
+        <div id="online-contacts"
+            tal:define="contacts view/get_online_contacts"
+            tal:attributes="class python:contacts > 5 and 'online-contacts-max' or 'online-contacts';
+            id string:$portlet_id-contacts">
+        <tal:items tal:repeat="contact contacts">
+            <dd class="portletItem"
+                tal:define="oddrow repeat/contact/odd;
+                            fullname python:contact.getProperty('fullname') or contact.id"
+                tal:attributes="class python:oddrow and  'portletItem even' or 'portletItem odd'">
+                <a  tal:content="fullname" 
+                    style="cursor: pointer;"
+                    tal:attributes="onclick string:jQuery.noConflict();; startChat('${contact/id}')"> 
+                    Contact Name 
+                </a>
+            </dd>
+        </tal:items>
     </div>
-    <dd class="portletFooter" id="online-contacts-footer"></dd>
+    </metal:macro>
+    <dd class="portletFooter" tal:attributes="id string:$portlet_id-footer"></dd>
 </dl>
 </tal:get>

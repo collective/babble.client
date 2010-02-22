@@ -1,3 +1,6 @@
+from Acquisition import aq_inner
+
+from zope import component
 from zope.interface import implements
 
 from plone.portlets.interfaces import IPortletDataProvider
@@ -50,13 +53,27 @@ class Renderer(base.Renderer):
     
     def get_online_contacts(self):
         """ """
-        # XXX: Restrict this to online contacts only
+        online_members = []
+        request = self.context.request
+        context = aq_inner(self.context)
+        get_online_users = \
+            component.getMultiAdapter(
+                                (context, request),
+                                name="get_online_users"
+                                )
+
+        online_contacts = get_online_users()
         member = self.get_authenticated_member()
+        if member.getId() in online_contacts:
+            online_contacts.remove(member.getId())
+
         pm = getToolByName(self, 'portal_membership')
         members = pm.listMembers()
-        if member in members:
-            members.remove(member)
-        return members
+        for member in members:
+            if member.getId() in online_contacts:
+                online_members.append(member)
+                
+        return online_members
 
 
 class AddForm(base.NullAddForm):
