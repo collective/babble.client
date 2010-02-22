@@ -21,8 +21,8 @@ var blink_order = 0;
 var doc_title;
 var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
-var poll_max = 32000;       // The maximum polling period
-var poll_min = 2000;        // The minimum polling period
+var poll_max = 20000;       // The maximum polling period
+var poll_min = 3000;        // The minimum polling period
 var poll_time = poll_min;   // The initial polling period
 <dtml-let member="portal_membership.getAuthenticatedMember()">
 var username = "&dtml-member;";
@@ -52,7 +52,7 @@ function oc(a) {
 function initialize(){  
     var open_chats = Array();
     var cookie = jQuery.cookie('chats-open-'+username);
-    log.info('initialize: cookie = ' + cookie);
+    log.info('initialize: cookie = ' + cookie + '\n');
     jQuery.cookie('chats-open-'+username, null, {path: '/'});
     if (cookie) {
         open_chats = cookie.split('|');
@@ -69,7 +69,10 @@ function initialize(){
         dataType: "json",
         data: {user: username, open_chats: cookie},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            setTimeout('initialize();', 20000); // If an error occured, call initialize again after 10 seconds.
+            log.error(textStatus);
+            log.error(errorThrown);
+            // If an error occured, call initialize again after 20 seconds.
+            setTimeout('initialize();', 20000); 
         },
         success: function(data) {
             jQuery.each(data.items, function(i,item) {
@@ -164,7 +167,7 @@ function closeChat(title) {
             new_chats.push(open_chats[i]);
         }
     }
-    log.info('closeChat: cookie');
+    log.info('closeChat: cookie \n');
     if (new_chats.length) {
         jQuery.cookie('chats-open-'+username, new_chats.join('|'), {path: '/'});
     }
@@ -176,10 +179,11 @@ function closeChat(title) {
         cache: false,
         data: {user: username, chat_buddy: title},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
+            log.error(textStatus);
             log.error(errorThrown);
         },
         success: function() {
-            log.info(title + "'s messages succesfully cleared.");
+            log.info(title + "'s messages succesfully cleared. \n");
         }
     });
 }
@@ -193,6 +197,7 @@ function startChat(contact) {
         dataType: "json",
         data: {user: username, chat_buddy: contact},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
+            log.error(textStatus);
             log.error(errorThrown);
         },
         success: function(data) {
@@ -365,8 +370,11 @@ function poll_server() {
         url: "@@poll",
         cache: false,
         dataType: "json",
+        timeout: poll_min - 100,
         data: {user: username},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
+            log.error(textStatus);
+            log.error(errorThrown);
             for (var i=0; i<chats.length; i++) {
                 var user = chats[i];
                 content = jQuery("#chatbox_"+user+" .chat-content");
@@ -437,6 +445,8 @@ function keypressed(event, textarea, title) {
                 cache: false,
                 data: {user: username, to: title, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    log.error(textStatus);
+                    log.error(errorTrown)
                     content = jQuery("#chatbox_"+to+" .chat-content");
                     content.append(
                         '<div class="chat-message">' + 
