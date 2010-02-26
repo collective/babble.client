@@ -4,7 +4,7 @@
     <javascript 
         authenticated="True"
         id="chat.js"
-        insert-before="jquery-integration.js"
+        insert-after="jquery.js"
         />
 
     <javascript 
@@ -16,13 +16,18 @@
     <javascript 
         id="++resource++quicksearch.js"
         insert-after="chat.js"
-        insert-before="jquery-integration.js"
         />
 
     <javascript 
         authenticated="True"
         id="++resource++chat_init.js"
         insert-after="chat.js"
+        />
+
+    <javascript 
+        authenticated="True"
+        id="++resource++chat_bottomfeeder.js"
+        insert-after="++resource++bottomfeeder.js"
         />
 
 </object>
