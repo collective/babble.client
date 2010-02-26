@@ -1,0 +1,8 @@
+<div class="subpanel">
+    <h3><span> &ndash; </span>Friends Online</h3>
+    <ul>
+        <li><span>Family Members</span></li>
+        <li><a href="#"><img src="chat-thumb.gif" alt="" /> Your Friend</a></li>
+        <li><a href="#"><img src="chat-thumb.gif" alt="" /> Your Friend</a></li>
+    </ul>
+</div>
