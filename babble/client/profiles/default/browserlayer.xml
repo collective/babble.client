@@ -1,7 +1,7 @@
 <layers>
     <layer
         name="babble.client"
-        interface="babble.client.interfaces.IOnlineContactsLayer"
+        interface="babble.client.interfaces.IBabbleClientLayer"
      />
 </layers>
 
