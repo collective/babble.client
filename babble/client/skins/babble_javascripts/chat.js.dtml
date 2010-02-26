@@ -235,7 +235,6 @@ function startChat(contact) {
 
 function createChatBox(title) {
     jQuery("<div/>").attr("id","chatbox_"+title)
-    .css('bottom', '0px')
     .addClass("chatbox")
     .html(
     '<div class="chat-head">' +
