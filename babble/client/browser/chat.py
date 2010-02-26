@@ -17,7 +17,6 @@ class BabbleException(Exception):
         return repr(self.value)
 
 
-
 class Chat:
     implements(IChat)
 
@@ -26,13 +25,6 @@ class Chat:
         context = aq_inner(self.context)
         mtool = getToolByName(context, 'portal_chat')
         return mtool.getConnection()
-
-
-    def _authenticated_member(self):
-        """ Returns the currently logged in member object """
-        context = aq_inner(self.context)
-        pm = getToolByName(context, 'portal_membership')
-        return pm.getAuthenticatedMember()
 
 
     def get_online_users(self):
