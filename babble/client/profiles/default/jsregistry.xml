@@ -24,10 +24,4 @@
         insert-after="chat.js"
         />
 
-    <javascript 
-        authenticated="True"
-        id="++resource++chat_bottomfeeder.js"
-        insert-after="++resource++bottomfeeder.js"
-        />
-
 </object>
