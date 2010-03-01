@@ -16,11 +16,6 @@
         />
 
     <browser:resource
-        name="chat_bottomfeeder.js"
-        file="resources/chat_bottomfeeder.js"
-        />
-
-    <browser:resource
         name="quicksearch.js"
         file="resources/quicksearch.js"
         />
