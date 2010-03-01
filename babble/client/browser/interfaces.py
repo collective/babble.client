@@ -31,3 +31,10 @@ class IChat(Interface):
             that chat box is opened.
         """
 
+
+class IChatBox(Interface):
+    """ """
+
+    def render_chat_box(self, box_id, user, contact):
+        """ """
+
