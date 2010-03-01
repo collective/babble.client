@@ -1,0 +1,31 @@
+<div class="chatbox"
+     tal:attributes="id options/box_id"
+     tal:define="title options/title">
+
+    <div class="chat-head"> 
+        <div class="chat-title"
+             tal:content="title">title</div> 
+        <div class="chat-options"> 
+            <a href="javascript:void(0)" 
+               tal:attributes="onclick string:javascript:toggleChat('$title')">-</a> 
+            <a href="javascript:void(0)" 
+               tal:attributes="onclick string:javascript:closeChat('$title')">X</a> 
+        </div>  
+        <br clear="all"/> 
+    </div> 
+    <div class="chat-content">
+        <div tal:repeat="message options/messages"
+                class="chat-message">  
+            <span class="chat-message-them"
+                    tal:content="structure python:'%s %s:&nbsp;&nbsp;' % (message[0], message[2])">
+            </span>  
+            <span class="chat-message-content"
+                    tal:content="python:message[3]">
+            </span>  
+        </div>
+    </div> 
+    <div class="chat-input"> 
+        <textarea class="chat-textarea"  
+            tal:attributes="onkeydown string:javascript:return keypressed(event, this, '$title');"> </textarea>  
+    </div>
+</div>
