@@ -7,8 +7,6 @@
     xmlns:zcml="http://namespaces.zope.org/zcml"
     i18n_domain="babble.client">
 
-    <five:registerPackage package="." initialize=".initialize" />
-
     <include package=".browser" />
     <include package=".portlets" />   
     <include package="collective.js.blackbird" />
