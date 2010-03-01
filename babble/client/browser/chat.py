@@ -5,17 +5,10 @@ from zope.interface import implements
 from Acquisition import aq_inner
 from Products.CMFCore.utils import getToolByName
 from babble.client.browser.interfaces import IChat
+from babble.client import utils
+from babble.client import BabbleException
 
 log = logging.getLogger('babble.client/browser/chat.py')
-
-class BabbleException(Exception):
-
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
 
 class Chat:
     implements(IChat)
@@ -26,17 +19,9 @@ class Chat:
         mtool = getToolByName(context, 'portal_chat')
         return mtool.getConnection()
 
-
     def get_online_users(self):
         """ """
-        server = self._getConnection()
-        try:
-            online_users = server.getOnlineUsers()
-        except xmlrpclib.Fault, e:
-            err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: getOnlineUsers: %s' % err_msg)
-            raise BabbleException(err_msg)
-
+        online_users = utils.get_online_contacts(self.context)
         log.info("online_users: %s" % str(online_users))
         return online_users
 
