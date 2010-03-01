@@ -4,6 +4,11 @@ from Products.CMFCore.utils import getToolByName
 from babble.client import BabbleException
 log = logging.getLogger('babble.client/utils.py')
 
+def getConnection(context):
+    """ Returns a connection to the chat service """
+    mtool = getToolByName(context, 'portal_chat')
+    return mtool.getConnection()
+
 def get_online_contacts(context):
     """ """
     pm = getToolByName(context, 'portal_membership')
@@ -15,8 +20,7 @@ def get_online_contacts(context):
             members.remove(member)
         return members
 
-    mtool = getToolByName(context, 'portal_chat')
-    server = mtool.getConnection()
+    server = getConnection(context)
     try:
         online_contacts = server.getOnlineUsers()
     except xmlrpclib.Fault, e:
@@ -36,4 +40,20 @@ def get_online_contacts(context):
             online_members.append(member)
             
     return online_members
+
+def get_last_conversation(context, user, chat_buddy):
+    """ Get all the uncleared messages between user and chat_buddy
+    """
+    server = getConnection(context)
+    try:
+        #pars: username, sender, auto_register, read, clear, confirm_online
+        mlist = server.getUnclearedMessages(
+                            user, chat_buddy, True, True, False, True)
+
+    except xmlrpclib.Fault, e:
+        err_msg = e.faultString.strip('\n').split('\n')[-1]
+        log.error('Error from chat.service: clearMessages: %s' % err_msg)
+        raise BabbleException(err_msg)
+    return mlist
+
 
