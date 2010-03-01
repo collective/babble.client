@@ -78,4 +78,12 @@
         permission="zope2.View"
         /> 
 
+    <browser:page
+        for="*"
+        attribute="render_chat_box"
+        class=".chat.ChatBox"
+        name="render_chat_box"
+        permission="zope2.View"
+        /> 
+
 </configure>
