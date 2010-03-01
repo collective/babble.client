@@ -1,13 +1,11 @@
-from Acquisition import aq_inner
-
-from zope import component
 from zope.interface import implements
 
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.portlets import base
 
-from Products.CMFCore.utils import getToolByName
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+
+from babble.client import utils
 
 class IOnlineContacts(IPortletDataProvider):
     """A portlet
@@ -42,38 +40,12 @@ class Renderer(base.Renderer):
     """
     render = ViewPageTemplateFile('onlinecontacts.pt')
 
+    def get_online_contacts(self):
+        return utils.get_online_contacts(self.context)
+
     def get_id(self):
         """ """
         return 'online-contacts-portlet-%d' % self.__hash__()
-
-    def get_authenticated_member(self):
-        """ """
-        pm = getToolByName(self, 'portal_membership')
-        return pm.getAuthenticatedMember()
-    
-    def get_online_contacts(self):
-        """ """
-        online_members = []
-        request = self.context.request
-        context = aq_inner(self.context)
-        get_online_users = \
-            component.getMultiAdapter(
-                                (context, request),
-                                name="get_online_users"
-                                )
-
-        online_contacts = get_online_users()
-        member = self.get_authenticated_member()
-        if member.getId() in online_contacts:
-            online_contacts.remove(member.getId())
-
-        pm = getToolByName(self, 'portal_membership')
-        members = pm.listMembers()
-        for member in members:
-            if member.getId() in online_contacts:
-                online_members.append(member)
-                
-        return online_members
 
 
 class AddForm(base.NullAddForm):
