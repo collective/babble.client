@@ -1,2 +1,8 @@
-def initialize(context):
-    """Initializer called when used as a Zope 2 product."""
+class BabbleException(Exception):
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
