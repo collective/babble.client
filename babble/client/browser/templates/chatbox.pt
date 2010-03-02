@@ -17,15 +17,15 @@
         <div tal:repeat="message options/messages"
                 class="chat-message">  
             <span class="chat-message-them"
-                    tal:content="structure python:'%s %s:&nbsp;&nbsp;' % (message[0], message[2])">
+                tal:content="structure python:'%s %s:&nbsp;&nbsp;' % (message[0], message[2])">
             </span>  
             <span class="chat-message-content"
-                    tal:content="python:message[3]">
+                  tal:content="python:message[3]">
             </span>  
         </div>
     </div> 
     <div class="chat-input"> 
         <textarea class="chat-textarea"  
-            tal:attributes="onkeydown string:javascript:return keypressed(event, this, '$title');"> </textarea>  
+            tal:attributes="onkeydown string:javascript:return keypressed(event, this, '$title');"></textarea>  
     </div>
 </div>
