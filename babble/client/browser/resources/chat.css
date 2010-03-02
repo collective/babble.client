@@ -21,6 +21,7 @@ div.online-contacts .portletItem, div.online-contacts-max .portletItem {
 	width: 225px;
 	display:none;
     bottom: 44px; /* TODO: This must somehow be configurable, in case the bottom.feeder is not installed */
+    z-index: 3; /* So that it's higher than the content actions */
 }
 
 .chat-head {
@@ -51,6 +52,10 @@ div.online-contacts .portletItem, div.online-contacts-max .portletItem {
 	border-bottom:1px solid #eeeeee;
 	background-color: #ffffff;
 	line-height: 1.3em;
+}
+
+.chat-message-them {
+    nowrap;
 }
 
 .chat-input {
