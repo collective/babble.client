@@ -9,17 +9,7 @@ def getConnection(context):
     mtool = getToolByName(context, 'portal_chat')
     return mtool.getConnection()
 
-def get_online_contacts(context):
-    """ """
-    pm = getToolByName(context, 'portal_membership')
-    member = pm.getAuthenticatedMember()
-    members = pm.listMembers()
-    
-    if context.portal_javascripts.getDebugMode():
-        if member in members:
-            members.remove(member)
-        return members
-
+def get_online_usernames(context):
     server = getConnection(context)
     try:
         online_contacts = server.getOnlineUsers()
@@ -30,16 +20,31 @@ def get_online_contacts(context):
             % err_msg)
 
         raise BabbleException(err_msg)
+    return online_contacts
 
+
+def get_online_members(context):
+    """ """
+    pm = getToolByName(context, 'portal_membership')
+    member = pm.getAuthenticatedMember()
+    members = pm.listMembers()
+    
+    if context.portal_javascripts.getDebugMode():
+        if member in members:
+            members.remove(member)
+        return members
+
+    online_users = get_online_usernames(context)
     online_members = []
-    if member.getId() in online_contacts:
-        online_contacts.remove(member.getId())
+    if member.getId() in online_users:
+        online_users.remove(member.getId())
 
     for member in members:
-        if member.getId() in online_contacts:
+        if member.getId() in online_users:
             online_members.append(member)
             
     return online_members
+
 
 def get_last_conversation(context, user, chat_buddy):
     """ Get all the uncleared messages between user and chat_buddy
@@ -54,6 +59,8 @@ def get_last_conversation(context, user, chat_buddy):
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from chat.service: clearMessages: %s' % err_msg)
         raise BabbleException(err_msg)
-    return mlist
+
+    messages = mlist and mlist[0]['messages'] or []
+    return messages
 
 
