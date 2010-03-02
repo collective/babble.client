@@ -40,8 +40,8 @@ class Renderer(base.Renderer):
     """
     render = ViewPageTemplateFile('onlinecontacts.pt')
 
-    def get_online_contacts(self):
-        return utils.get_online_contacts(self.context)
+    def get_online_members(self):
+        return utils.get_online_members(self.context)
 
     def get_id(self):
         """ """

@@ -29,7 +29,7 @@
 
     <metal:macro define-macro="current-online-contacts">
         <div id="online-contacts"
-            tal:define="contacts view/get_online_contacts"
+            tal:define="contacts view/get_online_members"
             tal:attributes="class python:contacts > 5 and 'online-contacts-max' or 'online-contacts';
             id string:$portlet_id-contacts">
         <tal:items tal:repeat="contact contacts">
