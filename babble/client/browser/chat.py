@@ -11,7 +11,6 @@ from babble.client.browser.interfaces import IChatBox
 from babble.client import utils
 from babble.client import BabbleException
 
-
 log = logging.getLogger('babble.client/browser/chat.py')
 
 class Chat:
@@ -19,7 +18,7 @@ class Chat:
 
     def get_online_users(self):
         """ """
-        online_users = utils.get_online_contacts(self.context)
+        online_users = utils.get_online_members(self.context)
         log.info("online_users: %s" % str(online_users))
         return online_users
 
@@ -87,18 +86,7 @@ class Chat:
         """ Get all the uncleared messages between user and chat_buddy
         """
         log.info('get_last_conversation')
-        server = utils.getConnection(self.context)
-        try:
-            #pars: username, sender, auto_register, read, clear, confirm_online
-            mlist = server.getUnclearedMessages(
-                                user, chat_buddy, True, True, False, True)
-
-        except xmlrpclib.Fault, e:
-            err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: clearMessages: %s' % err_msg)
-            raise BabbleException(err_msg)
-
-        messages = mlist and mlist[0]['messages'] or []
+        messages = utils.get_last_conversation(self.context, user, chat_buddy)
         return json.dumps({'messages': messages})
 
 
