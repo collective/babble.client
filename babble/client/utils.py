@@ -58,7 +58,7 @@ def get_last_conversation(context, user, chat_buddy):
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from chat.service: clearMessages: %s' % err_msg)
-        raise BabbleException(err_msg)
+        return []
 
     messages = mlist and mlist[0]['messages'] or []
     return messages
