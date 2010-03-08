@@ -2,7 +2,6 @@
 <metadata>
     <version>1</version>
     <dependencies>
-        <dependency>profile-bottom.feeder:default</dependency>
         <dependency>profile-collective.js.blackbird:default</dependency>
     </dependencies>
 </metadata>
