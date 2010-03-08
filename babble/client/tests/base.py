@@ -1,42 +1,53 @@
+from zope import component
+
 from Products.Five import zcml
 from Products.Five import fiveconfigure
 
 from Testing import ZopeTestCase as ztc
 
+from plone import browserlayer
+
+from Products.Archetypes.Schema.factory import instanceSchemaFactory
 from Products.PloneTestCase import PloneTestCase as ptc
-from Products.PloneTestCase.layer import onsetup
+from Products.PloneTestCase import layer 
 
-@onsetup
-def setup_product():
-    """Set up additional products and ZCML required to test this product.
+from babble.client.interfaces import IBabbleClientLayer
 
-    The @onsetup decorator causes the execution of this body to be deferred
-    until the setup of the Plone site testing layer.
-    """
+ztc.installProduct('babble.server')
+ztc.installPackage('babble.server')
+ztc.installPackage('babble.client')
 
-    # Load the ZCML configuration for this package and its dependencies
+SiteLayer = layer.PloneSite
 
-    fiveconfigure.debug_mode = True
-    import babble.client
-    zcml.load_config('configure.zcml', babble.client)
-    fiveconfigure.debug_mode = False
+class BabbleClientLayer(SiteLayer):
 
-    # We need to tell the testing framework that these products
-    # should be available. This can't happen until after we have loaded
-    # the ZCML.
+    @classmethod
+    def setUp(cls):
+        """ Set up the additional products required for the 
+            DubletteFinder.
+        """
+        PRODUCTS = [
+                'babble.server',
+                'babble.client',
+                ]
+        ptc.setupPloneSite(products=PRODUCTS)
 
-    ztc.installPackage('babble.client')
+        fiveconfigure.debug_mode = True
+        import babble.server
+        zcml.load_config('configure.zcml', babble.server)
+        import babble.client
+        zcml.load_config('configure.zcml', babble.client)
+        fiveconfigure.debug_mode = False
+        
+        browserlayer.utils.register_layer(IBabbleClientLayer, name='babble.client')
 
-# The order here is important: We first call the deferred function and then
-# let PloneTestCase install it during Plone site setup
-
-setup_product()
-ptc.setupPloneSite(products=['babble.client'])
+        component.provideAdapter(instanceSchemaFactory)
+        SiteLayer.setUp()
+    
 
 class TestCase(ptc.PloneTestCase):
     """Base class used for test cases
     """
+    layer = BabbleClientLayer
 
-class FunctionalTestCase(ptc.FunctionalTestCase):
-    """Test case class used for functional (doc-)tests
-    """
+

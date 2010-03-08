@@ -8,33 +8,53 @@ from plone.portlets.interfaces import IPortletRenderer
 
 from plone.app.portlets.storage import PortletAssignmentMapping
 
-from babble.client import exampleportlet
+from Products.BTreeFolder2.BTreeFolder2 import manage_addBTreeFolder
+from Products.TemporaryFolder.TemporaryFolder import SimpleTemporaryContainer
+from Products.CMFCore.utils import getToolByName
 
+from babble.server.service import ChatService
+
+from babble.client.portlets import onlinecontacts
 from babble.client.tests.base import TestCase
-
 
 class TestPortlet(TestCase):
 
     def afterSetUp(self):
-        self.setRoles(('Manager', ))
+        pq = self.portal.portal_quickinstaller
+
+        portal_setup = getToolByName(self.portal, 'portal_setup')
+        portal_setup.runAllImportStepsFromProfile('profile-babble.client:default')
+    
+        self.loginAsPortalOwner()
+
+        # Add the chat service
+        app = self.portal.aq_parent
+        obj = ChatService('chat_service')
+        app._setOb('chat_service', obj)
+        obj = app.aq_acquire('chat_service')
+        obj.manage_addUserFolder()
+        manage_addBTreeFolder(obj, 'users', 'Users')
+        obj.temp_folder = SimpleTemporaryContainer('temp_folder')
+
 
     def test_portlet_type_registered(self):
         portlet = getUtility(
             IPortletType,
-            name='babble.client.ExamplePortlet')
+            name="babble.client.onlinecontacts")
         self.assertEquals(portlet.addview,
-                          'babble.client.ExamplePortlet')
+                          'babble.client.onlinecontacts')
 
     def test_interfaces(self):
         # TODO: Pass any keyword arguments to the Assignment constructor
-        portlet = exampleportlet.Assignment()
+        portlet = onlinecontacts.Assignment()
         self.failUnless(IPortletAssignment.providedBy(portlet))
         self.failUnless(IPortletDataProvider.providedBy(portlet.data))
 
     def test_invoke_add_view(self):
         portlet = getUtility(
             IPortletType,
-            name='babble.client.ExamplePortlet')
+            name='babble.client.onlinecontacts')
+
         mapping = self.portal.restrictedTraverse(
             '++contextportlets++plone.leftcolumn')
         for m in mapping.keys():
@@ -49,16 +69,16 @@ class TestPortlet(TestCase):
 
         self.assertEquals(len(mapping), 1)
         self.failUnless(isinstance(mapping.values()[0],
-                                   exampleportlet.Assignment))
+                                   onlinecontacts.Assignment))
 
     def test_invoke_edit_view(self):
         # NOTE: This test can be removed if the portlet has no edit form
         mapping = PortletAssignmentMapping()
         request = self.folder.REQUEST
 
-        mapping['foo'] = exampleportlet.Assignment()
+        mapping['foo'] = onlinecontacts.Assignment()
         editview = getMultiAdapter((mapping['foo'], request), name='edit')
-        self.failUnless(isinstance(editview, exampleportlet.EditForm))
+        self.failUnless(isinstance(editview, onlinecontacts.EditForm))
 
     def test_obtain_renderer(self):
         context = self.folder
@@ -68,11 +88,11 @@ class TestPortlet(TestCase):
                              context=self.portal)
 
         # TODO: Pass any keyword arguments to the Assignment constructor
-        assignment = exampleportlet.Assignment()
+        assignment = onlinecontacts.Assignment()
 
         renderer = getMultiAdapter(
             (context, request, view, manager, assignment), IPortletRenderer)
-        self.failUnless(isinstance(renderer, exampleportlet.Renderer))
+        self.failUnless(isinstance(renderer, onlinecontacts.Renderer))
 
 
 class TestRenderer(TestCase):
@@ -90,14 +110,14 @@ class TestRenderer(TestCase):
 
         # TODO: Pass any default keyword arguments to the Assignment
         # constructor.
-        assignment = assignment or exampleportlet.Assignment()
+        assignment = assignment or onlinecontacts.Assignment()
         return getMultiAdapter((context, request, view, manager, assignment),
                                IPortletRenderer)
 
     def test_render(self):
         # TODO: Pass any keyword arguments to the Assignment constructor.
         r = self.renderer(context=self.portal,
-                          assignment=exampleportlet.Assignment())
+                          assignment=onlinecontacts.Assignment())
         r = r.__of__(self.folder)
         r.update()
         output = r.render()
@@ -110,3 +130,4 @@ def test_suite():
     suite.addTest(makeSuite(TestPortlet))
     suite.addTest(makeSuite(TestRenderer))
     return suite
+
