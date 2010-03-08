@@ -2,7 +2,7 @@
 <portlets>
 
  <portlet
-   addview="babble.client.OnlineContacts"
+   addview="babble.client.onlinecontacts"
    title="Online Contacts"
    description="A portlet which shows you a list of all online users and enables you to contact them."
    />

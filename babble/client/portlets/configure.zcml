@@ -9,7 +9,7 @@
         the 'editview' attribute from this statement.
     -->
     <plone:portlet
-        name="babble.client.OnlineContacts"
+        name="babble.client.onlinecontacts"
         interface=".onlinecontacts.IOnlineContacts"
         assignment=".onlinecontacts.Assignment"
         view_permission="zope2.View"
