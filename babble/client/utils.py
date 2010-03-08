@@ -1,7 +1,6 @@
 import logging
 import xmlrpclib
 from Products.CMFCore.utils import getToolByName
-from babble.client import BabbleException
 log = logging.getLogger('babble.client/utils.py')
 
 def getConnection(context):
@@ -29,10 +28,10 @@ def get_online_members(context):
     member = pm.getAuthenticatedMember()
     members = pm.listMembers()
     
-    if context.portal_javascripts.getDebugMode():
-        if member in members:
-            members.remove(member)
-        return members
+    # if context.portal_javascripts.getDebugMode():
+    #     if member in members:
+    #         members.remove(member)
+    #     return members
 
     online_users = get_online_usernames(context)
     online_members = []
@@ -51,9 +50,9 @@ def get_last_conversation(context, user, chat_buddy):
     """
     server = getConnection(context)
     try:
-        #pars: username, sender, auto_register, read, clear, confirm_online
+        #pars: username, sender, read, clear, confirm_online
         mlist = server.getUnclearedMessages(
-                            user, chat_buddy, True, True, False, True)
+                            user, chat_buddy, True, False, True)
 
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
