@@ -67,7 +67,7 @@ function initialize(){
         url: "@@initialize",
         cache: false,
         dataType: "json",
-        data: {user: username, open_chats: cookie},
+        data: {username: username, open_chats: cookie},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -181,7 +181,7 @@ function closeChat(title) {
     jQuery.ajax({
         url: "@@clear_messages",
         cache: false,
-        data: {user: username, chat_buddy: title},
+        data: {username: username, chat_buddy: title},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -208,7 +208,7 @@ function createChatBox(title) {
         async: false,
         data: {
             box_id: "chatbox_"+title,
-            user: username,
+            username: username,
             title: title,
             },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -338,7 +338,7 @@ function poll_server() {
         cache: false,
         dataType: "json",
         timeout: poll_min - 100,
-        data: {user: username},
+        data: {username: username},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -410,7 +410,7 @@ function keypressed(event, textarea, title) {
             jQuery.ajax({
                 url: "@@send_message",
                 cache: false,
-                data: {user: username, to: title, message: message}, 
+                data: {username: username, to: title, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     log.error(textStatus);
                     log.error(errorTrown)
