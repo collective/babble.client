@@ -24,10 +24,9 @@ var poll_count = 0;         // The amount of server polls that have been made
 var poll_max = 20000;       // The maximum polling period
 var poll_min = 3000;        // The minimum polling period
 var poll_time = poll_min;   // The initial polling period
-<dtml-let member="portal_membership.getAuthenticatedMember()">
+<dtml-let member="portal_membership.getAuthenticatedMember().getId().encode('utf-8')">
 var username = "&dtml-member;";
 </dtml-let>
-
 var window_focus = true;
 var chat_focus = new Array();
 var has_messages = new Array();
