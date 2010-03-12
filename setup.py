@@ -28,6 +28,7 @@ setup(
     install_requires=[
         'setuptools',
         'simplejson',
+        'babble.server',
         'collective.js.blackbird',
     ],
     tests_require=tests_require,
