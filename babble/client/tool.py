@@ -32,10 +32,19 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
 
     def getConnection(self):
         """ Return a connection to the chat service """
-        if not hasattr(self, '_v_connection'):
-            url = self.getProperty('chat_service_url')
+        url = self.getProperty('chat_service_url')
+        if not hasattr(self, '_v_chat_service_url'):
+            self._v_chat_service_url = url
             self._v_connection = xmlrpclib.Server(url, allow_none=1)
-        return self._v_connection
 
+        elif self._v_chat_service_url != url:
+            self._v_chat_service_url = url
+            self._v_connection = xmlrpclib.Server(url, allow_none=1)
+
+        elif not hasattr(self, '_v_connection'):
+            self._v_chat_service_url = url
+            self._v_connection = xmlrpclib.Server(url, allow_none=1)
+
+        return self._v_connection
 
 InitializeClass(MessageTool)
