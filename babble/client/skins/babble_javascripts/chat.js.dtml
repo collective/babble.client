@@ -66,7 +66,6 @@ function initialize(){
         url: "@@initialize",
         cache: false,
         dataType: "json",
-        data: {username: username, open_chats: cookie},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -180,7 +179,7 @@ function closeChat(title) {
     jQuery.ajax({
         url: "@@clear_messages",
         cache: false,
-        data: {username: username, chat_buddy: title},
+        data: {contact: title},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -207,8 +206,7 @@ function createChatBox(title) {
         async: false,
         data: {
             box_id: "chatbox_"+title,
-            username: username,
-            title: title,
+            contact: title,
             },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
@@ -337,7 +335,6 @@ function poll_server() {
         cache: false,
         dataType: "json",
         timeout: poll_min - 100,
-        data: {username: username},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -354,46 +351,47 @@ function poll_server() {
             }
         },
         success: function(data) {
-            jQuery.each(data.items, function(i,item){
-                if (item)	{ // fix IE bug
-                    var user = item.user;
-                    if (item.messages.length) {
-                        messages_found += 1;
-                        has_messages[user] = true;
-                        new_chats[user] = true;
-                        var chat = jQuery("#chatbox_"+user);
-                        if (chat.length <= 0) {
-                            createChat(user);
-                        }
-                        if (chat.css('display') == 'none') {
-                            chat.css('display','block');
-                            reorderChats();
-                        }
-                        var chat_content = jQuery("#chatbox_"+user+" .chat-content");
-                        for (var i=0; i<item.messages.length; i++) {
-                            message = item.messages[i]
-                            if (message[0] == user) {
-                                chat_content.append(
-                                    '<div class="chat-message">' + 
-                                        '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                                        '<span class="chat-message-content">'+message[3]+'</span>' + 
-                                    '</div>'
-                                );
-                            }
-                            else {
-                                chat_content.append(
-                                    '<div class="chat-message">' + 
-                                        '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                                        '<span class="chat-message-content">'+message[3]+'</span>' + 
-                                    '</div>'
-                                );
-                            }
-                        }
-                        var chat_content = jQuery("#chatbox_"+user+" .chat-content");
-                        chat_content.scrollTop(chat_content[0].scrollHeight);
+            var msgdict = data.messages;
+            for(var user in msgdict) {
+                var messages = msgdict[user];
+                // jQuery.each(data.messages, function(i,item){
+                // var user = item.user;
+                if (messages.length) {
+                    messages_found += 1;
+                    has_messages[user] = true;
+                    new_chats[user] = true;
+                    var chat = jQuery("#chatbox_"+user);
+                    if (chat.length <= 0) {
+                        createChat(user);
                     }
+                    if (chat.css('display') == 'none') {
+                        chat.css('display','block');
+                        reorderChats();
+                    }
+                    var chat_content = jQuery("#chatbox_"+user+" .chat-content");
+                    for (var i=0; i<messages.length; i++) {
+                        message = messages[i]
+                        if (message[0] == user) {
+                            chat_content.append(
+                                '<div class="chat-message">' + 
+                                    '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                                    '<span class="chat-message-content">'+message[3]+'</span>' + 
+                                '</div>'
+                            );
+                        }
+                        else {
+                            chat_content.append(
+                                '<div class="chat-message">' + 
+                                    '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                                    '<span class="chat-message-content">'+message[3]+'</span>' + 
+                                '</div>'
+                            );
+                        }
+                    }
+                    var chat_content = jQuery("#chatbox_"+user+" .chat-content");
+                    chat_content.scrollTop(chat_content[0].scrollHeight);
                 }
-            });
+            };
         }
     });
 }
@@ -409,7 +407,7 @@ function keypressed(event, textarea, title) {
             jQuery.ajax({
                 url: "@@send_message",
                 cache: false,
-                data: {username: username, to: title, message: message}, 
+                data: {to: title, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     log.error(textStatus);
                     log.error(errorTrown)

@@ -1,5 +1,6 @@
 import logging
 import xmlrpclib
+import simplejson as json
 from Products.CMFCore.utils import getToolByName
 log = logging.getLogger('babble.client/utils.py')
 
@@ -28,10 +29,10 @@ def get_online_members(context):
     member = pm.getAuthenticatedMember()
     members = pm.listMembers()
     
-    # if context.portal_javascripts.getDebugMode():
-    #     if member in members:
-    #         members.remove(member)
-    #     return members
+    if context.portal_javascripts.getDebugMode():
+        if member in members:
+            members.remove(member)
+        return members
 
     online_users = get_online_usernames(context)
     online_members = []
@@ -45,21 +46,30 @@ def get_online_members(context):
     return online_members
 
 
-def get_last_conversation(context, user, chat_buddy):
-    """ Get all the uncleared messages between user and chat_buddy
+def get_last_conversation(context, contact):
+    """ Get all the uncleared messages between current member and contact
     """
     server = getConnection(context)
+    pm = getToolByName(context, 'portal_membership')
+    member = pm.getAuthenticatedMember()
+    username = member.getId()
+    if member.hasProperty('chatpass'):
+        password = getattr(member, 'chatpass') 
+    else:
+        log.error("get_last_conversation: %s does not have prop 'chatpass'"
+                                                                    % username)
+        return {}
+
     try:
-        #pars: username, sender, read, clear, confirm_online
-        mlist = server.getUnclearedMessages(
-                            user, chat_buddy, True, False, True)
+        #pars: username, sender, read, clear
+        resp = server.getUnclearedMessages(
+                            username, password, contact, True, False)
 
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from chat.service: clearMessages: %s' % err_msg)
-        return []
-
-    messages = mlist and mlist[0]['messages'] or []
-    return messages
-
+        return {}
+    
+    resp = json.loads(resp)
+    return resp['messages']
 

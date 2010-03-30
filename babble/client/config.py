@@ -1,0 +1,2 @@
+SUCCESS = 0
+AUTH_FAIL = -1

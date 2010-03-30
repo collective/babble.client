@@ -13,10 +13,13 @@
         </div>  
         <br clear="all"/> 
     </div> 
-    <div class="chat-content">
-        <div tal:repeat="message options/messages"
+    <div class="chat-content"
+         tal:define="messages options/messages">
+        <div tal:repeat="message python:messages[title]"
                 class="chat-message">  
-            <span class="chat-message-them"
+            <span 
+                tal:define="own_msg python:message[0] == title"
+                tal:attributes="class python:own_msg and 'chat-message-them' or 'chat-message-me'"
                 tal:content="structure python:'%s %s:&nbsp;&nbsp;' % (message[0], message[2])">
             </span>  
             <span class="chat-message-content"
