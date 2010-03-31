@@ -4,8 +4,6 @@ import xmlrpclib
 import simplejson as json
 from zope.interface import implements
 
-from AccessControl.unauthorized import Unauthorized
-
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.browser import BrowserView
 from Products.CMFCore.utils import getToolByName
@@ -65,7 +63,8 @@ class Chat:
         password = getattr(member, 'chatpass') 
         try:
             # username, password, sender, read, clear
-            resp = server.getUnclearedMessages(username, password, None, True, False)
+            server.confirmAsOnline(username)
+            return server.getUnclearedMessages(username, password, None, True, False)
 
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
@@ -73,10 +72,6 @@ class Chat:
             # because I hadn't added the /chatservice tool to my instance
             log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
             raise BabbleException(err_msg)
-
-        resp = json.loads(resp)
-        messages = resp['messages']
-        return json.dumps({'username': username, 'messages': messages,})
 
 
     def poll(self):
@@ -96,6 +91,7 @@ class Chat:
         server = utils.getConnection(self.context)
         try:
             # pars: username, password, read
+            server.confirmAsOnline(username)
             return server.getUnreadMessages(username, password, True)
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
