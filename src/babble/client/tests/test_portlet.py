@@ -1,4 +1,3 @@
-import os
 from zope.component import getUtility, getMultiAdapter
 
 from plone.portlets.interfaces import IPortletType
@@ -7,31 +6,18 @@ from plone.portlets.interfaces import IPortletAssignment
 from plone.portlets.interfaces import IPortletDataProvider
 from plone.portlets.interfaces import IPortletRenderer
 
+from OFS.Folder import Folder
+
 from babble.client.portlets import onlinecontacts
 from babble.client.tests.base import TestCase
 
 class TestPortlet(TestCase):
 
     def afterSetUp(self):
-        # Get the instance's port number.
-        # XXX: There must be better way to do this :(
-        cwd = os.getcwd()
-        fn = os.path.join(cwd, "../instance/etc/zope.conf")
-        f = open(fn)
-        text = f.read().replace('\n', '')
-        end = text.find('</http-server>')
-        port = int(text[end-4:end])
-        f.close()
-
         self.loginAsPortalOwner()
         view = self.app.unrestrictedTraverse('+/addChatService.html')
         view(add_input_name='chatservice', title='Chat Service', submit_add=1)
-
-        # XXX: Configure the chat tool 
-
-        # The 'temp_folder' is not created for some reason, so do it here...
-        # self.app._setOb('temp_folder', SimpleTemporaryContainer('temp_folder'))
-
+        self.app._setOb('temp_folder', Folder('temp_folder'))
 
     def test_portlet_type_registered(self):
         portlet = getUtility(
@@ -63,7 +49,12 @@ class TestPortlet(TestCase):
 class TestRenderer(TestCase):
 
     def afterSetUp(self):
-        self.setRoles(('Manager', ))
+        self.loginAsPortalOwner()
+        view = self.app.unrestrictedTraverse('+/addChatService.html')
+        view(add_input_name='chatservice', title='Chat Service', submit_add=1)
+
+        # The 'temp_folder' is not created for some reason, so do it here...
+        self.app._setOb('temp_folder', Folder('temp_folder'))
 
     def renderer(self, context=None, request=None, view=None, manager=None,
                  assignment=None):
