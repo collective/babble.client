@@ -15,7 +15,7 @@
     </div> 
     <div class="chat-content"
          tal:define="messages options/messages">
-        <div tal:repeat="message python:messages[title]"
+        <div tal:repeat="message python:messages.get(title, [])"
                 class="chat-message">  
             <span 
                 tal:define="own_msg python:message[0] == title"
