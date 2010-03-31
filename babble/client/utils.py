@@ -12,15 +12,15 @@ def getConnection(context):
 def get_online_usernames(context):
     server = getConnection(context)
     try:
-        online_contacts = server.getOnlineUsers()
+        resp = server.getOnlineUsers()
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error(\
             'Error from get_online_contacts: server.getOnlineUsers: %s' \
             % err_msg)
-	return []
 
-    return online_contacts
+    resp = json.loads(resp)
+    return resp['online_users']
 
 
 def get_online_members(context):
