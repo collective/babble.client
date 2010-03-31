@@ -7,6 +7,8 @@ from AccessControl import ClassSecurityInfo
 from Products.CMFCore.utils import UniqueObject
 from Products.CMFCore.utils import SimpleItemWithProperties
 
+from babble.client import BabbleMessageFactory as _
+
 log = logging.getLogger('babble.client/tool.py')
 
 class MessageTool(UniqueObject, SimpleItemWithProperties):
@@ -14,16 +16,25 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
     id = 'portal_chat'
     security = ClassSecurityInfo()
     _properties = (
-        {'id':'title', 'type': 'string', 'mode':'w',
-         'label':'Title'},
-        {'id':'description', 'type': 'text', 'mode':'w',
-         'label':'Description'},
-        {'id':'chat_service_url', 'type': 'string', 'mode':'w',
-         'label':'Chat Service URL'},
+        {   'id':'chat_service_url', 
+            'type': 'string', 
+            'mode':'w',
+            'label': _('Chat Service URL'),
+         },
+        {   'id':'poll_max', 
+            'type': 'int', 
+            'mode':'w',
+            'label': _('Maximum polling interval (milliseconds)'),
+        },
+        {   'id':'poll_min', 
+            'type': 'int', 
+            'mode':'w',
+            'label': _('Minimum polling interval (milliseconds)'),
+        },
         )
-    title = ''
-    description = ''
     chat_service_url = 'http://admin:admin@localhost:8080/chatservice'
+    poll_max = 20000 
+    poll_min = 3000
 
     def __setstate__(self, state):
         """ connect to chat service if they are defined """
@@ -48,3 +59,4 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
         return self._v_connection
 
 InitializeClass(MessageTool)
+

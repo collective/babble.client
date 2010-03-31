@@ -21,12 +21,21 @@ var blink_order = 0;
 var doc_title;
 var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
-var poll_max = 20000;       // The maximum polling period
-var poll_min = 3000;        // The minimum polling period
+
+<dtml-let pollmax="portal_chat.poll_max">
+var poll_max = &dtml-pollmax;;  // The maximum polling period
+</dtml-let>
+
+<dtml-let pollmin="portal_chat.poll_min">
+var poll_min = &dtml-pollmin;;  // The minimum polling period
+</dtml-let>
+
 var poll_time = poll_min;   // The initial polling period
+
 <dtml-let member="portal_membership.getAuthenticatedMember().getId().encode('utf-8')">
 var username = "&dtml-member;";
 </dtml-let>
+
 var window_focus = true;
 var chat_focus = new Array();
 var has_messages = new Array();
