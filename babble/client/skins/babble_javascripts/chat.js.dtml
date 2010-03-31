@@ -409,13 +409,13 @@ function keypressed(event, textarea, title) {
                 data: {to: title, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     log.error(textStatus);
-                    log.error(errorTrown)
-                    content = jQuery("#chatbox_"+to+" .chat-content");
-                    content.append(
+                    if (errorThrown)
+                        log.error(errorThrown)
+                    jQuery("#chatbox_"+title+" .chat-content").append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-error">Connection Error</span>' + 
-                        '</div>'
-                    );
+                        '</div>');
+                    jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
                 },
                 success: function(data) { 
                     message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
