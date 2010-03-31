@@ -13,8 +13,15 @@ from Products.PloneTestCase import layer
 
 from babble.client.interfaces import IBabbleClientLayer
 
+import Products.Five
+ztc.installProduct('Five')
+zcml.load_config('configure.zcml', package=Products.Five)
+
+import babble.server
 ztc.installProduct('babble.server')
+zcml.load_config('configure.zcml', package=babble.server)
 ztc.installPackage('babble.server')
+
 ztc.installPackage('babble.client')
 
 SiteLayer = layer.PloneSite
