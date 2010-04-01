@@ -16,23 +16,53 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
     id = 'portal_chat'
     security = ClassSecurityInfo()
     _properties = (
-        {   'id':'chat_service_url', 
+        {   'id':'use_local_service', 
+            'type': 'boolean', 
+            'mode':'w',
+            'label': _('Bypass XMLRPC by using a local chatservice:'),
+        },
+        {   'id':'name', 
             'type': 'string', 
             'mode':'w',
-            'label': _('Chat Service URL'),
+            'label': _('Service name:'),
+         },
+        {   'id':'host', 
+            'type': 'string', 
+            'mode':'w',
+            'label': _('Host: (When not using a local chatservice)'),
+        },
+        {   'id':'port', 
+            'type': 'string', 
+            'mode':'w',
+            'label': _('Port: (When not using a local chatservice)'),
+         },
+        {   'id':'username', 
+            'type': 'string', 
+            'mode':'w',
+            'label': _('Username: (When not using a local chatservice)'),
+         },
+        {   'id':'password', 
+            'type': 'string', 
+            'mode':'w',
+            'label': _('Password: (When not using a local chatservice)'),
          },
         {   'id':'poll_max', 
             'type': 'int', 
             'mode':'w',
-            'label': _('Maximum polling interval (milliseconds)'),
+            'label': _('Maximum polling interval: (milliseconds)'),
         },
         {   'id':'poll_min', 
             'type': 'int', 
             'mode':'w',
-            'label': _('Minimum polling interval (milliseconds)'),
-        },
-        )
-    chat_service_url = 'http://admin:admin@localhost:8080/chatservice'
+            'label': _('Minimum polling interval: (milliseconds)'),
+        },)
+
+    use_local_service = False
+    host = 'nohost'
+    port = '8080'
+    name = 'chatservice'
+    username = 'portal_owner'
+    password = 'secret'
     poll_max = 20000 
     poll_min = 3000
 
@@ -43,16 +73,20 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
 
     def getConnection(self):
         """ Return a connection to the chat service """
-        url = self.getProperty('chat_service_url')
-        if not hasattr(self, '_v_chat_service_url'):
-            self._v_chat_service_url = url
-            self._v_connection = xmlrpclib.Server(url, allow_none=1)
+        if self.use_local_service:
+            return self.portal_url.getPortalObject().aq_parent.chatservice
 
-        elif self._v_chat_service_url != url:
-            self._v_chat_service_url = url
-            self._v_connection = xmlrpclib.Server(url, allow_none=1)
+        username = self.getProperty('username')
+        password = self.getProperty('password')
+        host = self.getProperty('host')
+        port = self.getProperty('port')
+        name = self.getProperty('name')
+        url = 'http://%s:%s@%s:%s/%s' % (username, password, host, port, name)
 
-        elif not hasattr(self, '_v_connection'):
+        if not hasattr(self, '_v_chat_service_url') \
+                or not hasattr(self, '_v_connection') \
+                or self._v_chat_service_url != url:
+
             self._v_chat_service_url = url
             self._v_connection = xmlrpclib.Server(url, allow_none=1)
 
