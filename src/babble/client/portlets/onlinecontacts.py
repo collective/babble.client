@@ -26,11 +26,6 @@ class Assignment(base.Assignment):
     def __init__(self):
         pass
 
-    @property
-    def title(self):
-        """ """
-        return "Who's online?"
-
 
 class Renderer(base.Renderer):
     """
@@ -50,6 +45,7 @@ class Renderer(base.Renderer):
 
 class AddForm(base.NullAddForm):
     """ """
+
     def create(self):
         return Assignment()
 

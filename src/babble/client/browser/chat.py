@@ -16,25 +16,20 @@ from babble.client.config import SUCCESS
 
 log = logging.getLogger('babble.client/browser/chat.py')
 
-class Chat:
+class Chat(BrowserView):
     implements(IChat)
 
-    def get_online_users(self):
-        """ """
-        online_users = utils.get_online_members(self.context)
-        log.info("online_users: %s" % str(online_users))
-        return online_users
-
-
     def confirm_as_online(self):
-        """ """
+        """ Let the chat server know that the currently authenticated used is
+            still online 
+        """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
             return
 
         server = utils.getConnection(self.context)
         member = pm.getAuthenticatedMember()
-        server.confirmAsOnline(member.getId())
+        return server.confirmAsOnline(member.getId())
 
 
     def initialize(self):
@@ -56,14 +51,12 @@ class Chat:
             password = str(random.random())
             resp = json.loads(server.register(username, password))
             if resp['status'] == SUCCESS:
-                if member.hasProperty('chatpass'):
-                    member.manage_delProperties(ids=['chatpass'])
-                member.manage_addProperty('chatpass', password, 'string')
+                setattr(member, 'chatpass', password)
 
         password = getattr(member, 'chatpass') 
         try:
-            # username, password, sender, read, clear
             server.confirmAsOnline(username)
+            # username, password, sender, read, clear
             return server.getUnclearedMessages(username, password, None, True, False)
 
         except xmlrpclib.Fault, e:
@@ -83,7 +76,7 @@ class Chat:
             return 
 
         member = pm.getAuthenticatedMember()
-        if not member.hasProperty('chatpass'):
+        if not hasattr(member, 'chatpass'):
             return 
 
         password = getattr(member, 'chatpass') 
@@ -108,7 +101,7 @@ class Chat:
         log.info('Chat message %s sent to %s' % (message, to))
         server = utils.getConnection(self.context)
         member = pm.getAuthenticatedMember()
-        if not member.hasProperty('chatpass'):
+        if not hasattr(member, 'chatpass'):
             return 
 
         password = getattr(member, 'chatpass') 
@@ -121,18 +114,11 @@ class Chat:
             log.error('Error from chat.service: sendMessage: %s' % err_msg)
             raise BabbleException(err_msg)
 
-        resp = json.loads(resp)
-        if resp['status'] != SUCCESS:
+        if json.loads(resp)['status'] != SUCCESS:
             raise BabbleException('sendMessage from %s to %s failed' \
                                                         % (username, to))
 
-
-    def get_last_conversation(self, contact):
-        """ Get all the uncleared messages between user and contact
-        """
-        log.info('get_last_conversation')
-        messages = utils.get_last_conversation(self.context, contact)
-        return json.dumps({'messages': messages})
+        return resp
 
 
     def clear_messages(self, contact):
@@ -140,12 +126,15 @@ class Chat:
             This means that they won't be loaded and displayed again next time
             that chat box is opened.
         """
+        pm = getToolByName(self.context, 'portal_membership')
+        if pm.isAnonymousUser():
+            return
+
         log.info('clear messages sent to buddy: %s' % (contact))
         server = utils.getConnection(self.context)
 
-        pm = getToolByName(self.context, 'portal_membership')
         member = pm.getAuthenticatedMember()
-        if not member.hasProperty('chatpass'):
+        if not hasattr(member, 'chatpass'):
             return 
 
         password = getattr(member, 'chatpass') 
@@ -163,10 +152,11 @@ class Chat:
             log.error('Error from chat.service: clearMessages: %s' % err_msg)
             raise BabbleException(err_msg)
 
-        resp = json.loads(resp)
-        if resp['status'] != SUCCESS:
+        if json.loads(resp)['status'] != SUCCESS:
             raise BabbleException(
                     'getUnclearedMessages for %s failed' % username)
+
+        return resp
 
 
 class ChatBox(BrowserView):
