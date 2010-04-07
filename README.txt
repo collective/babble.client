@@ -50,11 +50,15 @@ there should now be a new types of portlet, "Who's online?".
 Add this portlet. If you have more than one person currently using the site,
 you should see them appear in this portlet.
 
+Note: When you are running your portal_javascripts registry in debug mode (or
+running './bin/instance fg' in Plone4), then the "Who's Online?" portlet will
+show *all* the registered users, and not just the online ones, to make
+debugging easier.
+
 Now simply click on the user in the portlet, and a chatbox will appear in the
 bottom right of the page.
 
 Now start babbling!
-
 
     -----------------                     -----------------
     |               |  XML-RPC with JSON  |               |
@@ -62,6 +66,17 @@ Now start babbling!
     |               |                     |               |
     |  Zope2/Plone  |                     |     Zope2     |
     -----------------                     -----------------
+
+actionbar.panel integration:
+----------------------------
+
+You can use the chat service with a floating toolbar at the bottom (as
+was popularised with Facebook). 
+
+There exists an add-on for actionbar.panel, that provides this functionality.
+
+Simply install actionbar.babble (which will pull in actionbar.panel), to
+receive a bottom bar on which the chat windows will dock.
 
 
 Contact:
