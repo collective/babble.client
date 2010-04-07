@@ -49,8 +49,11 @@ def get_online_members(context):
 def get_last_conversation(context, contact):
     """ Get all the uncleared messages between current member and contact
     """
-    server = getConnection(context)
     pm = getToolByName(context, 'portal_membership')
+    if pm.isAnonymousUser():
+        return {}
+
+    server = getConnection(context)
     member = pm.getAuthenticatedMember()
     username = member.getId()
     if member.hasProperty('chatpass'):
