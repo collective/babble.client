@@ -32,6 +32,14 @@
 
     <browser:page
         for="*"
+        class=".chat.Chat"
+        name="babblechat"
+        permission="zope2.View"
+        allowed_interface=".interfaces.IChat"
+        /> 
+
+    <browser:page
+        for="*"
         attribute="send_message"
         class=".chat.Chat"
         name="send_message"
@@ -59,22 +67,6 @@
         attribute="clear_messages"
         class=".chat.Chat"
         name="clear_messages"
-        permission="zope2.View"
-        /> 
-
-    <browser:page
-        for="*"
-        attribute="get_last_conversation"
-        class=".chat.Chat"
-        name="get_last_conversation"
-        permission="zope2.View"
-        /> 
-
-    <browser:page
-        for="*"
-        attribute="get_online_users"
-        class=".chat.Chat"
-        name="get_online_users"
         permission="zope2.View"
         /> 
 
