@@ -4,12 +4,15 @@ Introduction
 Babble: Instant Messaging for Plone
 -----------------------------------
 
-babble.client is an instant messaging client for Plone. It uses babble.server
-as its messaging service.
+Babble is an instant messaging service for Plone. 
+It consists of babble.client for the Plone front-end, and babble.server which
+is a Zope2 messaging service.
 
-The client makes extensive use of JQuery and Ajax techniques.
+The client consists of a "Who's online?" portlet and chatboxes 
+that make extensive use of JQuery and Ajax techniques.
 
 Currently, communication with the messaging service is being done via polling.
+
 Server-push options such as Comet, could be considered in the future, but
 there is no implementation for this at the moment.
 
@@ -28,12 +31,37 @@ Configuration:
 --------------
 
 babble.client needs a running zope instance with a configured babble.server
-messaging service.
+messaging service. (see the babble.server README)
 
 The client is configured via the portal_chat tool in the ZMI:
-- The 'Chat Service URL' field must point to the babble.server messaging service.
+- The fields must indicate the babble.server messaging service's particulars.
 - The maximum and minimum polling intervals can also be set in this tool. The
 default values are recommended though.
+
+How do I start using it?
+------------------------
+
+Make sure that babble.client is installed via Plone's control panel, or the
+portal_quickinstaller tool in the ZMI (Zope management interface).
+
+In Plone, go to the portlets manage page. In the dropdown of addable portlets,
+there should now be a new types of portlet, "Who's online?".
+
+Add this portlet. If you have more than one person currently using the site,
+you should see them appear in this portlet.
+
+Now simply click on the user in the portlet, and a chatbox will appear in the
+bottom right of the page.
+
+Now start babbling!
+
+
+    -----------------                     -----------------
+    |               |  XML-RPC with JSON  |               |
+    | babble.client |---------------------| babble.server |
+    |               |                     |               |
+    |  Zope2/Plone  |                     |     Zope2     |
+    -----------------                     -----------------
 
 
 Contact:
