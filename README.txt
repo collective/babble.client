@@ -8,7 +8,7 @@ Babble is an instant messaging service for Plone.
 It consists of babble.client for the Plone front-end, and babble.server which
 is a Zope2 messaging service.
 
-The client consists of a "Who's online?" portlet and chatboxes 
+The client consists of a "Online contacts" portlet and chatboxes 
 that make extensive use of JQuery and Ajax techniques.
 
 Currently, communication with the messaging service is being done via polling.
@@ -38,6 +38,7 @@ The client is configured via the portal_chat tool in the ZMI:
 - The maximum and minimum polling intervals can also be set in this tool. The
 default values are recommended though.
 
+
 How do I start using it?
 ------------------------
 
@@ -45,13 +46,13 @@ Make sure that babble.client is installed via Plone's control panel, or the
 portal_quickinstaller tool in the ZMI (Zope management interface).
 
 In Plone, go to the portlets manage page. In the dropdown of addable portlets,
-there should now be a new types of portlet, "Who's online?".
+there should now be a new types of portlet, "Online contacts".
 
 Add this portlet. If you have more than one person currently using the site,
 you should see them appear in this portlet.
 
 Note: When you are running your portal_javascripts registry in debug mode (or
-running './bin/instance fg' in Plone4), then the "Who's Online?" portlet will
+running './bin/instance fg' in Plone4), then the "Online contacts" portlet will
 show *all* the registered users, and not just the online ones, to make
 debugging easier.
 
@@ -60,6 +61,8 @@ bottom right of the page.
 
 Now start babbling!
 
+
+        Zeo Client                           Zeo Client
     -----------------                     -----------------
     |               |  XML-RPC with JSON  |               |
     | babble.client |---------------------| babble.server |
@@ -78,6 +81,17 @@ There exists an add-on for actionbar.panel, that provides this functionality.
 Simply install actionbar.babble (which will pull in actionbar.panel), to
 receive a bottom bar on which the chat windows will dock.
 
+A word of advice:
+-----------------
+
+When, working locally or on production, I would recommend 
+runnning the messaging service (babble.server) in a
+standalone Zope instance or in a separate Zeo client.
+
+Whenever I ran it in the same single non-zeo instance as the client, 
+I would have problems with the browser not responding after I 
+restart the instance.
+
 
 Contact:
 --------
@@ -91,8 +105,7 @@ brand <at> syslab <dot> com
 TODO:
 =====
 
-- consider replacing dtml with collective.xrtresource
-- consider adding the ability to block certain users.
-- consider the ability to set your own status
+- Currently Javascripts can't run anymore because of DTML,
+  therefore, consider replacing dtml with collective.xrtresource.
 
 
