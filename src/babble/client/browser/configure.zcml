@@ -12,22 +12,22 @@
 
     <browser:resource
         name="chat_init.js"
-        file="resources/chat_init.js"
+        file="javascripts/chat_init.js"
         />
 
     <browser:resource
         name="quicksearch.js"
-        file="resources/quicksearch.js"
+        file="javascripts/quicksearch.js"
         />
 
     <browser:resource
         name="jquery.cookie.js"
-        file="resources/jquery.cookie.js"
+        file="javascripts/jquery.cookie.js"
         />
 
     <browser:resource
         name="chat.css"
-        file="resources/chat.css"
+        file="stylesheets/chat.css"
         />
 
     <browser:page

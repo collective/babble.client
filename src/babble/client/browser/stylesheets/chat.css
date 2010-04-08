@@ -1,0 +1,176 @@
+div.online-contacts {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-left:1px solid #8CACBB;
+}
+
+div.online-contacts-max {
+    height: 18em;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-left:1px solid #8CACBB;
+}
+
+div.online-contacts .portletItem, div.online-contacts-max .portletItem {
+    border-left:0px;
+}
+
+.chatbox {
+	position: fixed;
+	position:expression("absolute");
+	width: 225px;
+	display:none;
+    /*  44px; TODO: This must somehow be configurable, in case the bottom.feeder is not installed */
+    bottom: 0; 
+    z-index: 3; /* So that it's higher than the content actions */
+}
+
+.chat-head {
+	background-color: #578308;
+	padding:7px;
+	color: #ffffff;
+	border-right:1px solid #578308;
+	border-left:1px solid #578308;
+}
+
+.chat-blink {
+	background-color: #176689;
+	border-right:1px solid #176689;
+	border-left:1px solid #176689;
+}
+
+.chat-content {
+	font-family: arial,sans-serif;
+	font-size: 13px;
+	color: #333333;
+	height:200px;
+	width:209px;
+	overflow-y:auto;
+	overflow-x:auto;
+	padding:7px;
+	border-left:1px solid #cccccc;
+	border-right:1px solid #cccccc;
+	border-bottom:1px solid #eeeeee;
+	background-color: #ffffff;
+	line-height: 1.3em;
+}
+
+.chat-message-them {
+    nowrap;
+}
+
+.chat-input {
+	padding: 5px;
+	background-color: #ffffff;
+	border-left:1px solid #cccccc;
+	border-right:1px solid #cccccc;
+	border-bottom:1px solid #cccccc;
+}
+
+.chat-textarea {
+	width: 206px;
+	height:44px;
+	padding:3px 0pt 3px 3px;
+	border: 1px solid #eeeeee;
+	margin: 1px;
+	overflow:hidden;
+}
+
+.chat-textarea-selected {
+	border: 2px solid #578308;
+	margin:0;
+}
+
+.chat-message {
+	margin-left:1em;
+}
+
+.chat-info {
+	margin-left:-1em;
+	color:#666666;
+
+}
+
+.chat-message-from {
+	margin-left:-1em;
+	font-weight: bold;
+}
+
+.chat-message-me {
+	margin-left:-1em;
+	font-weight: bold;
+    color: #436976;
+}
+
+.chat-message-them {
+	margin-left:-1em;
+	font-weight: bold;
+    color: #F62817;
+}
+
+.chat-message-error {
+	margin-left:-1em;
+    color:#76797C;
+    font-size:90%;
+    font-weight:normal;
+}
+
+.chat-options {
+	float: right;
+}
+
+.chat-options a {
+	text-decoration: none;
+	color: white;
+	font-weight:bold;
+	font-family:Verdana,Arial,"Bitstream Vera Sans",sans-serif;
+    padding-right: 1em;
+}
+
+.chat-title {
+	float: left;
+	font-weight: bold;
+}
+
+/* Styling for the chat panel bottom feeder */
+#footpanel a.chat{
+	background: url(++resource++babble.client.images/comment_32.png) no-repeat 3px center;
+	width: 126px;
+	border-left: 1px solid #bbb;
+	border-right: 1px solid #bbb;
+	padding-left: 40px;
+	text-indent: 0; 
+    /*--Reset text indent since there will be a combination of both text and image--*/
+}
+
+/*--Right align the chat and alert panels--*/
+#footpanel li#chatpanel, #footpanel li#alertpanel {	float: right; }  
+
+#chatpanel .subpanel li { 
+    background: url(++resource++babble.client.images/dash.gif) repeat-x left center; 
+}
+
+#chatpanel .subpanel li span {
+	padding: 5px;
+	background: #fff;
+	color: #777;
+	float: left;
+}
+
+#chatpanel .subpanel li a img {
+	float: left;
+	margin: 0 5px;
+}
+
+#chatpanel .subpanel li a{
+	padding: 3px 0;	margin: 0;
+	line-height: 32px;
+	height: 32px; 
+	background: #fff;
+	display: block;
+}
+
+#chatpanel .subpanel li a:hover {
+	background: #DEE7EC;
+	text-decoration: none;
+}
