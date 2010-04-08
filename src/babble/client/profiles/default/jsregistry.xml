@@ -2,13 +2,12 @@
 <object name="portal_javascripts" meta_type="JavaScripts Registry">
 
     <javascript 
-        authenticated="True"
+        expression="python: not here.restrictedTraverse('@@plone_portal_state').anonymous()"
         id="chat.js"
         insert-after="jquery.js"
         />
 
     <javascript 
-        authenticated="True"
         id="++resource++jquery.cookie.js"
         insert-after="chat.js"
         />
@@ -19,7 +18,7 @@
         />
 
     <javascript 
-        authenticated="True"
+        expression="python: not here.restrictedTraverse('@@plone_portal_state').anonymous()"
         id="++resource++chat_init.js"
         insert-after="chat.js"
         />
