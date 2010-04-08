@@ -16,6 +16,7 @@ Communication between the client and server is done by polling via XML-RPC and J
 Server-push options such as Comet, could be considered in the future, but
 there is no implementation for this at the moment.
 
+
 Features:
 ---------
 
@@ -27,6 +28,13 @@ Features:
 - Requests to the messaging service must be password authenticated
 - Can run on a different server than the messaging service
 - Well tested. 
+
+
+Compatibility:
+--------------
+
+Confirmed to work with Plone 3.3 and Plone 4
+
 
 Configuration:
 --------------
@@ -74,6 +82,7 @@ There exists an add-on for actionbar.panel, that provides this functionality.
 Simply install actionbar.babble (which will pull in actionbar.panel), to
 receive a bottom bar on which the chat windows will dock.
 
+
 A word of advice:
 -----------------
 
@@ -84,6 +93,7 @@ standalone Zope instance or in a separate Zeo client.
 Whenever I ran it in the same single non-zeo instance as the client, 
 I would have problems with the browser not responding after I 
 restart the instance.
+
 
 Contact:
 --------
