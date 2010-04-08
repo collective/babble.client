@@ -26,6 +26,7 @@ Features:
 - Configurable polling intervals
 - Requests to the messaging service must be password authenticated
 - Can run on a different server than the messaging service
+- Well tested. 
 
 Configuration:
 --------------
