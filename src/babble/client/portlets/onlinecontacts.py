@@ -26,6 +26,11 @@ class Assignment(base.Assignment):
     def __init__(self):
         pass
 
+    @property
+    def title(self):
+        """ """
+        return "Online contacts"
+
 
 class Renderer(base.Renderer):
     """
