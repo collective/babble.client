@@ -17,11 +17,10 @@ import Products.Five
 ztc.installProduct('Five')
 zcml.load_config('configure.zcml', package=Products.Five)
 
-import babble.server
 ztc.installProduct('babble.server')
-zcml.load_config('configure.zcml', package=babble.server)
 ztc.installPackage('babble.server')
 
+ztc.installPackage('collective.js.blackbird')
 ztc.installPackage('babble.client')
 
 SiteLayer = layer.PloneSite
@@ -34,12 +33,15 @@ class BabbleClientLayer(SiteLayer):
             DubletteFinder.
         """
         PRODUCTS = [
+                'collective.js.blackbird',
                 'babble.server',
                 'babble.client',
                 ]
         ptc.setupPloneSite(products=PRODUCTS)
 
         fiveconfigure.debug_mode = True
+        import collective.js.blackbird
+        zcml.load_config('configure.zcml', collective.js.blackbird)
         import babble.server
         zcml.load_config('configure.zcml', babble.server)
         import babble.client

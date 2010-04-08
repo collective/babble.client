@@ -154,7 +154,8 @@ class TestChat(TestCase):
 
         # Also test that utils' get_last_conversation returns this message
         messages = utils.get_last_conversation(portal, 'member2')
-        self.assertEquals(messages, {})
+        self.assertEquals(messages.keys(), ['member2'])
+        self.assertEquals(messages['member2'], [hello_message])
 
         resp = traverse('@@babblechat/clear_messages')('member2')
         resp = json.loads(resp)
