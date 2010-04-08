@@ -56,7 +56,7 @@ def get_last_conversation(context, contact):
     server = getConnection(context)
     member = pm.getAuthenticatedMember()
     username = member.getId()
-    if member.hasProperty('chatpass'):
+    if hasattr(member, 'chatpass'):
         password = getattr(member, 'chatpass') 
     else:
         log.error("get_last_conversation: %s does not have prop 'chatpass'"
