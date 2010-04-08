@@ -58,11 +58,11 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
         },)
 
     use_local_service = False
-    host = 'nohost'
+    host = 'localhost'
     port = '8080'
     name = 'chatservice'
-    username = 'portal_owner'
-    password = 'secret'
+    username = 'admin'
+    password = 'admin'
     poll_max = 20000 
     poll_min = 3000
 
@@ -91,6 +91,7 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
             self._v_connection = xmlrpclib.Server(url, allow_none=1)
 
         return self._v_connection
+
 
 InitializeClass(MessageTool)
 
