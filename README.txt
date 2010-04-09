@@ -42,10 +42,24 @@ Configuration:
 babble.client needs a running zope instance with a configured babble.server
 messaging service. (see the babble.server README)
 
+IMPORTANT: The babble.server 'Chat Service' object *must* be created in the Zope
+root of a Zope instance, not in any Plone root. 
+
 The client is configured via the portal_chat tool in the ZMI:
-- The fields must indicate the babble.server service's particulars.
-- The maximum and minimum polling intervals can also be set in this tool. The
-default values are recommended though.
+
+    - Service name: This is the name of babble.server's 'Chat Service' object that you
+      created in the Zope root of the Zope instance you will be using as your
+      message server.
+
+    - Host: This is the hostname of the server running the 'Chat Service'. 
+
+    - Port: This is the port number of the server running the 'Chat Service'.
+
+    - Username: This is the username of the Zope user that you used to
+      create the 'Chat Service'.
+
+    - Password: This is the password of the Zope user that you used to
+      create the 'Chat Service'.
 
 
 How do I start using it?

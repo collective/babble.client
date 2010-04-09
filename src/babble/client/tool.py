@@ -6,6 +6,7 @@ from AccessControl import ClassSecurityInfo
 
 from Products.CMFCore.utils import UniqueObject
 from Products.CMFCore.utils import SimpleItemWithProperties
+from Products.CMFCore.utils import getToolByName
 
 from babble.client import BabbleMessageFactory as _
 
@@ -16,11 +17,6 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
     id = 'portal_chat'
     security = ClassSecurityInfo()
     _properties = (
-        {   'id':'use_local_service', 
-            'type': 'boolean', 
-            'mode':'w',
-            'label': _('Bypass XMLRPC by using a local chatservice:'),
-        },
         {   'id':'name', 
             'type': 'string', 
             'mode':'w',
@@ -29,22 +25,22 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
         {   'id':'host', 
             'type': 'string', 
             'mode':'w',
-            'label': _('Host: (When not using a local chatservice)'),
+            'label': _('Host:'),
         },
         {   'id':'port', 
             'type': 'string', 
             'mode':'w',
-            'label': _('Port: (When not using a local chatservice)'),
+            'label': _('Port:'),
          },
         {   'id':'username', 
             'type': 'string', 
             'mode':'w',
-            'label': _('Username: (When not using a local chatservice)'),
+            'label': _('Username:'),
          },
         {   'id':'password', 
             'type': 'string', 
             'mode':'w',
-            'label': _('Password: (When not using a local chatservice)'),
+            'label': _('Password:'),
          },
         {   'id':'poll_max', 
             'type': 'int', 
@@ -73,8 +69,16 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
 
     def getConnection(self):
         """ Return a connection to the chat service """
-        if self.use_local_service:
-            return self.portal_url.getPortalObject().aq_parent.chatservice
+        # If 'self' has no acquisition context, then we can't access
+        # portal_url. I don't yet know why this happens :-/
+        if self.use_local_service and getToolByName(self, 'portal_url', None):
+            zope_root = self.portal_url.getPortalObject().aq_parent
+            if hasattr(zope_root, self.name):
+                return zope_root[self.name]
+            else:
+                log.error("No Chat Service '%s' in the Zope root" % self.name)
+                # This will raise KeyError 
+                return zope_root[self.name]
 
         username = self.getProperty('username')
         password = self.getProperty('password')

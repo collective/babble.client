@@ -18,6 +18,7 @@ def get_online_usernames(context):
         log.error(\
             'Error from get_online_contacts: server.getOnlineUsers: %s' \
             % err_msg)
+        return []
 
     resp = json.loads(resp)
     return resp['online_users']
