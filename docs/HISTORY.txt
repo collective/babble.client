@@ -1,7 +1,13 @@
 Changelog
 =========
 
-1.0 (2010-04-08)
+1.2 (2010-04-09)
+----------------
+
+- Removed the option from portal_chat to bypass XML-RPC [jcbrand]
+- Bugfixes in tests and fixed getConnection AttributeError for utils.py [jcbrand]
+
+1.1 (2010-04-08)
 ----------------
 
 - Tweaked jsregistry.xml to gain Plone3 compatibility [jcbrand]
