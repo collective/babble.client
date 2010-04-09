@@ -8,7 +8,7 @@ tests_require=[]
 setup(
     name='babble.client',
     version=version,
-    description="This product provides a portlet labeled 'Who's online?' which shows you a list of all online users and enables you to contact them.",
+    description="Babble: Instant messaging client for Plone",
     long_description=open("README.txt").read() + "\n" +
                     open(os.path.join("docs", "HISTORY.txt")).read(),
     # Get more strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers

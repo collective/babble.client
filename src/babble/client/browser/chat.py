@@ -53,7 +53,17 @@ class Chat(BrowserView):
             if resp['status'] == SUCCESS:
                 setattr(member, 'chatpass', password)
 
-        password = getattr(member, 'chatpass') 
+        if hasattr(member, 'chatpass'):
+            password = getattr(member, 'chatpass') 
+        else:
+            log.error("The member %s is registered in the Chat Service, but "
+            "doesn't have his password anymore. This could be because an "
+            "existing Chat Service is being used with a new Plone instance. "
+            "Deleting the user's entry in the Chat Service's acl_users and "
+            "folder in 'users' should fix this problem" % username)
+            # This will raise an attribute error
+            password = getattr(member, 'chatpass') 
+
         try:
             server.confirmAsOnline(username)
             # username, password, sender, read, clear
