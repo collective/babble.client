@@ -42,6 +42,11 @@ Configuration:
 babble.client needs a running zope instance with a configured babble.server
 messaging service. (see the babble.server README)
 
+NOTE: It's recommended that you run the babble.server messaging service in a separate
+server or Zeo Client. Running the client and server in the same instance
+sometimes causes the browser (and probably Zope/ZPublisher) to become
+unresponsive.
+
 IMPORTANT: The babble.server 'Chat Service' object *must* be created in the Zope
 root of a Zope instance, not in any Plone root. 
 
@@ -97,16 +102,42 @@ Simply install actionbar.babble (which will pull in actionbar.panel), to
 receive a bottom bar on which the chat windows will dock.
 
 
-A word of advice:
------------------
+Troubleshooting:
+----------------
 
-When, working locally or on production, I would recommend 
-runnning the messaging service (babble.server) in a
-standalone Zope instance or in a separate Zeo client.
+1). *I get a 'connection error' message inside the chat window*
 
-Whenever I ran it in the same single non-zeo instance as the client, 
-I would have problems with the browser not responding after I 
-restart the instance.
+ The 'connection error' message happens whenever the chat client
+ (babble.client) cannot communicate with the chat server (babble.server).
+ 
+ This is usually because the chat server is not running (i.e when you
+ restart the zope server).
+ 
+ Check that the chat server is running and that your settings in the
+ portal_chat tool are correct.
+
+2). *Plone freezes or locks up completely and I have to restart the instance
+before this goes away*
+
+ This happens when there is only one Zope instance that has both the
+ chat client and the chat server running in it.
+ 
+ The chat client 'polls' the chat server to find new messages. If the
+ server stops responding because it is overwhelmed or because it is
+ restarted, then the browser hangs forever as it waits for a response, 
+ even after Zope was restarted.
+ 
+ The best solution is to run the chat server in a separate dedicated Zeo 
+ instance not being used for anything else. 
+ 
+ Make sure to change the port in the portal_chat tool to point to this
+ Zeo instance.
+ 
+ A second thing you can do, is to increase the minimum poll time in
+ the portal_chat tool, for example from 3000 ms to 6000 ms or more.
+ 
+ This will of course mean that messages can take longer to appear for the
+ conversation partners.
 
 
 Contact:
@@ -120,7 +151,7 @@ Contact me with questions or suggestions:
 TODO:
 -----
 
-- Currently Javascripts can't run anymore because of DTML,
+- Currently Javascript tests can't run anymore because of DTML,
   therefore, consider replacing dtml with collective.xrtresource.
 
 
