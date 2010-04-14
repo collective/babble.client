@@ -1,4 +1,5 @@
 import logging
+from socket import error as socket_error
 import xmlrpclib
 import simplejson as json
 from Products.CMFCore.utils import getToolByName
@@ -18,6 +19,12 @@ def get_online_usernames(context):
         log.error(\
             'Error from get_online_contacts: server.getOnlineUsers: %s' \
             % err_msg)
+        return []
+    except socket_error, e:
+        log.error(\
+            'Socket error from get_online_contacts:' + \
+            'server.getOnlineUsers: %s \nis the chatserver running?' \
+            %e)
         return []
 
     resp = json.loads(resp)
