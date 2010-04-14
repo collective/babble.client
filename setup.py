@@ -10,7 +10,8 @@ setup(
     version=version,
     description="Babble: Instant messaging client for Plone",
     long_description=open("README.txt").read() + "\n" +
-                    open(os.path.join("docs", "HISTORY.txt")).read(),
+                    open(os.path.join("docs", "HISTORY.txt")).read() +
+                    open(os.path.join("docs", "CONTRIBUTORS.txt")).read(),
     # Get more strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
     "Framework :: Plone",
