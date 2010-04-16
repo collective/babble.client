@@ -11,18 +11,18 @@
         />
 
     <browser:resource
-        name="chat_init.js"
-        file="javascripts/chat_init.js"
+        name="jquery.ba-dotimeout.min.js"
+        file="thirdparty/jquery.ba-dotimeout.min.js"
         />
 
     <browser:resource
         name="quicksearch.js"
-        file="javascripts/quicksearch.js"
+        file="thirdparty/quicksearch.js"
         />
 
     <browser:resource
         name="jquery.cookie.js"
-        file="javascripts/jquery.cookie.js"
+        file="thirdparty/jquery.cookie.js"
         />
 
     <browser:resource
@@ -36,38 +36,6 @@
         name="babblechat"
         permission="zope2.View"
         allowed_interface=".interfaces.IChat"
-        /> 
-
-    <browser:page
-        for="*"
-        attribute="send_message"
-        class=".chat.Chat"
-        name="send_message"
-        permission="zope2.View"
-        /> 
-
-    <browser:page
-        for="*"
-        attribute="poll"
-        class=".chat.Chat"
-        name="poll"
-        permission="zope2.View"
-        /> 
-
-    <browser:page
-        for="*"
-        attribute="initialize"
-        class=".chat.Chat"
-        name="initialize"
-        permission="zope2.View"
-        /> 
-
-    <browser:page
-        for="*"
-        attribute="clear_messages"
-        class=".chat.Chat"
-        name="clear_messages"
-        permission="zope2.View"
         /> 
 
     <browser:page
