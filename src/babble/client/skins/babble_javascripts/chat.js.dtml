@@ -71,8 +71,13 @@ function initialize(){
             }
         }
     }
+    var path = window.location.pathname;
+    if (path.indexOf("portal_factory") != -1) {
+        path = path.split('/portal_factory')[0];
+    }
+    path += '/@@initialize';
     jQuery.ajax({
-        url: "@@initialize",
+        url: path,
         cache: false,
         dataType: "json",
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -184,8 +189,13 @@ function closeChat(title) {
     else {
         jQuery.cookie('chats-open-'+username, null, {path: '/'});
     }
+    var path = window.location.pathname;
+    if (path.indexOf("portal_factory") != -1) {
+        path = path.split('/portal_factory')[0];
+    }
+    path += '/@@clear_messages';
     jQuery.ajax({
-        url: "@@clear_messages",
+        url: path,
         cache: false,
         data: {contact: title},
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -208,8 +218,13 @@ function startChat(contact) {
 }
 
 function createChatBox(title) {
+    var path = window.location.pathname;
+    if (path.indexOf("portal_factory") != -1) {
+        path = path.split('/portal_factory')[0];
+    }
+    path += '/@@render_chat_box';
     jQuery.ajax({
-        url: "@@render_chat_box",
+        url: path,
         cache: false,
         async: false,
         data: {
@@ -338,8 +353,13 @@ function poll(){
 }
 
 function poll_server() {
+    var path = window.location.pathname;
+    if (path.indexOf("portal_factory") != -1) {
+        path = path.split('/portal_factory')[0];
+    }
+    path += '/@@poll';
     jQuery.ajax({
-        url: "@@poll",
+        url: path,
         cache: false,
         dataType: "json",
         timeout: poll_min - 100,
@@ -412,8 +432,13 @@ function keypressed(event, textarea, title) {
 		jQuery(textarea).focus();
 		jQuery(textarea).css('height','44px');
 		if (message != '') {
+            var path = window.location.pathname;
+            if (path.indexOf("portal_factory") != -1) {
+                path = path.split('/portal_factory')[0];
+            }
+            path += '/@@send_message';
             jQuery.ajax({
-                url: "@@send_message",
+                url: path,
                 cache: false,
                 data: {to: title, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
