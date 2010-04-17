@@ -139,6 +139,19 @@ before this goes away*
  This will of course mean that messages can take longer to appear for the
  conversation partners.
 
+3). *Nothing happens when I click on a contact's name in the portlet*
+
+ Check the debug output on Firebug for any clues. If you get messages that
+ something is undefined, such as "jQuery is not defined", then the ordering
+ in portal_javascripts is probably wrong.
+
+ chat.js, jquery.ba-dotimeout.min.js, jquery.cookie.js and quicksearch.js 
+ must all come *after* jquery.js. 
+ 
+ In Plone 3, you might have collective.js.jquery installed, in which case a 
+ newer jQuery version is installed and jquery.js is disabled. Make sure 
+ that the newer library is *before* the above mentioned scipts.
+
 
 Contact:
 --------
@@ -153,5 +166,7 @@ TODO:
 
 - Currently Javascript tests can't run anymore because of DTML,
   therefore, consider replacing dtml with collective.xrtresource.
+- Identify and present URLs in the chat boxes
+- Add broadcasting (send to all) functionality
 
 

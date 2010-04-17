@@ -1,11 +1,16 @@
 Changelog
 =========
 
+1.3b2 (Unreleased)
+------------------
+
+- New polling solution via the doTimeout plugin instead of setTimeout [jcbrand]
+- Fixed ajax calls when in portal_factory as context [jcbrand]
+
 1.3b1 (2010-04-12)
 ------------------
 
 - Updated the README [jcbrand]
-
 
 1.2 (2010-04-09)
 ----------------
@@ -17,7 +22,6 @@ Changelog
 ----------------
 
 - Tweaked jsregistry.xml to gain Plone3 compatibility [jcbrand]
-
 
 1.0 (2010-04-08)
 ----------------
