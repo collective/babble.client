@@ -5,16 +5,14 @@ Babble: Instant Messaging for Plone
 -----------------------------------
 
 Babble is an instant messaging service for Plone. 
-It consists of babble.client for the Plone front-end and babble.server, 
+It consists of babble.client as the Plone front-end and 
+`babble.server <http://plone.org/products/babble.server>`_, 
 a Zope2 messaging service, for the backend.
 
 The client consists of an *Online contacts* portlet and modal chatboxes 
 that make extensive use of JQuery and Ajax techniques.
 
 Communication between the client and server is done by polling via XML-RPC and JSON.
-
-Server-push options such as Comet, could be considered in the future, but
-there is no implementation for this at the moment.
 
 
 Features:
@@ -26,6 +24,8 @@ Features:
 - An 'online users' portlet provides a list of currently online users
 - Configurable polling intervals
 - Requests to the messaging service must be password authenticated
+- Can be `integrated <http://plone.org/products/actionbar.babble>`_ with the 
+  ActionBar of `actionbar.panel <http://plone.org/products/actionbar.panel/>`_
 - Can run on a different server than the messaging service
 - Well tested. 
 
@@ -33,14 +33,29 @@ Features:
 Compatibility:
 --------------
 
-Confirmed to work with Plone 3.3 and Plone 4
+Tested to work with Plone 3.3 and Plone 4
+
+
+Quickly setting up a demonstration:
+-----------------------------------
+
+There is a `demo <http://plone.org/products/babble.demo>`_ egg available 
+on Plone.org and pypi, with which you can quickly set up a new Babble 
+configured Plone 4 site for demonstration purposes. 
+
+See the README of the `babble.demo <http://plone.org/products/babble.demo>`_ 
+package for instructions on how to set it up.
+
+If you however want to configure the system yourself, then read the next
+section.
 
 
 Configuration:
 --------------
 
 babble.client needs a running zope instance with a configured babble.server
-messaging service. (see the babble.server README)
+messaging service. (see the babble.server 
+`README <http://pypi.python.org/pypi/babble.server>`_)
 
 NOTE: It's recommended that you run the babble.server messaging service in a separate
 server or Zeo Client. Running the client and server in the same instance
@@ -52,19 +67,19 @@ root of a Zope instance, not in any Plone root.
 
 The client is configured via the portal_chat tool in the ZMI:
 
-    - Service name: This is the name of babble.server's 'Chat Service' object that you
-      created in the Zope root of the Zope instance you will be using as your
-      message server.
+ - Service name: This is the name of babble.server's 'Chat Service' object that you
+   created in the Zope root of the Zope instance you will be using as your
+   message server.
 
-    - Host: This is the hostname of the server running the 'Chat Service'. 
+ - Host: This is the hostname of the server running the 'Chat Service'. 
 
-    - Port: This is the port number of the server running the 'Chat Service'.
+ - Port: This is the port number of the server running the 'Chat Service'.
 
-    - Username: This is the username of the Zope user that you used to
-      create the 'Chat Service'.
+ - Username: This is the username of the Zope user that you used to
+   create the 'Chat Service'.
 
-    - Password: This is the password of the Zope user that you used to
-      create the 'Chat Service'.
+ - Password: This is the password of the Zope user that you used to
+   create the 'Chat Service'.
 
 
 How do I start using it?
