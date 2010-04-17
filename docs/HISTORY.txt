@@ -6,6 +6,7 @@ Changelog
 
 - New polling solution via the doTimeout plugin instead of setTimeout [jcbrand]
 - Fixed ajax calls when in portal_factory as context [jcbrand]
+- Made the 'Who's online?' portlet's heading editable [jcbrand]
 
 1.3b1 (2010-04-12)
 ------------------
