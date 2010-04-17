@@ -1,3 +1,5 @@
+from zope import schema
+from zope.formlib import form
 from zope.interface import implements
 
 from plone.portlets.interfaces import IPortletDataProvider
@@ -6,30 +8,35 @@ from plone.app.portlets.portlets import base
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 
 from babble.client import utils
+from babble.client import BabbleMessageFactory as _
 
 class IOnlineContacts(IPortletDataProvider):
-    """A portlet
-
-    It inherits from IPortletDataProvider because for this portlet, the
-    data that is being rendered and the portlet assignment itself are the
-    same.
+    """ Interface for a portlet showing the currently online contacts
     """
+    header = schema.TextLine(
+                        title=_(u"Portlet header"),
+                        description=_(u"Title of the rendered portlet"),
+                        default=_(u"Who's online?"),
+                        required=True)
+
 
 class Assignment(base.Assignment):
-    """ 
-    This is what is actually managed through the portlets UI and associated
-    with columns.
+    """ This is what is actually managed through the portlets UI and associated
+        with columns.
     """
-
     implements(IOnlineContacts)
 
-    def __init__(self):
-        pass
+    header = u""
+
+    def __init__(self, header=_(u"Online contacts")):
+        self.header = header
 
     @property
     def title(self):
-        """ """
-        return "Online contacts"
+        """ This property is used to give the title of the portlet in the
+            'manage portlets' screen. Here, we use the title that the user gave.
+        """
+        return self.header
 
 
 class Renderer(base.Renderer):
@@ -46,12 +53,29 @@ class Renderer(base.Renderer):
     def get_id(self):
         """ """
         return 'online-contacts-portlet-%d' % self.__hash__()
+        
+    def title(self):
+        return self.data.header
 
 
-class AddForm(base.NullAddForm):
+class AddForm(base.AddForm):
     """ """
+    form_fields = form.Fields(IOnlineContacts)
+    label = _(u"Add an 'Online Contacts' Portlet")
+    description = _(
+            u"This portlet displays the currently online users, and "
+            u"enables you to chat with them")
 
-    def create(self):
-        return Assignment()
+    def create(self, data):
+        return Assignment(**data)
 
+
+class EditForm(base.EditForm):
+    """ """
+    form_fields = form.Fields(IOnlineContacts)
+
+    label = _(u"Edit 'Online Contacts' Portlet")
+    description = _(
+            u"This portlet displays the currently online users, and "
+            u"enables you to chat with them")
 

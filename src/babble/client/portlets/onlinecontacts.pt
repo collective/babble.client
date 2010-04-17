@@ -22,9 +22,7 @@
     tal:attributes="id portlet_id"
     i18n:domain="slc.onlinecontacts">
     <dt class="portletHeader">
-        <span class="portletTopLeft"></span>
-        Who's online?
-        <span class="portletTopRight"></span>
+        <span tal:replace="view/title">Who's online?</span>
     </dt>
 
     <metal:macro define-macro="current-online-contacts">
