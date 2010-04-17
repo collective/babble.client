@@ -108,7 +108,6 @@ class Chat(BrowserView):
         if pm.isAnonymousUser():
             return
 
-        log.info('Chat message %s sent to %s' % (message, to))
         server = utils.getConnection(self.context)
         member = pm.getAuthenticatedMember()
         if not hasattr(member, 'chatpass'):
@@ -116,6 +115,7 @@ class Chat(BrowserView):
 
         password = getattr(member, 'chatpass') 
         username = member.getId()
+        log.info('Chat message from %s sent to %s' % (username, to))
         server = utils.getConnection(self.context)
         try:
             resp = server.sendMessage(username, password, to, message)
