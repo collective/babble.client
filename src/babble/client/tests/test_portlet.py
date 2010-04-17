@@ -40,8 +40,9 @@ class TestPortlet(TestCase):
                                     '++contextportlets++plone.leftcolumn'
                                     )
         addview = mapping.restrictedTraverse('+/' + portlet.addview)
-        assignment = addview.create()
+        assignment = addview.create({'header':u"Who is online?"})
         self.assertEquals(type(assignment), type(onlinecontacts.Assignment()))
+        self.assertEquals(assignment.title, u"Who is online?")
 
     def test_obtain_renderer(self):
         context = self.folder
