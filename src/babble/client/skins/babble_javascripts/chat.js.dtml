@@ -21,6 +21,8 @@ var blink_order = 0;
 var doc_title;
 var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
+var poll_cycle = 10;        // The amount of polls to make in a cycle
+var reset_poll = false;
 
 <dtml-let pollmax="portal_chat.poll_max">
 var poll_max = &dtml-pollmax;;  // The maximum polling period
@@ -30,7 +32,8 @@ var poll_max = &dtml-pollmax;;  // The maximum polling period
 var poll_min = &dtml-pollmin;;  // The minimum polling period
 </dtml-let>
 
-var poll_time = poll_min;   // The initial polling period
+var timeout = 1000;
+var poll_interval = poll_min;   // The initial polling period
 
 <dtml-let member="portal_membership.getAuthenticatedMember().getId().encode('utf-8')">
 var username = "&dtml-member;";
@@ -57,7 +60,18 @@ function oc(a) {
     return o;
 }
 
-function initialize(){  
+jQuery(document).ready(function() {
+    if (initialize()) { 
+        jQuery.doTimeout(poll_max, function() {
+            initialize();
+        });
+    }
+});
+
+function initialize() {  
+    if (!username)
+        return true; // This will let doTimout continue, i.e initialize will be called again.
+
     var open_chats = Array();
     var cookie = jQuery.cookie('chats-open-'+username);
     log.info('initialize: cookie = ' + cookie + '\n');
@@ -75,16 +89,16 @@ function initialize(){
     if (path.indexOf("portal_factory") != -1) {
         path = path.split('/portal_factory')[0];
     }
-    path += '/@@initialize';
+    path += '/@@babblechat/initialize';
     jQuery.ajax({
         url: path,
         cache: false,
         dataType: "json",
+        timeout: timeout,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
-            // If an error occured, call initialize again after 20 seconds.
-            setTimeout('initialize();', 20000); 
+            return true; // This will let doTimout continue, i.e initialize will be called again.
         },
         success: function(data) {
             var msgdict = data.messages;
@@ -126,9 +140,8 @@ function initialize(){
                     //setTimeout('chat_content.scrollTop(chat_content[0].scrollHeight);', 100); // IE bug
                 }
             };
-            if (username) {
-                setTimeout('poll();', poll_time);
-            }
+            poll_interval = poll_min;
+            poll();
         }
     });
 }
@@ -193,7 +206,7 @@ function closeChat(title) {
     if (path.indexOf("portal_factory") != -1) {
         path = path.split('/portal_factory')[0];
     }
-    path += '/@@clear_messages';
+    path += '/@@babblechat/clear_messages';
     jQuery.ajax({
         url: path,
         cache: false,
@@ -211,10 +224,14 @@ function closeChat(title) {
 function startChat(contact) {
     createChat(contact);
     jQuery("#chatbox_"+contact+" .chat-textarea").focus();
-    poll_time = poll_min;
-    poll_count = 1;
     messages_found = 0;
-    setTimeout('poll();', poll_time);
+    reset_poll = true;
+    if (poll_interval > poll_min) {
+        // The poll time will only be reset once the current 
+        // interval has been passed. Therefore we poll the
+        // server in the meantime.
+        poll_server();
+    }
 }
 
 function createChatBox(title) {
@@ -298,58 +315,42 @@ function createChat(title, minimize) {
     chatbox.show();
 }
 
-function poll(){
-    // log.info('Poll: poll_time: ' + poll_time);
-    if (window_focus == false) {
-        var blink_number = 0;
-        var title_changed = 0;
-        for (var i = 0; i < new_chats.length; i++) {
-            if (new_chats[i] == true) {
-                ++blink_number;
-                if (blink_number >= blink_order) {
-                    document.title = i+' says...';
-                    title_changed = 1;
-                    break;	
-                }
-            }
+function poll() {
+    /* The way doTimout works, it will execute the code in the callback
+     * function *after* poll_interval has passed.
+     */
+    jQuery.doTimeout(poll_interval, function(){
+        if (reset_poll) {
+            poll_interval = poll_min;
+            poll_count = 0;
+            reset_poll = false;
+            return true
         }
-        if (title_changed == 0) {
-            document.title = doc_title;
-            blink_order = 0;
+
+        if (poll_count < poll_cycle) { 
+            poll_server();
+            poll_count++;
+            if (messages_found > 0) {
+                poll_interval = poll_min;
+                poll_count = 1;
+                messages_found = 0;
+                poll();
+                return false;
+            } 
+            return true;
         } 
         else {
-            ++blink_order;
-        }
-    } 
-    else {
-        for (var i = 0; i < new_chats.length; i++) {
-            new_chats[i] = false;
-        }
-    }
-    for (var i = 0; i < new_chats.length; i++) {
-        if (has_messages[i] == true) {
-            if (chat_focus[i] == false) {
-                //FIXME: toggle all or none policy
-                jQuery('#chatbox_'+ i +' .chat-head').toggleClass('chat-blink');
-            }
-        }
-    }
-    poll_server();
+            poll_count = 1;
+            if (poll_interval < poll_max)
+                poll_interval *= 2;
+             
+            if (poll_interval > poll_max)
+                poll_interval = poll_max;
 
-    poll_count++;
-    if (messages_found > 0) {
-        poll_time = poll_min;
-        poll_count = 1;
-        messages_found = 0;
-    } 
-    else if ((poll_count >= 10) && (poll_time < poll_max)) {
-        poll_time *= 2;
-        poll_count = 1;
-        if (poll_time > poll_max) {
-            poll_time = poll_max;
+            poll();
+            return false;
         }
-    }
-    setTimeout('poll();', poll_time);
+    });
 }
 
 function poll_server() {
@@ -357,12 +358,13 @@ function poll_server() {
     if (path.indexOf("portal_factory") != -1) {
         path = path.split('/portal_factory')[0];
     }
-    path += '/@@poll';
+    path += '/@@babblechat/poll';
     jQuery.ajax({
         url: path,
         cache: false,
+        async: true,
         dataType: "json",
-        timeout: poll_min - 100,
+        timeout: timeout,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -375,7 +377,7 @@ function poll_server() {
                     '</div>'
                 );
                 content.scrollTop(content[0].scrollHeight);
-                poll_time = 20000; 
+                poll_interval = 20000; 
             }
         },
         success: function(data) {
@@ -436,10 +438,11 @@ function keypressed(event, textarea, title) {
             if (path.indexOf("portal_factory") != -1) {
                 path = path.split('/portal_factory')[0];
             }
-            path += '/@@send_message';
+            path += '/@@babblechat/send_message';
             jQuery.ajax({
                 url: path,
                 cache: false,
+                async: true,
                 data: {to: title, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     log.error(textStatus);
@@ -461,13 +464,18 @@ function keypressed(event, textarea, title) {
                             '<span class="chat-message-content">'+message+'</span>' + 
                         '</div>');
                     jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
+
+                    reset_poll = true;
+                    if (poll_interval > poll_min) {
+                        // The poll time will only be reset once the current 
+                        // interval has been passed. Therefore we poll the
+                        // server in the meantime.
+                        poll_server();
+                    }
+                    return false;
                 }
             });
 		}
-		poll_time = poll_min;
-		poll_count = 1;
-        setTimeout('poll();', poll_time);
-		return false;
 	}
 	var adjustedHeight = textarea.clientHeight;
 	var maxHeight = 94;
