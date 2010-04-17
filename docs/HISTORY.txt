@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.3b2 (Unreleased)
+1.3b2 (2010-04-17)
 ------------------
 
 - New polling solution via the doTimeout plugin instead of setTimeout [jcbrand]
