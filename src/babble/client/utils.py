@@ -1,8 +1,9 @@
 import logging
-from socket import error as socket_error
-import xmlrpclib
 import simplejson as json
+import xmlrpclib
+from socket import error as socket_error
 from Products.CMFCore.utils import getToolByName
+
 log = logging.getLogger('babble.client/utils.py')
 
 def getConnection(context):
@@ -37,7 +38,8 @@ def get_online_members(context):
     member = pm.getAuthenticatedMember()
     members = pm.listMembers()
     
-    if context.portal_javascripts.getDebugMode():
+    pj = getToolByName(context, 'portal_javascripts')
+    if pj.getDebugMode():
         if member in members:
             members.remove(member)
         return members
