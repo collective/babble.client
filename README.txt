@@ -167,6 +167,32 @@ before this goes away*
  newer jQuery version is installed and jquery.js is disabled. Make sure 
  that the newer library is *before* the above mentioned scipts.
 
+4). Babble doesn't work with deliverance of collection.xdv
+
+ That is because deliverance and collective.xdv need to be told to ignore the
+ ajax calls that Babble makes.
+
+ For collective.xdv, add the following to the *Unstyled paths* textbox in the
+ @@xdv-settings configuration view (found via *Site setup*)::
+
+    ^.*/@@babblechat.*$
+    ^.*/@@render_chat_box
+
+
+ For deliverance, you'll need proxy declarations similar to the following in
+ your rules.xml file::
+
+    <proxy path="regex:^.*/@@babblechat.*$">
+        <dest href="http://localhost:8080/VirtualHostBase/http/localhost:5099/MySite/VirtualHostRoot/" />
+    </proxy>
+
+    <proxy path="regex:^.*/@@render_chat_box">
+        <dest href="http://localhost:8080/VirtualHostBase/http/localhost:5099/MySite/VirtualHostRoot/" />
+    </proxy>
+
+ Where MySite is your Plone site's name, running on 8080 and the deliverance
+ proxy on 5099.
+
 
 Contact:
 --------
