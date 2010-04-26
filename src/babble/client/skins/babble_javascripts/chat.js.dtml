@@ -89,6 +89,9 @@ function initialize() {
     if (path.indexOf("portal_factory") != -1) {
         path = path.split('/portal_factory')[0];
     }
+    else if (path == '/') {
+        path = ''
+    }
     path += '/@@babblechat/initialize';
     jQuery.ajax({
         url: path,
@@ -206,6 +209,9 @@ function closeChat(title) {
     if (path.indexOf("portal_factory") != -1) {
         path = path.split('/portal_factory')[0];
     }
+    else if (path == '/') {
+        path = ''
+    }
     path += '/@@babblechat/clear_messages';
     jQuery.ajax({
         url: path,
@@ -238,6 +244,9 @@ function createChatBox(title) {
     var path = window.location.pathname;
     if (path.indexOf("portal_factory") != -1) {
         path = path.split('/portal_factory')[0];
+    }
+    else if (path == '/') {
+        path = ''
     }
     path += '/@@render_chat_box';
     jQuery.ajax({
@@ -358,6 +367,9 @@ function poll_server() {
     if (path.indexOf("portal_factory") != -1) {
         path = path.split('/portal_factory')[0];
     }
+    else if (path == '/') {
+        path = ''
+    }
     path += '/@@babblechat/poll';
     jQuery.ajax({
         url: path,
@@ -437,6 +449,9 @@ function keypressed(event, textarea, title) {
             var path = window.location.pathname;
             if (path.indexOf("portal_factory") != -1) {
                 path = path.split('/portal_factory')[0];
+            }
+            else if (path == '/') {
+                path = ''
             }
             path += '/@@babblechat/send_message';
             jQuery.ajax({
