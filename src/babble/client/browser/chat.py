@@ -117,7 +117,7 @@ class Chat(BrowserView):
 
         password = getattr(member, 'chatpass') 
         username = member.getId()
-        log.info(u'Chat message %s from %s sent to %s' % (message, username, to))
+        log.info(u'Chat message from %s sent to %s' % (username, to))
         server = utils.getConnection(self.context)
         try:
             resp = server.sendMessage(username, password, to, message)
