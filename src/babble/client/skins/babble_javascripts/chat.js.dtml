@@ -41,13 +41,13 @@ var username = "&dtml-member;";
 
 var window_focus = true;
 var chat_focus = new Array();
-var has_messages = new Array();
 var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
 function get_minimized_chats() {
-    if (jQuery.cookie('chats_minimized'))
-        return jQuery.cookie('chats_minimized').split(/\|/);
+    var cookie = jQuery.cookie('chats_minimized_'+username);
+    if (cookie)
+        return cookie.split(/\|/);
     return Array()
 }
 
@@ -104,50 +104,53 @@ function initialize() {
             return true; // This will let doTimout continue, i.e initialize will be called again.
         },
         success: function(data) {
-            var msgdict = data.messages;
-            for(var user in msgdict) {
-                var messages = msgdict[user];
-                if (messages.length) {
-                    messages_found += 1;
-                    has_messages[user] = true;
-                    new_chats[user] = true;
-                    var chat = jQuery("#chatbox_"+user);
-                    if (chat.length <= 0) {
-                        createChat(user, 1);
-                    }
-                    if (chat.css('display') == 'none') {
-                        chat.css('display','block');
-                        reorderChats();
-                    }
-                    var chat_content = jQuery("#chatbox_"+user+" .chat-content");
-                    for (var i=0; i<messages.length; i++) {
-                        message = messages[i]
-                        if (message[0] == user) {
-                            chat_content.append(
-                                '<div class="chat-message">' + 
-                                    '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                                    '<span class="chat-message-content">'+message[3]+'</span>' + 
-                                '</div>'
-                            );
-                        }
-                        else {
-                            chat_content.append(
-                                '<div class="chat-message">' + 
-                                    '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                                    '<span class="chat-message-content">'+message[3]+'</span>' + 
-                                '</div>'
-                            );
-                        }
-                    }
-                    chat_content.scrollTop(chat_content[0].scrollHeight);
-                    //setTimeout('chat_content.scrollTop(chat_content[0].scrollHeight);', 100); // IE bug
+            for(var user in data.messages) {
+                var messages = data.messages[user];
+                if (!messages.length) {
+                    continue
                 }
+                appendMessages(user, messages, 0);
             };
             poll_interval = poll_min;
             poll();
         }
     });
 }
+
+function appendMessages(user, messages, minimized) {
+    messages_found += 1;
+    new_chats[user] = true;
+    var chat = jQuery("#chatbox_"+user);
+    if (chat.length <= 0) {
+        createChat(user, minimized);
+    }
+    if (chat.css('display') == 'none') {
+        chat.css('display','block');
+        reorderChats();
+    }
+    var chat_content = chat.find(".chat-content");
+    for (var i=0; i<messages.length; i++) {
+        message = messages[i]
+        if (message[0] == user) {
+            chat_content.append(
+                '<div class="chat-message">' + 
+                    '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                    '<span class="chat-message-content">'+message[3]+'</span>' + 
+                '</div>'
+            );
+        }
+        else {
+            chat_content.append(
+                '<div class="chat-message">' + 
+                    '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                    '<span class="chat-message-content">'+message[3]+'</span>' + 
+                '</div>'
+            );
+        }
+    }
+    chat_content.scrollTop(chat_content[0].scrollHeight);
+}
+
 
 function reorderChats() {
     var index = 0;
@@ -232,12 +235,6 @@ function startChat(contact) {
     jQuery("#chatbox_"+contact+" .chat-textarea").focus();
     messages_found = 0;
     reset_poll = true;
-    if (poll_interval > poll_min) {
-        // The poll time will only be reset once the current 
-        // interval has been passed. Therefore we poll the
-        // server in the meantime.
-        poll_server();
-    }
 }
 
 function createChatBox(title) {
@@ -271,19 +268,19 @@ function createChatBox(title) {
 
 function handleChatEvents(title) {
     chat_focus[title] = false;
-    jQuery("#chatbox_"+title+" .chat-textarea").blur(function(){
+    var chat_area = jQuery("#chatbox_"+title+" .chat-textarea");
+    chat_area.blur(function(){
         chat_focus[title] = false;
-        jQuery("#chatbox_"+title+" .chat-textarea").removeClass('chat-textarea-selected');
+        chat_area.removeClass('chat-textarea-selected');
     }).focus(function(){
         chat_focus[title] = true;
-        has_messages[title] = false;
-        jQuery('#chatbox_'+title+' .chat-head').removeClass('chat-blink');
-        jQuery("#chatbox_"+title+" .chat-textarea").addClass('chat-textarea-selected');
+        chat_area.addClass('chat-textarea-selected');
     });
 
-    jQuery("#chatbox_"+title).click(function() {
-        if (jQuery('#chatbox_'+title+' .chat-content').css('display') != 'none') {
-            jQuery("#chatbox_"+title+" .chat-textarea").focus();
+    var chatbox = jQuery("#chatbox_"+title);
+    chatbox.click(function() {
+        if (chatbox.find('.chat-content').css('display') != 'none') {
+            chatbox.find('.chat-textarea').focus();
         }
     });
 }
@@ -300,13 +297,14 @@ function createChat(title, minimize) {
     jQuery.cookie('chats-open-'+username, new_cookie, {path: '/'});
     log.info('createChat: cookie = ' + new_cookie);
 
-    if (jQuery("#chatbox_"+title).length > 0) {
+    var chatbox = jQuery("#chatbox_"+title);
+    if (chatbox.length > 0) {
         // The chatbox exists, merely hidden
-        if (jQuery("#chatbox_"+title).css('display') == 'none') {
-            jQuery("#chatbox_"+title).css('display','block');
+        if (chatbox.css('display') == 'none') {
+            chatbox.css('display','block');
             reorderChats();
         }
-        jQuery("#chatbox_"+title+" .chat-textarea").focus();
+        chatbox.find(".chat-textarea").focus();
         return;
     }
     chatbox = createChatBox(title);
@@ -316,12 +314,14 @@ function createChat(title, minimize) {
         // Minimize the chat if it's in the minimized_chats cookie
         var minimized_chats = get_minimized_chats();
         if (title in oc(minimized_chats)) {
-            jQuery('#chatbox_'+title+' .chat-content').css('display','none');
-            jQuery('#chatbox_'+title+' .chat-input').css('display','none');
+            chatbox.find('.chat-content').css('display','none');
+            chatbox.find('.chat-input').css('display','none');
         }
     }
     handleChatEvents(title)
     chatbox.show();
+    var chat_content = chatbox.find('.chat-content');
+    chat_content.scrollTop(chat_content[0].scrollHeight);
 }
 
 function poll() {
@@ -393,46 +393,12 @@ function poll_server() {
             }
         },
         success: function(data) {
-            var msgdict = data.messages;
-            for(var user in msgdict) {
-                var messages = msgdict[user];
-                // jQuery.each(data.messages, function(i,item){
-                // var user = item.user;
-                if (messages.length) {
-                    messages_found += 1;
-                    has_messages[user] = true;
-                    new_chats[user] = true;
-                    var chat = jQuery("#chatbox_"+user);
-                    if (chat.length <= 0) {
-                        createChat(user);
-                    }
-                    if (chat.css('display') == 'none') {
-                        chat.css('display','block');
-                        reorderChats();
-                    }
-                    var chat_content = jQuery("#chatbox_"+user+" .chat-content");
-                    for (var i=0; i<messages.length; i++) {
-                        message = messages[i]
-                        if (message[0] == user) {
-                            chat_content.append(
-                                '<div class="chat-message">' + 
-                                    '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                                    '<span class="chat-message-content">'+message[3]+'</span>' + 
-                                '</div>'
-                            );
-                        }
-                        else {
-                            chat_content.append(
-                                '<div class="chat-message">' + 
-                                    '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                                    '<span class="chat-message-content">'+message[3]+'</span>' + 
-                                '</div>'
-                            );
-                        }
-                    }
-                    var chat_content = jQuery("#chatbox_"+user+" .chat-content");
-                    chat_content.scrollTop(chat_content[0].scrollHeight);
+            for(var user in data.messages) {
+                var messages = data.messages[user];
+                if (!messages.length) {
+                    continue
                 }
+                appendMessages(user, messages, 0);
             };
         }
     });
@@ -440,11 +406,10 @@ function poll_server() {
 
 function keypressed(event, textarea, title) {
 	if(event.keyCode == 13 && event.shiftKey == 0)  {
-		message = jQuery(textarea).val();
+        var textbox = jQuery(textarea);
+		var message = textbox.val();
 		message = message.replace(/^\s+|\s+jQuery/g,"");
-		jQuery(textarea).val('');
-		jQuery(textarea).focus();
-		jQuery(textarea).css('height','44px');
+		textbox.val('').focus().css('height','44px');
 		if (message != '') {
             var path = window.location.pathname;
             if (path.indexOf("portal_factory") != -1) {
@@ -463,22 +428,25 @@ function keypressed(event, textarea, title) {
                     log.error(textStatus);
                     if (errorThrown)
                         log.error(errorThrown)
-                    jQuery("#chatbox_"+title+" .chat-content").append(
+
+                    var chat_content = jQuery("#chatbox_"+title+" .chat-content");
+                    chat_content.append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-error">Connection Error</span>' + 
                         '</div>');
-                    jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
+                    chat_content.scrollTop(chat_content[0].scrollHeight);
                 },
                 success: function(data) { 
                     message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
                     var now = new Date();
                     var time = now.getHours()+':'+now.getMinutes();
-                    jQuery("#chatbox_"+title+" .chat-content").append(
+                    var chat_content = jQuery("#chatbox_"+title+" .chat-content");
+                    chat_content.append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-me">'+username+' '+time+':&nbsp;&nbsp;</span>' + 
                             '<span class="chat-message-content">'+message+'</span>' + 
                         '</div>');
-                    jQuery("#chatbox_"+title+" .chat-content").scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
+                    chat_content.scrollTop(chat_content[0].scrollHeight);
 
                     reset_poll = true;
                     if (poll_interval > poll_min) {
@@ -516,10 +484,10 @@ function toggleChat(title) {
                 new_cookie.push(minimized_chats[i]);
             }
         }
-        jQuery.cookie('chats_minimized', new_cookie.join('|'));
+        jQuery.cookie('chats_minimized_'+username, new_cookie.join('|'));
         var chat_content = jQuery('#chatbox_'+title+' .chat-content');
         chat_content.css('display','block');
-        chat_content.scrollTop(jQuery("#chatbox_"+title+" .chat-content")[0].scrollHeight);
+        chat_content.scrollTop(chat_content[0].scrollHeight);
         jQuery('#chatbox_'+title+' .chat-input').css('display','block');
     } 
     else {
@@ -527,7 +495,7 @@ function toggleChat(title) {
         if (!(title in oc(minimized_chats))) {
             var new_cookie = title;
             new_cookie += '|'+minimized_chats.join('|');
-            jQuery.cookie('chats_minimized', new_cookie);
+            jQuery.cookie('chats_minimized_'+username, new_cookie);
         }
         jQuery('#chatbox_'+title+' .chat-content').css('display','none');
         jQuery('#chatbox_'+title+' .chat-input').css('display','none');
