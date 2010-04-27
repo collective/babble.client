@@ -33,8 +33,7 @@ class Chat(BrowserView):
 
 
     def initialize(self):
-        """ Initializion by fetching all open chat sessions and their uncleared
-            and unread chat messages
+        """ Initialization by fetching all unread chat messages...
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
@@ -66,8 +65,8 @@ class Chat(BrowserView):
 
         try:
             server.confirmAsOnline(username)
-            # username, password, sender, read, clear
-            return server.getUnclearedMessages(username, password, None, True, False)
+            # pars: username, password, read
+            return server.getUnreadMessages(username, password, True)
 
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
@@ -95,7 +94,10 @@ class Chat(BrowserView):
         try:
             # pars: username, password, read
             server.confirmAsOnline(username)
-            return server.getUnreadMessages(username, password, True)
+            msgs = server.getUnreadMessages(username, password, True)
+            # if json.loads(msgs)['messages']:
+            #     log.info('In poll() for %s, msgs: %s' % (username, str(msgs)))
+            return msgs
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from chat.service: getUnreadMessages: %s' % err_msg)
@@ -115,7 +117,7 @@ class Chat(BrowserView):
 
         password = getattr(member, 'chatpass') 
         username = member.getId()
-        log.info('Chat message from %s sent to %s' % (username, to))
+        log.info(u'Chat message %s from %s sent to %s' % (message, username, to))
         server = utils.getConnection(self.context)
         try:
             resp = server.sendMessage(username, password, to, message)
