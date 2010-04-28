@@ -115,6 +115,7 @@ class Chat(BrowserView):
         if not hasattr(member, 'chatpass'):
             return 
 
+        message = utils.urlize(message, blank=True, auto_escape=True) 
         password = getattr(member, 'chatpass') 
         username = member.getId()
         log.info(u'Chat message from %s sent to %s' % (username, to))
@@ -175,6 +176,9 @@ class ChatBox(BrowserView):
     """ """
     implements(IChatBox)
     template = ViewPageTemplateFile('templates/chatbox.pt')
+
+    def reverse_escape(self, html):
+        return utils.reverse_escape(html)
 
     def render_chat_box(self, box_id, contact):
         """ """
