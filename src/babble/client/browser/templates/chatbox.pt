@@ -23,7 +23,7 @@
                 tal:content="structure python:'%s %s:&nbsp;&nbsp;' % (message[0], message[2])">
             </span>  
             <span class="chat-message-content"
-                  tal:content="python:message[3]">
+                  tal:content="structure python:view.reverse_escape(message[3])">
             </span>  
         </div>
     </div> 
