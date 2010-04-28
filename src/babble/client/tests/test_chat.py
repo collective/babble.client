@@ -143,14 +143,13 @@ class TestChat(TestCase):
         self.assertEquals(resp['status'], SUCCESS)
         self.assertEquals(resp['messages'], {})
 
-        # Check that calling initialize again will return the original message,
-        # since it hasn't been cleared yet
+        # Check that calling initialize again will not return the original message,
+        # since it has been cleared
         resp = traverse('@@babblechat/initialize')()
         resp = json.loads(resp)
         self.assertEquals(resp['status'], SUCCESS)
         messages = resp['messages']
-        self.assertEquals(messages.keys(), ['member2'])
-        self.assertEquals(messages['member2'], [hello_message])
+        self.assertEquals(messages.keys(), [])
 
         # Also test that utils' get_last_conversation returns this message
         messages = utils.get_last_conversation(portal, 'member2')
