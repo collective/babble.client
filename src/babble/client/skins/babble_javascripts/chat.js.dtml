@@ -39,16 +39,25 @@ var poll_interval = poll_min;   // The initial polling period
 var username = "&dtml-member;";
 </dtml-let>
 
+<dtml-let baseurl="portal_url()">
+var base_url = "&dtml-baseurl;";
+</dtml-let>
+
 var window_focus = true;
 var chat_focus = new Array();
 var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
-function get_minimized_chats() {
+function getMinimizedChats() {
     var cookie = jQuery.cookie('chats_minimized_'+username);
     if (cookie)
         return cookie.split(/\|/);
     return Array()
+}
+
+
+function sanitizePath(call) {
+    return base_url + call
 }
 
 function oc(a) {
@@ -68,6 +77,7 @@ jQuery(document).ready(function() {
     }
 });
 
+
 function initialize() {  
     if (!username)
         return true; // This will let doTimout continue, i.e initialize will be called again.
@@ -85,14 +95,7 @@ function initialize() {
             }
         }
     }
-    var path = window.location.pathname;
-    if (path.indexOf("portal_factory") != -1) {
-        path = path.split('/portal_factory')[0];
-    }
-    else if (path == '/') {
-        path = ''
-    }
-    path += '/@@babblechat/initialize';
+    path = sanitizePath('/@@babblechat/initialize')
     jQuery.ajax({
         url: path,
         cache: false,
@@ -131,11 +134,13 @@ function appendMessages(user, messages, minimized) {
     var chat_content = chat.find(".chat-content");
     for (var i=0; i<messages.length; i++) {
         message = messages[i]
+        var text = message[3].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
         if (message[0] == user) {
+
             chat_content.append(
                 '<div class="chat-message">' + 
                     '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                    '<span class="chat-message-content">'+message[3]+'</span>' + 
+                    '<span class="chat-message-content">'+text+'</span>' + 
                 '</div>'
             );
         }
@@ -143,7 +148,7 @@ function appendMessages(user, messages, minimized) {
             chat_content.append(
                 '<div class="chat-message">' + 
                     '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
-                    '<span class="chat-message-content">'+message[3]+'</span>' + 
+                    '<span class="chat-message-content">'+text+'</span>' + 
                 '</div>'
             );
         }
@@ -208,14 +213,7 @@ function closeChat(title) {
     else {
         jQuery.cookie('chats-open-'+username, null, {path: '/'});
     }
-    var path = window.location.pathname;
-    if (path.indexOf("portal_factory") != -1) {
-        path = path.split('/portal_factory')[0];
-    }
-    else if (path == '/') {
-        path = ''
-    }
-    path += '/@@babblechat/clear_messages';
+    path = sanitizePath('/@@babblechat/clear_messages');
     jQuery.ajax({
         url: path,
         cache: false,
@@ -238,14 +236,7 @@ function startChat(contact) {
 }
 
 function createChatBox(title) {
-    var path = window.location.pathname;
-    if (path.indexOf("portal_factory") != -1) {
-        path = path.split('/portal_factory')[0];
-    }
-    else if (path == '/') {
-        path = ''
-    }
-    path += '/@@render_chat_box';
+    path = sanitizePath('/@@render_chat_box');
     jQuery.ajax({
         url: path,
         cache: false,
@@ -312,7 +303,7 @@ function createChat(title, minimize) {
     chats.push(title);
     if (minimize == 1) {
         // Minimize the chat if it's in the minimized_chats cookie
-        var minimized_chats = get_minimized_chats();
+        var minimized_chats = getMinimizedChats();
         if (title in oc(minimized_chats)) {
             chatbox.find('.chat-content').css('display','none');
             chatbox.find('.chat-input').css('display','none');
@@ -363,20 +354,13 @@ function poll() {
 }
 
 function poll_server() {
-    var path = window.location.pathname;
-    if (path.indexOf("portal_factory") != -1) {
-        path = path.split('/portal_factory')[0];
-    }
-    else if (path == '/') {
-        path = ''
-    }
-    path += '/@@babblechat/poll';
+    path = sanitizePath('/@@babblechat/poll');
     jQuery.ajax({
         url: path,
         cache: false,
         async: true,
-        dataType: "json",
         timeout: timeout,
+        dataType: "json",
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -405,20 +389,13 @@ function poll_server() {
 }
 
 function keypressed(event, textarea, title) {
-	if(event.keyCode == 13 && event.shiftKey == 0)  {
+	if(event.keyCode == 13 && event.shiftKey == 0) {
         var textbox = jQuery(textarea);
 		var message = textbox.val();
 		message = message.replace(/^\s+|\s+jQuery/g,"");
 		textbox.val('').focus().css('height','44px');
 		if (message != '') {
-            var path = window.location.pathname;
-            if (path.indexOf("portal_factory") != -1) {
-                path = path.split('/portal_factory')[0];
-            }
-            else if (path == '/') {
-                path = ''
-            }
-            path += '/@@babblechat/send_message';
+            path = sanitizePath('/@@babblechat/send_message');
             jQuery.ajax({
                 url: path,
                 cache: false,
@@ -475,7 +452,7 @@ function keypressed(event, textarea, title) {
 }
 
 function toggleChat(title) {
-    var minimized_chats = get_minimized_chats();
+    var minimized_chats = getMinimizedChats();
     if (jQuery('#chatbox_'+title+' .chat-content').css('display') == 'none') {  
         // Chat will be maximized
         var new_cookie = Array();
