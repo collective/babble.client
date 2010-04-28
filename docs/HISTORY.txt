@@ -1,11 +1,11 @@
 Changelog
 =========
 
-y (unreleased)
---------------
+
+1.3b4 (unreleased)
+------------------
 
 - Nothing changed yet.
-
 
 1.3b3 (2010-04-28)
 ------------------

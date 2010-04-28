@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = 'ydev'
+version = '1.3b4dev'
 
 tests_require=[]
 
