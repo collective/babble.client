@@ -10,6 +10,8 @@ class TestChat(TestCase):
     """ Tests the babble/client/browser/chat.py module
     """
 
+    # TODO: Add tests for URL detection in messages... 
+
     def afterSetUp(self):
         self.loginAsPortalOwner()
         view = self.app.unrestrictedTraverse('+/addChatService.html')

@@ -209,5 +209,6 @@ TODO:
 - Currently Javascript tests can't run anymore because of DTML,
   therefore, consider replacing dtml with collective.xrtresource.
 - Add broadcasting (send to all) functionality
+- Add tests for URL detection in messages
 
 
