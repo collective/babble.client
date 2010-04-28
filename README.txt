@@ -23,6 +23,7 @@ Features:
 - New messages automatically opens chat window
 - An 'online users' portlet provides a list of currently online users
 - Configurable polling intervals
+- URLs recieved via chat messages are clickable
 - Requests to the messaging service must be password authenticated
 - Can be `integrated <http://plone.org/products/actionbar.babble>`_ with the 
   ActionBar of `actionbar.panel <http://plone.org/products/actionbar.panel/>`_
@@ -207,7 +208,6 @@ TODO:
 
 - Currently Javascript tests can't run anymore because of DTML,
   therefore, consider replacing dtml with collective.xrtresource.
-- Identify and present URLs in the chat boxes
 - Add broadcasting (send to all) functionality
 
 

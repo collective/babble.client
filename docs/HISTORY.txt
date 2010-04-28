@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.3b3 (Unreleased)
+------------------
+
+- Fixed repeating page section rendering problem [jcbrand]
+- Added URL recognition [jcbrand]
+
 1.3b2 (2010-04-17)
 ------------------
 
