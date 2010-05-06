@@ -20,7 +20,7 @@ setup(
     keywords='plone syslab.com portlet onlinecontacts',
     author='Syslab.com, JC Brand',
     author_email='brand@syslab.com',
-    url='http://plone.org',
+    url='http://plone.org/products/babble.client',
     license='GPL',
     packages=find_packages('src', exclude=['ez_setup']),
     package_dir={'': 'src'},
