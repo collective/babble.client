@@ -102,8 +102,8 @@ def urlize(text, url_limit=None, nofollow=False, blank=False, auto_escape=False)
     out = ''.join(words)
     try:
         out = unicode(out, 'utf-8')
-    except:
-        print "Could not make unicode out of words"
+    except UnicodeDecodeError:
+        log.error("urllize: Could not make unicode out of 'words'")
     return out
 
 
