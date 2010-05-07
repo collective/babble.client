@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.3.1 (Unreleased)
+----------------
+
+- Unicode fix in utils.py [thomas_w] 
 
 1.3 (2010-05-06)
 ----------------
