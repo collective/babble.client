@@ -48,6 +48,20 @@ var chat_focus = new Array();
 var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
+if (!log) {
+    var log = {
+        toggle: function() {},
+        move:   function() {},
+        resize: function() {},
+        clear:  function() {},
+        debug:  function() {},
+        info:   function() {},
+        warn:   function() {},
+        error:  function() {},
+        profile: function() {}
+    };
+}
+
 function getMinimizedChats() {
     var cookie = jQuery.cookie('chats_minimized_'+username);
     if (cookie)
