@@ -10,11 +10,11 @@ It consists of babble.client as the Plone front-end client and
 a Zope2 messaging service, as the backend chat service.
 
 The client consists of an *Online contacts* portlet with which you can initiate 
-new chats. Chat sessions occur in modal dialog chatboxes which make use of 
-JQuery and Ajax polling to provide seamless, real-time messaging.
-
+new chats. Chat sessions occur in modal dialog chatboxes and make use of 
+JQuery Ajax polling to provide seamless, real-time messaging.
 During inactive periods, the polling interval gradually becomes longer until it
 reaches a specific (configurable) maximum polling interval.
+
 Communication between the client and server is achieved with JSON packets 
 sent via XML-RPC. 
 
