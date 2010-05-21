@@ -140,21 +140,25 @@ def get_online_members(context):
     member = pm.getAuthenticatedMember()
     members = pm.listMembers()
     
-    pj = getToolByName(context, 'portal_javascripts')
-    if pj.getDebugMode():
-        if member in members:
-            members.remove(member)
-        return members
+    # XXX: Nice for debugging but confuses people
+    #
+    # pj = getToolByName(context, 'portal_javascripts')
+    # if pj.getDebugMode():
+    #     if member in members:
+    #         members.remove(member)
+    #     return members
 
     online_users = get_online_usernames(context)
-    online_members = []
     if member.getId() in online_users:
         online_users.remove(member.getId())
 
-    for member in members:
-        if member.getId() in online_users:
-            online_members.append(member)
-            
+    online_members = []
+    for mid in online_users:
+        member = pm.getMemberById(mid)
+        if member is None:
+            continue
+        online_members.append(member)
+
     return online_members
 
 
