@@ -4,7 +4,7 @@ Changelog
 1.3.2 (Unreleased)
 ------------------
 
-- Remove the dependency on blackbird being installed [jcbrand]
+- Removed the dependency on collective.js.blackbird being installed [jcbrand]
 - Fixed a bug whereby LDAP users are not visible [jcbrand]
 
 1.3.1 (2010-05-07)
