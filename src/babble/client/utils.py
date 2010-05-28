@@ -146,9 +146,13 @@ def get_online_members(context):
     # if pj.getDebugMode():
     #     if member in members:
     #         members.remove(member)
-    #     return members
+    #     return member
 
     online_users = get_online_usernames(context)
+    log.info('members: %s' % str(members))
+    log.info('get_online_users: %s' % str(online_users))
+    log.info('member.getId: %s' % member.getId())
+  
     if member.getId() in online_users:
         online_users.remove(member.getId())
 
@@ -159,6 +163,7 @@ def get_online_members(context):
             continue
         online_members.append(member)
 
+    log.info('get_online_members: %s' % str(online_members))
     return online_members
 
 

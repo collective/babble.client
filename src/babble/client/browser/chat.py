@@ -96,7 +96,7 @@ class Chat(BrowserView):
             server.confirmAsOnline(username)
             msgs = server.getUnreadMessages(username, password, True)
             # if json.loads(msgs)['messages']:
-            #     log.info('In poll() for %s, msgs: %s' % (username, str(msgs)))
+            # log.info('In poll() for %s (%s), msgs: %s' % (username, password,  str(msgs)))
             return msgs
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
