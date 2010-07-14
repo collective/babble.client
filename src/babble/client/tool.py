@@ -1,3 +1,4 @@
+import httplib
 import logging
 import xmlrpclib
 
@@ -11,6 +12,21 @@ from Products.CMFCore.utils import getToolByName
 from babble.client import BabbleMessageFactory as _
 
 log = logging.getLogger('babble.client/tool.py')
+
+#Thats ugly, but it seems to be the only way to add short timeouts for these
+#xmlrpclib connections only.
+class CustomHTTPConnection(httplib.HTTPConnection):
+    def getfile(self):
+        return self.response
+    def getreply(self):
+            response = self.getresponse()
+            self.response = response
+            return response.status, response.reason, response.msg
+class QuickTimeoutTransport(xmlrpclib.Transport):
+    def make_connection(self, host):
+        import httplib
+        host, extra_headers, x509 = self.get_host_info(host)
+        return CustomHTTPConnection(host, timeout = 5)
 
 class MessageTool(UniqueObject, SimpleItemWithProperties):
     meta_type = 'Chat Tool'
@@ -92,7 +108,7 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
                 or self._v_chat_service_url != url:
 
             self._v_chat_service_url = url
-            self._v_connection = xmlrpclib.Server(url, allow_none=1)
+            self._v_connection = xmlrpclib.Server(url, transport = QuickTimeoutTransport(), allow_none=1)
 
         return self._v_connection
 
