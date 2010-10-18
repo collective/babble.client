@@ -430,7 +430,9 @@ function keypressed(event, textarea, title) {
                 success: function(data) { 
                     message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
                     var now = new Date();
-                    var time = now.getHours()+':'+now.getMinutes();
+                    var minutes = now.getMinutes().toString();
+                    if (minutes.length==1) {minutes = '0'+minutes;}
+                    var time = now.getHours().toString()+':'+minutes;
                     var chat_content = jQuery("#chatbox_"+title+" .chat-content");
                     chat_content.append(
                         '<div class="chat-message">' + 

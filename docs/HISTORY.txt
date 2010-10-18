@@ -4,7 +4,8 @@ Changelog
 1.3.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed display of single number seconds if in 0-9
+  [pilz]
 
 
 1.3.3 (2010-10-01)
