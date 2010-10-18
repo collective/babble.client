@@ -6,6 +6,8 @@ Changelog
 
 - Fixed display of single number seconds if in 0-9
   [pilz]
+- Converted message dates from server back to local time
+  [pilz]
 
 
 1.3.3 (2010-10-01)
