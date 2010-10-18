@@ -152,7 +152,7 @@ function appendMessages(user, messages, minimized) {
         var timeob = Date();
         timeob.setHours(message[2].substring(0,2));
         timeob.setMinutes(message[2].substring(3,5));
-        var localtime = timeob.toLocaleTimeString().substring(0:5);
+        var localtime = timeob.toLocaleTimeString().substring(0,5);
         if (message[0] == user) {
 
             chat_content.append(
