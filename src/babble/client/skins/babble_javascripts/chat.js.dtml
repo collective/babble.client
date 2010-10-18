@@ -149,11 +149,15 @@ function appendMessages(user, messages, minimized) {
     for (var i=0; i<messages.length; i++) {
         message = messages[i]
         var text = message[3].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+        var timeob = Date();
+        timeob.setHours(message[2].substring(0,2));
+        timeob.setMinutes(message[2].substring(3,5));
+        var localtime = timeob.toLocaleTimeString().substring(0:5);
         if (message[0] == user) {
 
             chat_content.append(
                 '<div class="chat-message">' + 
-                    '<span class="chat-message-them">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                    '<span class="chat-message-them">'+message[0]+' '+localtime+':&nbsp;&nbsp;</span>' + 
                     '<span class="chat-message-content">'+text+'</span>' + 
                 '</div>'
             );
@@ -161,7 +165,7 @@ function appendMessages(user, messages, minimized) {
         else {
             chat_content.append(
                 '<div class="chat-message">' + 
-                    '<span class="chat-message-me">'+message[0]+' '+message[2]+':&nbsp;&nbsp;</span>' + 
+                    '<span class="chat-message-me">'+message[0]+' '+localtime+':&nbsp;&nbsp;</span>' + 
                     '<span class="chat-message-content">'+text+'</span>' + 
                 '</div>'
             );
