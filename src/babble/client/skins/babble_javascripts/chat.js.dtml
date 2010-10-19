@@ -154,7 +154,7 @@ function appendMessages(user, messages, minimized) {
         var day = message[1].substring(8,10);
         var hour = message[2].substring(0,2);
         var minute = message[2].substring(3,5);
-        var timeob = new Date(Date.UTC(year, month, day, hour, minute));
+        var timeob = new Date(new Date(year, month, day, hour, minute) - new Date().getTimezoneOffset() * 60000);
         var localtime = timeob.toLocaleTimeString().substring(0,5);
         if (message[0] == user) {
 
@@ -439,7 +439,7 @@ function keypressed(event, textarea, title) {
                     var now = new Date();
                     var minutes = now.getMinutes().toString();
                     if (minutes.length==1) {minutes = '0'+minutes;}
-                    var time = now.getHours().toString()+':'+minutes;
+                    var time = now.toLocaleTimeString().substring(0,5);
                     var chat_content = jQuery("#chatbox_"+title+" .chat-content");
                     chat_content.append(
                         '<div class="chat-message">' + 
