@@ -272,7 +272,17 @@ function createChatBox(title) {
             return
         },
         success: function(data) {
-            jQuery('body').append(data);
+            jQuery('body').append(data).find('.chat-message .time').each(function (){
+                jthis = jQuery(this);
+                var time = jthis.text().split(':');
+                var hour = time[0];
+                var minutes = time[1];
+                var date = new Date();
+                date.setHours(hour - date.getTimezoneOffset() / 60);
+                date.setMinutes(minutes);
+                jthis.replaceWith(date.toLocaleTimeString().substring(0,5));
+            });
+
         }
     });
     return jQuery('#chatbox_'+title);

@@ -19,8 +19,10 @@
                 class="chat-message">  
             <span 
                 tal:define="own_msg python:message[0] == title"
-                tal:attributes="class python:own_msg and 'chat-message-them' or 'chat-message-me'"
-                tal:content="structure python:'%s %s:&nbsp;&nbsp;' % (message[0], message[2])">
+                tal:attributes="class python:own_msg and 'chat-message-them' or 'chat-message-me'">
+                <tal:inline tal:replace="structure python: message[0]" />
+                <span class="time" tal:content="structure python: message[2]" />
+                &nbsp;&nbsp;
             </span>  
             <span class="chat-message-content"
                   tal:content="structure python:view.reverse_escape(message[3])">
