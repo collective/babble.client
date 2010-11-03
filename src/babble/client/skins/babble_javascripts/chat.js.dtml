@@ -62,6 +62,38 @@ if (!log) {
     };
 }
 
+function prep4JQ(str) {
+    /* From JQUERY selector docs: 
+     * If you wish to use any of the meta-characters 
+     * (#;&,.+*~':"!^$[]()=>|/@ ) as a literal part of a name, 
+     * you must escape the character with two backslashes: \\.
+     */
+    str = str.replace(/\#/g, '\\#');
+    str = str.replace(/\;/g, '\\;');
+    str = str.replace(/\&/g, '\\&');
+    str = str.replace(/\,/g, '\\,');
+    str = str.replace(/\./g, '\\.');
+    str = str.replace(/\+/g, '\\+');
+    str = str.replace(/\*/g, '\\*');
+    str = str.replace(/\~/g, '\\~');
+    str = str.replace(/\'/g, "\\'");
+    str = str.replace(/\:/g, '\\:');
+    str = str.replace(/\"/g, '\\"');
+    str = str.replace(/\!/g, '\\!');
+    str = str.replace(/\^/g, '\\^');
+    str = str.replace(/\$/g, '\\$');
+    str = str.replace(/\[/g, '\\[');
+    str = str.replace(/\]/g, '\\]');
+    str = str.replace(/\(/g, '\\(');
+    str = str.replace(/\)/g, '\\)');
+    str = str.replace(/\=/g, '\\=');
+    str = str.replace(/\>/g, '\\>');
+    str = str.replace(/\|/g, '\\|');
+    str = str.replace(/\//g, '\\/');
+    str = str.replace(/\@/g, '\\@');
+    return str
+}
+
 function getMinimizedChats() {
     var cookie = jQuery.cookie('chats_minimized_'+username);
     if (cookie)
@@ -213,7 +245,7 @@ function positionNewChat(chatbox) {
 }
 
 function closeChat(title) {
-    jQuery('#chatbox_'+title).css('display','none');
+    jQuery('#chatbox_'+prep4JQ(title)).css('display','none');
     reorderChats();
     var cookie = jQuery.cookie('chats-open-'+username);
     if (cookie)
@@ -285,7 +317,7 @@ function createChatBox(title) {
 
         }
     });
-    return jQuery('#chatbox_'+title);
+    return jQuery('#chatbox_'+prep4JQ(title));
 }
 
 function handleChatEvents(title) {
@@ -486,7 +518,7 @@ function keypressed(event, textarea, title) {
 
 function toggleChat(title) {
     var minimized_chats = getMinimizedChats();
-    if (jQuery('#chatbox_'+title+' .chat-content').css('display') == 'none') {  
+    if (jQuery('#chatbox_'+prep4JQ(title)+' .chat-content').css('display') == 'none') {  
         // Chat will be maximized
         var new_cookie = Array();
         for (var i=0; i < minimized_chats.length; i++) {
@@ -495,10 +527,10 @@ function toggleChat(title) {
             }
         }
         jQuery.cookie('chats_minimized_'+username, new_cookie.join('|'));
-        var chat_content = jQuery('#chatbox_'+title+' .chat-content');
+        var chat_content = jQuery('#chatbox_'+prep4JQ(title)+' .chat-content');
         chat_content.css('display','block');
         chat_content.scrollTop(chat_content[0].scrollHeight);
-        jQuery('#chatbox_'+title+' .chat-input').css('display','block');
+        jQuery('#chatbox_'+prep4JQ(title)+' .chat-input').css('display','block');
     } 
     else {
         // Chat will be minimized
@@ -507,8 +539,8 @@ function toggleChat(title) {
             new_cookie += '|'+minimized_chats.join('|');
             jQuery.cookie('chats_minimized_'+username, new_cookie);
         }
-        jQuery('#chatbox_'+title+' .chat-content').css('display','none');
-        jQuery('#chatbox_'+title+' .chat-input').css('display','none');
+        jQuery('#chatbox_'+prep4JQ(title)+' .chat-content').css('display','none');
+        jQuery('#chatbox_'+prep4JQ(title)+' .chat-input').css('display','none');
     }
 }
 
