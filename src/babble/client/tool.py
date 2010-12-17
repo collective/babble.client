@@ -26,7 +26,11 @@ class QuickTimeoutTransport(xmlrpclib.Transport):
     def make_connection(self, host):
         import httplib
         host, extra_headers, x509 = self.get_host_info(host)
-        return CustomHTTPConnection(host, timeout = 5)
+        try:
+            return CustomHTTPConnection(host, timeout = 5)
+        except TypeError:
+            # Python 2.4, Plone 3.x. TypeError: __init__() got an unexpected keyword argument 'timeout'
+            return CustomHTTPConnection(host)
 
 class MessageTool(UniqueObject, SimpleItemWithProperties):
     meta_type = 'Chat Tool'
