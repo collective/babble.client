@@ -180,6 +180,11 @@ class ChatBox(BrowserView):
     def reverse_escape(self, html):
         return utils.reverse_escape(html)
 
+    def get_fullname(self, username):
+        pm = getToolByName(self.context, 'portal_membership')
+        member = pm.getMemberById(username)
+        return member.getProperty('fullname') or username
+
     def render_chat_box(self, box_id, contact):
         """ """
         messages = utils.get_last_conversation(self.context, contact)

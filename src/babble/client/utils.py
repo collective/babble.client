@@ -25,7 +25,7 @@ def get_string_words(text):
 
 
 def reverse_escape(html):
-    """ Returns the given HTML with ampersands, quotes and angle brackets encoded.
+    """ Returns the given HTML with ampersands, quotes and angle brackets decoded.
     """
     return html.replace(
                 '&amp;',  '&').replace(
@@ -44,7 +44,6 @@ def escape(html):
                 '"', '&quot;').replace(
                 "'", '&#39;')
 
-
 def trim_url(url, limit):
     if limit and len(url) > limit:
         return '%s...' % url[:max(0,limit-3)]
@@ -54,10 +53,12 @@ def trim_url(url, limit):
 
 def urlize(text, url_limit=None, nofollow=False, blank=False, auto_escape=False):
     """
-    Adapted from a similar method in Django
+    Make HTML <a> tag with the specified URL.
 
     Works on http://, https://, www. links and links ending in .org, .net or
-    .com. Links can have trailing punctuation (periods, commas, close-parens)
+    .com. 
+
+    Links can have trailing punctuation (periods, commas, close-parens)
     and leading punctuation (opening parens) and it'll still do the right
     thing.
 
@@ -103,7 +104,7 @@ def urlize(text, url_limit=None, nofollow=False, blank=False, auto_escape=False)
     try:
         out = unicode(out, 'utf-8')
     except UnicodeDecodeError:
-        log.error("urllize: Could not make unicode out of 'words'")
+        log.error("urlize: Could not make unicode out of 'words'")
     return out
 
 
@@ -130,27 +131,27 @@ def get_online_usernames(context):
             %e)
         return []
 
-    resp = json.loads(resp)
-    return resp['online_users']
+    online_users = json.loads(resp)['online_users']
+    log.info('get_online_usernames: %s' % str(online_users))
+    return online_users
 
 
 def get_online_members(context):
     """ """
     pm = getToolByName(context, 'portal_membership')
     member = pm.getAuthenticatedMember()
-    members = pm.listMembers()
     
     # XXX: Nice for debugging but confuses people
     #
     # pj = getToolByName(context, 'portal_javascripts')
     # if pj.getDebugMode():
+    #     members = pm.listMembers()
+    #     log.info('members: %s' % str(members))
     #     if member in members:
     #         members.remove(member)
     #     return member
 
     online_users = get_online_usernames(context)
-    log.info('members: %s' % str(members))
-    log.info('get_online_users: %s' % str(online_users))
     log.info('member.getId: %s' % member.getId())
   
     if member.getId() in online_users:

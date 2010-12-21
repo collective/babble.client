@@ -4,7 +4,7 @@
 
     <div class="chat-head"> 
         <div class="chat-title"
-             tal:content="title">title</div> 
+             tal:content="python:view.get_fullname(title)">title</div> 
         <div class="chat-options"> 
             <a href="javascript:void(0)" 
                tal:attributes="onclick string:javascript:toggleChat('$title')">-</a> 

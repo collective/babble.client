@@ -1,6 +1,8 @@
 import datetime
+from pytz import utc
 import simplejson as json
 from OFS.Folder import Folder
+from Products.CMFCore.utils import getToolByName
 from babble.client import utils
 from babble.client.tests.base import TestCase
 from babble.client import BabbleException
@@ -35,13 +37,17 @@ class TestChat(TestCase):
                                     'email': 'test@example.com', })
 
     def test_online_users(self):
-        """ Tests the confirm_as_online and get_online_usernames methods
+        """ Tests the confirm_as_online, get_online_usernames and 
+            get_online_members methods
         """
         portal = self.portal
         traverse = portal.restrictedTraverse
     
         online_users = utils.get_online_usernames(portal)
         self.assertEquals(online_users, [])
+
+        online_members = utils.get_online_members(portal)
+        self.assertEquals(online_members, [])
 
         self.logout()
         resp = traverse('@@babblechat/confirm_as_online')()
@@ -56,6 +62,13 @@ class TestChat(TestCase):
         online_users = utils.get_online_usernames(portal)
         self.assertEquals(online_users, ['member1'])
 
+        # get_online_members ignores the currently logged in user.
+        # So, if member1 is currently logged in and also online (according to
+        # get_online_users), get_online_members will still return an empty
+        # list.
+        online_members = utils.get_online_members(portal)
+        self.assertEquals(online_members, [])
+
         self.login(name='member2')
 
         resp = traverse('@@babblechat/confirm_as_online')()
@@ -64,6 +77,18 @@ class TestChat(TestCase):
 
         online_users = utils.get_online_usernames(portal)
         self.assertEquals(online_users, ['member1', 'member2'])
+
+        # Again, the logged in member2 is ignored
+        tm = getToolByName(portal, 'portal_membership')
+        member1 = tm.getMemberById('member1')
+        online_members = utils.get_online_members(portal)
+        self.assertEquals(online_members, [member1])
+
+        # Now the logged in member1 is ignored
+        self.login(name='member1')
+        member2 = tm.getMemberById('member2')
+        online_members = utils.get_online_members(portal)
+        self.assertEquals(online_members, [member2])
 
 
     def test_messaging(self):
@@ -117,7 +142,7 @@ class TestChat(TestCase):
 
         # Send a message from member2 to member1 and note the time so that we
         # can test for it later on
-        timeminutes = datetime.datetime.now().strftime("%H:%M")
+        timeminutes = datetime.datetime.now(utc).strftime("%H:%M")
         resp = traverse('@@babblechat/send_message')('member1', 'hello')
         resp = json.loads(resp)
         self.assertEquals(resp['status'], SUCCESS)
@@ -135,9 +160,7 @@ class TestChat(TestCase):
         # Check the message format
         date = datetime.date.today().strftime("%Y/%m/%d")
         hello_message = ['member2', date, timeminutes, 'hello']
-        self.assertEquals(
-                messages['member2'], 
-                [hello_message])
+        self.assertEquals(messages['member2'], [hello_message])
 
         # Check that the next poll returns no new messages
         resp = traverse('@@babblechat/poll')()
@@ -181,6 +204,44 @@ class TestChat(TestCase):
         method = traverse('@@babblechat/clear_messages')
         pars = ['member2']
         self.assertRaises(BabbleException, method, *pars)
+
+
+    def test_utils(self):
+        """ Tests some of the utility methods not being tested elsewhere 
+        """
+        s = 'someone@emailadress.com'
+        self.assertEquals(utils.reverse_escape(utils.escape(s)), s)
+        s = '& <>\'"'
+        self.assertEquals(utils.reverse_escape(utils.escape(s)), s)
+
+        url = 'http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg'
+        short_url = utils.trim_url(url, 25)
+        assert(short_url[:len(short_url)-3] in url)
+        self.assertEquals(short_url, url[:22]+'...')
+
+        urlized = utils.urlize(url)
+        test_url = u'<a href="http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg">http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg</a>'
+        self.assertEquals(urlized, test_url)
+
+        urlized  = utils.urlize(url, nofollow=True)
+        test_url = u'<a href="http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg" rel="nofollow">http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg</a>'
+        self.assertEquals(urlized, test_url)
+
+        urlized = utils.urlize(url, blank=True)
+        test_url = u'<a href="http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg" target="_blank">http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg</a>'
+        self.assertEquals(urlized, test_url)
+
+        urlized  = utils.urlize(url, auto_escape=True)
+        test_url = u'&lt;a href=&quot;http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg&quot;&gt;http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg&lt;/a&gt;'
+        self.assertEquals(urlized, test_url)
+
+        urlized = utils.urlize(url, nofollow=True, blank=True)
+        test_url = u'<a href="http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg" rel="nofollow" target="_blank">http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg</a>'
+        self.assertEquals(urlized, test_url)
+        
+        urlized = utils.urlize(url, url_limit=5, nofollow=True, blank=True)
+        test_url = u'<a href="http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg" rel="nofollow" target="_blank">ht...</a>'
+        self.assertEquals(urlized, test_url)
 
 
     def test_render_chat_box(self):
