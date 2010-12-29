@@ -11,6 +11,8 @@
         expression="python: not here.restrictedTraverse('@@plone_portal_state').anonymous()"
         id="chat.js"
         insert-after="jquery.js"
+        cacheable="False"
+        cookable="False"
         />
 
     <javascript 
