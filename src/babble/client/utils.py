@@ -164,7 +164,8 @@ def get_online_members(context):
             continue
         online_members.append(member)
 
-    log.info('get_online_members: %s' % str(online_members))
+    # Warning: Use only for debugging, use in production can cause downtime on the site.
+    #log.info('get_online_members: %s' % str(online_members))
     return online_members
 
 
