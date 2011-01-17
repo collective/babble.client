@@ -3,4 +3,6 @@ Contributors
 - JC Brand <brand@syslab.com>
 - Cillian de Roíste <deroiste@syslab.com>
 - Wolfgang Thomas <thomas@syslab.com>
+- Patrick Gerken <gerken@syslab.com>
+- Cleber J. Santos 
 
