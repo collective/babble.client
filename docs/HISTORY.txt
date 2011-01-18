@@ -1,19 +1,21 @@
 Changelog
 =========
 
-1.3.5 (unreleased)
+1.4b1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fixed to work with email addresses as usernames. [jcbrand]
+- Show users' fullnames in the chatboxes and the portlet. [jcbrand]
+- Simplified the polling system and provide better polling defaults. [jcbrand]
+- Send anonymous users to a login_form when they click on contacts in the
+  portlet. [jcbrand]
 
 
 1.3.4 (2010-10-18)
 ------------------
 
-- Fixed display of single number seconds if in 0-9
-  [pilz]
-- Converted message dates from server back to local time
-  [pilz]
+- Fixed display of single number seconds if in 0-9 [pilz]
+- Converted message dates from server back to local time [pilz]
 
 
 1.3.3 (2010-10-01)
