@@ -3,15 +3,14 @@ from zope.interface import Interface
 class IChat(Interface):
 
     def initialize(self):
-        """ Initializion by fetching all open chat sessions and their uncleared
-            and unread chat messages
+        """ Check if the user is registered, and register if not
         """
 
     def get_uncleared_messages(self, sender=None, read=True, clear=False):
         """ Retrieve the uncleared messages from the chat server 
         """
 
-    def poll(self):
+    def poll(self, username):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
@@ -25,6 +24,7 @@ class IChat(Interface):
             This means that they won't be loaded and displayed again next time
             that chat box is opened.
         """
+
 
 class IChatBox(Interface):
     """ """
