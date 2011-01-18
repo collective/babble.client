@@ -13,24 +13,30 @@ from babble.client import BabbleMessageFactory as _
 
 log = logging.getLogger('babble.client/tool.py')
 
-#Thats ugly, but it seems to be the only way to add short timeouts for these
-#xmlrpclib connections only.
 class CustomHTTPConnection(httplib.HTTPConnection):
+    """ Thats ugly, but it seems to be the only way to add short timeouts 
+        for these xmlrpclib connections only.
+    """ 
     def getfile(self):
         return self.response
+
     def getreply(self):
-            response = self.getresponse()
-            self.response = response
-            return response.status, response.reason, response.msg
+        response = self.getresponse()
+        self.response = response
+        return response.status, response.reason, response.msg
+
+
 class QuickTimeoutTransport(xmlrpclib.Transport):
+    """ """
     def make_connection(self, host):
-        import httplib
         host, extra_headers, x509 = self.get_host_info(host)
         try:
-            return CustomHTTPConnection(host, timeout = 5)
+            return CustomHTTPConnection(host, timeout=5)
         except TypeError:
-            # Python 2.4, Plone 3.x. TypeError: __init__() got an unexpected keyword argument 'timeout'
+            # Python 2.4, Plone 3.x:
+            # TypeError: __init__() got an unexpected keyword argument 'timeout'
             return CustomHTTPConnection(host)
+
 
 class MessageTool(UniqueObject, SimpleItemWithProperties):
     meta_type = 'Chat Tool'
@@ -80,7 +86,7 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
     username = 'admin'
     password = 'admin'
     poll_max = 20000 
-    poll_min = 3000
+    poll_min = 5000 
 
     def __setstate__(self, state):
         """ connect to chat service if they are defined """
@@ -112,7 +118,11 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
                 or self._v_chat_service_url != url:
 
             self._v_chat_service_url = url
-            self._v_connection = xmlrpclib.Server(url, transport = QuickTimeoutTransport(), allow_none=1)
+            self._v_connection = xmlrpclib.Server(
+                                            url, 
+                                            transport=QuickTimeoutTransport(), 
+                                            allow_none=1
+                                            )
 
         return self._v_connection
 
