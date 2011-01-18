@@ -27,7 +27,7 @@ var blink_order = 0;
 var doc_title;
 var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
-var poll_cycle = 3;        // The amount of polls to make in a cycle
+var poll_cycle = 10;        // The amount of polls to make in a cycle
 
 <dtml-let pollmax="portal_chat.poll_max">
 var poll_max = &dtml-pollmax;;  // The maximum polling period
