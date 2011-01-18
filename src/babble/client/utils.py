@@ -1,4 +1,5 @@
 import re
+import socket
 import urllib
 import string
 import logging
@@ -7,7 +8,9 @@ import xmlrpclib
 from socket import error as socket_error
 from Products.CMFCore.utils import getToolByName
 
-log = logging.getLogger('babble.client/utils.py')
+from babble.client import config
+
+log = logging.getLogger('babble.client/utils.py:')
 
 # Configuration for urlize() function.
 LEADING_PUNCTUATION  = ['(', '<', '&lt;']
@@ -126,7 +129,7 @@ def get_online_usernames(context):
         return []
     except socket_error, e:
         log.error(\
-            'Socket error from get_online_contacts:' + \
+            'Socket error from get_online_contacts: ' + \
             'server.getOnlineUsers: %s \nis the chatserver running?' \
             %e)
         return []
@@ -142,7 +145,6 @@ def get_online_members(context):
     member = pm.getAuthenticatedMember()
     
     # XXX: Nice for debugging but confuses people
-    #
     # pj = getToolByName(context, 'portal_javascripts')
     # if pj.getDebugMode():
     #     members = pm.listMembers()
@@ -150,9 +152,7 @@ def get_online_members(context):
     #     if member in members:
     #         members.remove(member)
     #     return member
-
     online_users = get_online_usernames(context)
-    log.info('member.getId: %s' % member.getId())
   
     if member.getId() in online_users:
         online_users.remove(member.getId())
@@ -174,7 +174,7 @@ def get_last_conversation(context, contact):
     """
     pm = getToolByName(context, 'portal_membership')
     if pm.isAnonymousUser():
-        return {}
+        return json.dumps({'status': config.SERVER_FAULT, 'messages': {}})
 
     server = getConnection(context)
     member = pm.getAuthenticatedMember()
@@ -182,19 +182,25 @@ def get_last_conversation(context, contact):
     if hasattr(member, 'chatpass'):
         password = getattr(member, 'chatpass') 
     else:
-        log.error("get_last_conversation: %s does not have prop 'chatpass'"
-                                                                    % username)
-        return {}
+        log.error("get_last_conversation: %s does not have prop 'chatpass'\n"
+                  "This should not happen!" % username)
+        return json.dumps({'status': config.SERVER_FAULT, 'messages': {}})
 
     try:
         #pars: username, sender, read, clear
         resp = server.getUnclearedMessages(
                             username, password, contact, True, False)
-
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from chat.service: clearMessages: %s' % err_msg)
-        return {}
+        return json.dumps({'status': config.SERVER_FAULT, 'messages': {}})
+
+    except socket.error, e:
+        # Catch timeouts so that we can notify the caller
+        log.error(\
+            'Socket error from get_online_contacts: ' + \
+            'server.getOnlineUsers: %s \nIs the chatserver running?' %e)
+        return json.dumps({'status': config.TIMEOUT, 'messages': {}})
     
     resp = json.loads(resp)
     return resp['messages']
