@@ -2,14 +2,13 @@ from zope.interface import Interface
 
 class IChat(Interface):
 
-    def confirm_as_online(self):
-        """ Let the chat server know that the currently authenticated used is
-            still online 
-        """
-
     def initialize(self):
         """ Initializion by fetching all open chat sessions and their uncleared
             and unread chat messages
+        """
+
+    def get_uncleared_messages(self, sender=None, read=True, clear=False):
+        """ Retrieve the uncleared messages from the chat server 
         """
 
     def poll(self):
@@ -18,8 +17,8 @@ class IChat(Interface):
         """
 
     def send_message(self, to, message):
-        """ Send a chat message """
-
+        """ Send a chat message 
+        """
 
     def clear_messages(self, contact):
         """ Mark the messages in a chat contact's messagebox as cleared.
@@ -29,6 +28,9 @@ class IChat(Interface):
 
 class IChatBox(Interface):
     """ """
+
+    def reverse_escape(self, html):
+        """ """
 
     def render_chat_box(self, box_id, user, contact):
         """ """
