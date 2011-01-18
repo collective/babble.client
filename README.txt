@@ -7,16 +7,26 @@ Babble: Instant Messaging for Plone
 Babble is an instant messaging service for Plone. 
 It consists of babble.client as the Plone front-end client and 
 `babble.server <http://plone.org/products/babble.server>`_, 
-a Zope2 messaging service, as the backend chat service.
-
-The client consists of an *Online contacts* portlet with which you can initiate 
-new chats. Chat sessions occur in modal dialog chatboxes and make use of 
-JQuery Ajax polling to provide seamless, real-time messaging.
-During inactive periods, the polling interval gradually becomes longer until it
-reaches a specific (configurable) maximum polling interval.
+a Zope2-based messaging service, as the backend chat service.
 
 Communication between the client and server is achieved with JSON packets 
 sent via XML-RPC. 
+
+The client consists of an *Online contacts* portlet with which you can initiate 
+new chats. 
+
+Instead of using the provided portlet, you can also consider using Babble together with
+`actionbar.babble <http://plone.org/products/actionbar.babble>`_ .
+
+Chat sessions occur in modal dialog chatboxes and make use of 
+JQuery Ajax polling to provide seamless, real-time messaging.
+
+During inactive periods, the polling interval gradually becomes longer until it
+reaches a specific (configurable) maximum polling interval.
+
+Please note: even thought the polling values are configurable, it's not advised
+to make the minimum polling interval less than 5000 milliseconds.
+
 
 
 Features:
