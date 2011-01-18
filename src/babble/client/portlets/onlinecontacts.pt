@@ -33,11 +33,20 @@
         <tal:items tal:repeat="contact contacts">
             <dd class="portletItem"
                 tal:define="oddrow repeat/contact/odd;
-                            fullname python:contact.getProperty('fullname') or contact.id"
+                            fullname python:contact.getProperty('fullname') or contact.id;
+                            anonymous view/is_anonymous;"
                 tal:attributes="class python:oddrow and  'portletItem even' or 'portletItem odd'">
+
                 <a  tal:content="fullname" 
                     style="cursor: pointer;"
+                    tal:condition="not: anonymous"
                     tal:attributes="onclick string:jQuery.noConflict();; startChat('${contact/id}')"> 
+                    Contact Name 
+                </a>
+                <a  tal:content="fullname" 
+                    style="cursor: pointer;"
+                    tal:condition="anonymous"
+                    href="login_form">
                     Contact Name 
                 </a>
             </dd>

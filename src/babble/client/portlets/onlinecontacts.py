@@ -6,6 +6,7 @@ from plone.portlets.interfaces import IPortletDataProvider
 from plone.app.portlets.portlets import base
 
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from Products.CMFCore.utils import getToolByName
 
 from babble.client import utils
 from babble.client import BabbleMessageFactory as _
@@ -56,6 +57,11 @@ class Renderer(base.Renderer):
         
     def title(self):
         return self.data.header
+
+    def is_anonymous(self):
+        """ """
+        pm = getToolByName(self.context, 'portal_membership')
+        return pm.isAnonymousUser()
 
 
 class AddForm(base.AddForm):
