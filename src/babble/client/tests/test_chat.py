@@ -6,7 +6,7 @@ from Products.CMFCore.utils import getToolByName
 from babble.client import utils
 from babble.client.tests.base import TestCase
 from babble.client import BabbleException
-from babble.server.config import SUCCESS
+from babble.server import config 
 
 class TestChat(TestCase):
     """ Tests the babble/client/browser/chat.py module
@@ -50,14 +50,18 @@ class TestChat(TestCase):
         self.assertEquals(online_members, [])
 
         self.logout()
-        resp = traverse('@@babblechat/confirm_as_online')()
-        self.assertEquals(resp, None)
+        member = self.mtool.getAuthenticatedMember()
+        username = member.getId()
+        server = utils.getConnection(self.portal)
+        resp = json.loads(server.confirmAsOnline(username))
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
 
         self.login(name='member1')
 
-        resp = traverse('@@babblechat/confirm_as_online')()
-        resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
+        # resp = traverse('@@babblechat/confirm_as_online')()
+        server = utils.getConnection(self.portal)
+        resp = json.loads(server.confirmAsOnline('member1'))
+        self.assertEquals(resp['status'], config.SUCCESS)
 
         online_users = utils.get_online_usernames(portal)
         self.assertEquals(online_users, ['member1'])
@@ -71,9 +75,9 @@ class TestChat(TestCase):
 
         self.login(name='member2')
 
-        resp = traverse('@@babblechat/confirm_as_online')()
-        resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
+        server = utils.getConnection(self.portal)
+        resp = json.loads(server.confirmAsOnline('member2'))
+        self.assertEquals(resp['status'], config.SUCCESS)
 
         online_users = utils.get_online_usernames(portal)
         self.assertEquals(online_users, ['member1', 'member2'])
@@ -102,96 +106,107 @@ class TestChat(TestCase):
         self.login(name='member1')
         resp = traverse('@@babblechat/initialize')()
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
-        self.assertEquals(resp['messages'], {})
-
+        self.assertEquals(resp['status'], config.SUCCESS)
         
         # Test some methods' handling of anon users
         self.logout()
         resp = traverse('@@babblechat/initialize')()
         self.assertEquals(resp, None)
-        resp = traverse('@@babblechat/poll')()
+        member = self.mtool.getAuthenticatedMember()
+        resp = traverse('@@babblechat/poll')(member.getId())
         self.assertEquals(resp, None)
         resp = traverse('@@babblechat/send_message')('member1', 'message')
         self.assertEquals(resp, None)
         resp = traverse('@@babblechat/clear_messages')('member1')
         self.assertEquals(resp, None)
         messages = utils.get_last_conversation(portal, 'member1')
-        self.assertEquals(messages, {})
+        self.assertEquals(messages['status'], config.AUTH_FAIL)
+        self.assertEquals(messages['messages'], {})
 
         # Test methods' response to a user ('portal_owner') who wasn't
         # initialized
         self.logout()
         self.loginAsPortalOwner()
-        resp = traverse('@@babblechat/poll')()
+
+        member = self.mtool.getAuthenticatedMember()
+        resp = traverse('@@babblechat/poll')(member.getId())
         self.assertEquals(resp, None)
         resp = traverse('@@babblechat/send_message')('member1', 'message')
         self.assertEquals(resp, None)
-        resp = traverse('@@babblechat/clear_messages')('member1')
-        self.assertEquals(resp, None)
+
+        method = traverse('@@babblechat/clear_messages')
+        pars = ['member1']
+        self.assertRaises(AttributeError, method, *pars)
+
         messages = utils.get_last_conversation(portal, 'member1')
-        self.assertEquals(messages, {})
+        self.assertEquals(messages['status'], config.SERVER_FAULT)
+        self.assertEquals(messages['messages'], {})
         
         # Make sure member2 is registered on the chatserver by calling
         # initialize
         self.login(name='member2')
         resp = traverse('@@babblechat/initialize')()
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
-        self.assertEquals(resp['messages'], {})
+        self.assertEquals(resp['status'], config.SUCCESS)
 
         # Send a message from member2 to member1 and note the time so that we
         # can test for it later on
         timeminutes = datetime.datetime.now(utc).strftime("%H:%M")
         resp = traverse('@@babblechat/send_message')('member1', 'hello')
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
+        self.assertEquals(resp['status'], config.SUCCESS)
 
         # Poll for member1 and see if we got our message
         self.login(name='member1')
-        resp = traverse('@@babblechat/poll')()
+        resp = traverse('@@babblechat/poll')('member1')
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
+        self.assertEquals(resp['status'], config.SUCCESS)
 
         # Check that a message was received from member2
-        messages = resp['messages']
-        self.assertEquals(messages.keys(), ['member2'])
+        self.assertEquals(resp['messages'].keys(), ['member2'])
 
         # Check the message format
         date = datetime.date.today().strftime("%Y/%m/%d")
         hello_message = ['member2', date, timeminutes, 'hello']
-        self.assertEquals(messages['member2'], [hello_message])
+        self.assertEquals(resp['messages']['member2'][0], 'Member2')
+        self.assertEquals(resp['messages']['member2'][1], [hello_message])
 
         # Check that the next poll returns no new messages
-        resp = traverse('@@babblechat/poll')()
+        resp = traverse('@@babblechat/poll')('member1')
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
+        self.assertEquals(resp['status'], config.SUCCESS)
         self.assertEquals(resp['messages'], {})
 
-        # Check that calling initialize again will not return the original message,
-        # since it has been cleared
-        resp = traverse('@@babblechat/initialize')()
+        # Check that calling get_uncleared_messages will return the original message,
+        # since it has not been cleared
+        resp = traverse('@@babblechat/get_uncleared_messages')()
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
         messages = resp['messages']
-        self.assertEquals(messages.keys(), [])
+        self.assertEquals(resp['status'], config.SUCCESS)
+        self.assertEquals(messages['member2'][0], 'Member2')
+        self.assertEquals(messages['member2'][1], [hello_message])
 
         # Also test that utils' get_last_conversation returns this message
         messages = utils.get_last_conversation(portal, 'member2')
-        self.assertEquals(messages.keys(), ['member2'])
-        self.assertEquals(messages['member2'], [hello_message])
+        self.assertEquals(messages.keys(), ['status', 'messages'])
+        self.assertEquals(messages['status'], config.SUCCESS)
+        self.assertEquals(messages['messages'], {'member2': [hello_message]})
 
+        # Now we clear the messages
         resp = traverse('@@babblechat/clear_messages')('member2')
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
+        self.assertEquals(resp['status'], config.SUCCESS)
 
         messages = utils.get_last_conversation(portal, 'member2')
-        self.assertEquals(messages, {})
+        self.assertEquals(messages, {'status': config.SUCCESS, 'messages':{}})
+
+        resp = json.loads(traverse('@@babblechat/get_uncleared_messages')())
+        self.assertEquals(resp['status'], config.SUCCESS)
+        self.assertEquals(resp['messages'], {})
 
         resp = traverse('@@babblechat/initialize')()
         resp = json.loads(resp)
-        self.assertEquals(resp['status'], SUCCESS)
-        self.assertEquals(resp['messages'], {})
+        self.assertEquals(resp['status'], config.SUCCESS)
 
         # Test method's response to wrong authentication
         member = self.mtool.getAuthenticatedMember()

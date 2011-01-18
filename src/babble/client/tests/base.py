@@ -17,8 +17,7 @@ class BabbleClientLayer(SiteLayer):
 
     @classmethod
     def setUp(cls):
-        """ Set up the additional products required for the 
-            DubletteFinder.
+        """ Set up the additional products required
         """
         PRODUCTS = [
                 'babble.server',

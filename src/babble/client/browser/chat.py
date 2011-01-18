@@ -22,6 +22,8 @@ class BabbleView(BrowserView):
     """ Base view for commong methods """
 
     def get_fullname(self, username):
+        """ Get user via his ID and return his fullname
+        """
         pm = getToolByName(self.context, 'portal_membership')
         member = pm.getMemberById(username)
         if not member:
@@ -34,6 +36,35 @@ class BabbleView(BrowserView):
 
 class Chat(BabbleView):
     implements(IChat)
+
+    def initialize(self):
+        """ Check if the user is registered, and register if not... 
+        """
+        pm = getToolByName(self.context, 'portal_membership')
+        if pm.isAnonymousUser():
+            return
+
+        member = pm.getAuthenticatedMember()
+        username = member.getId()
+        log.info('initialize called, username: %s' % username)
+        
+        server = utils.getConnection(self.context)
+        try:
+            resp = json.loads(server.isRegistered(username))
+        except socket.timeout:
+            # Catch timeouts so that we can notify the caller
+            log.error('initialize: timeout error for  %s' % username)
+            # We return the same output as the poll would have
+            # returned...
+            return json.dumps({'status': TIMEOUT})
+
+        if not resp['is_registered']:
+            password = str(random.random())
+            json.loads(server.register(username, password))
+            setattr(member, 'chatpass', password)
+
+        return json.dumps({'status': SUCCESS})
+
 
     def get_uncleared_messages(self, sender=None, read=True, clear=False):
         """ Retrieve the uncleared messages from the chat server 
@@ -77,40 +108,22 @@ class Chat(BabbleView):
                             'messages': {},
                             })
 
-        if json.loads(resp)['status'] != SUCCESS:
+        json_dict = json.loads(resp)
+
+        if json_dict['status'] != SUCCESS:
             raise BabbleException(
                     'getUnclearedMessages for %s failed' % username)
 
-        return resp
+        # Add the message sender's fullname to the messages dict and return
+        msg_dict = {} 
+        for username, messages  in json_dict['messages'].items(): 
+            fullname = self.get_fullname(username)
+            msg_dict[username] = (fullname, messages)
 
-
-    def initialize(self):
-        """ Check if the user is registered, and register if not... 
-        """
-        pm = getToolByName(self.context, 'portal_membership')
-        if pm.isAnonymousUser():
-            return
-
-        member = pm.getAuthenticatedMember()
-        username = member.getId()
-        log.info('initialize called, username: %s' % username)
-        
-        server = utils.getConnection(self.context)
-        try:
-            resp = json.loads(server.isRegistered(username))
-        except socket.timeout:
-            # Catch timeouts so that we can notify the caller
-            log.error('initialize: timeout error for  %s' % username)
-            # We return the same output as the poll would have
-            # returned...
-            return json.dumps({'status': TIMEOUT})
-
-        if not resp['is_registered']:
-            password = str(random.random())
-            json.loads(server.register(username, password))
-            setattr(member, 'chatpass', password)
-
-        return json.dumps({'status': SUCCESS})
+        return json.dumps({
+                'status': json_dict['status'], 
+                'messages': msg_dict,
+                })
 
 
     def poll(self, username):
@@ -119,7 +132,7 @@ class Chat(BabbleView):
         """
         pm = getToolByName(self.context, 'portal_membership')
         member = pm.getMemberById(username)
-        if not hasattr(member, 'chatpass'):
+        if not member or not hasattr(member, 'chatpass'):
             return 
 
         password = getattr(member, 'chatpass') 
@@ -140,23 +153,22 @@ class Chat(BabbleView):
             log.error('Error from chat.service: getUnreadMessages: %s' % err_msg)
             raise BabbleException(err_msg)
 
-        # Get the message authors' fullnames and add to the JSON packet
         json_dict = json.loads(msgs)
+        # Add the message sender's fullname to the messages dict and return
         msg_dict = {} 
         for username, messages  in json_dict['messages'].items(): 
             fullname = self.get_fullname(username)
-            msg_dict[username] = messages
             msg_dict[username] = (fullname, messages)
 
         return json.dumps({
-                        'status': json_dict['status'], 
-                        'messages': msg_dict,
-                        })
-
+                'status': json_dict['status'], 
+                'messages': msg_dict,
+                })
 
 
     def send_message(self, to, message):
-        """ Send a chat message """
+        """ Send a chat message 
+        """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
             return
@@ -206,7 +218,7 @@ class ChatBox(BabbleView):
 
     def render_chat_box(self, box_id, contact):
         """ """
-        messages = utils.get_last_conversation(self.context, contact)
-        return self.template(messages=messages, box_id=box_id, title=contact)
+        response = utils.get_last_conversation(self.context, contact)
+        return self.template(messages=response['messages'], box_id=box_id, title=contact)
 
 

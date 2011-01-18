@@ -455,7 +455,7 @@ function poll_server() {
                     '</div>'
                 );
                 content.scrollTop(content[0].scrollHeight);
-                poll_interval = 20000; 
+                poll_interval = poll_max; 
             }
         },
         success: function(data) {

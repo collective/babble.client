@@ -174,7 +174,7 @@ def get_last_conversation(context, contact):
     """
     pm = getToolByName(context, 'portal_membership')
     if pm.isAnonymousUser():
-        return json.dumps({'status': config.SERVER_FAULT, 'messages': {}})
+        return {'status': config.AUTH_FAIL, 'messages': {}}
 
     server = getConnection(context)
     member = pm.getAuthenticatedMember()
@@ -184,7 +184,7 @@ def get_last_conversation(context, contact):
     else:
         log.error("get_last_conversation: %s does not have prop 'chatpass'\n"
                   "This should not happen!" % username)
-        return json.dumps({'status': config.SERVER_FAULT, 'messages': {}})
+        return {'status': config.SERVER_FAULT, 'messages': {}}
 
     try:
         #pars: username, sender, read, clear
@@ -193,16 +193,15 @@ def get_last_conversation(context, contact):
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from chat.service: clearMessages: %s' % err_msg)
-        return json.dumps({'status': config.SERVER_FAULT, 'messages': {}})
+        return {'status': config.SERVER_FAULT, 'messages': {}}
 
     except socket.error, e:
         # Catch timeouts so that we can notify the caller
         log.error(\
             'Socket error from get_online_contacts: ' + \
             'server.getOnlineUsers: %s \nIs the chatserver running?' %e)
-        return json.dumps({'status': config.TIMEOUT, 'messages': {}})
+        return {'status': config.TIMEOUT, 'messages': {}}
     
-    resp = json.loads(resp)
-    return resp['messages']
+    return json.loads(resp)
 
     	
