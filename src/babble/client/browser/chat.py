@@ -15,6 +15,7 @@ from babble.client import utils
 from babble.client import BabbleException
 from babble.client.config import SUCCESS
 from babble.client.config import TIMEOUT
+from babble.client.config import AUTH_FAIL
 
 log = logging.getLogger('babble.client/browser/chat.py')
 
@@ -42,7 +43,7 @@ class Chat(BabbleView):
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
-            return
+            return json.dumps({'status': AUTH_FAIL})
 
         member = pm.getAuthenticatedMember()
         username = member.getId()
