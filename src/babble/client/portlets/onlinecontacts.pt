@@ -1,5 +1,8 @@
-<tal:get define="portlet_id view/get_id">
-<tal:script replace="structure string: 
+<tal:get define="portlet_id view/get_id;
+                 contacts view/get_online_members;"
+     i18n:domain="babble.client">
+
+<tal:script condition="python:len(contacts) > 7" replace="structure string: 
 <script type='text/javascript'>
     jQuery(document).ready(function(){
         doc_title = document.title;
@@ -9,10 +12,10 @@
             window_focus = true;
             document.title = doc_title;
         });
-        jQuery('dl#$portlet_id div#$portlet_id-contacts dd').quicksearch({
-            position: 'prepend',
-            attached: 'dl#$portlet_id dd#$portlet_id-footer',
-            loaderText: '',
+        jQuery('dl#$portlet_id dd#$portlet_id-contacts div').quicksearch({
+            position: 'append',
+            attached: 'dd#$portlet_id-footer',
+            loaderText: 'Filter contacts',
             delay: 100
         })
     });
@@ -26,21 +29,21 @@
     </dt>
 
     <metal:macro define-macro="current-online-contacts">
-        <div id="online-contacts"
-            tal:define="contacts view/get_online_members"
-            tal:attributes="class python:contacts > 5 and 'online-contacts-max' or 'online-contacts';
-            id string:$portlet_id-contacts">
+        <dd class="portletItem" 
+            id="online-contacts"
+            tal:attributes="class python:len(contacts) > 7 and 'online-contacts-max portletItem' or 'online-contacts portletItem';
+                            id string:$portlet_id-contacts">
         <tal:items tal:repeat="contact contacts">
-            <dd class="portletItem"
+            <div class="chatportlet-online-contact"
                 tal:define="oddrow repeat/contact/odd;
                             fullname python:contact.getProperty('fullname') or contact.id;
                             anonymous view/is_anonymous;"
-                tal:attributes="class python:oddrow and  'portletItem even' or 'portletItem odd'">
+                tal:attributes="class python:oddrow and 'even chatportlet-online-contact' or 'odd chatportlet-online-contact'">
 
                 <a  tal:content="fullname" 
                     style="cursor: pointer;"
                     tal:condition="not: anonymous"
-                    tal:attributes="onclick string:jQuery.noConflict();; startChat('${contact/id}')"> 
+                    tal:attributes="onclick string:alert('hello');; startChat('${contact/id}')"> 
                     Contact Name 
                 </a>
                 <a  tal:content="fullname" 
@@ -49,10 +52,14 @@
                     href="login_form">
                     Contact Name 
                 </a>
-            </dd>
+            </div>
         </tal:items>
-    </div>
+        <div tal:condition="not: contacts">
+            <div class="formHelp no-contacts-message"
+                  i18n:translate="no_contacts_message">No one else is currently online</div>
+        </div>
+        </dd>
+        <dd class="portletFooter" tal:condition="python:len(contacts) > 7" tal:attributes="id string:$portlet_id-footer"></dd>
     </metal:macro>
-    <dd class="portletFooter" tal:attributes="id string:$portlet_id-footer"></dd>
 </dl>
 </tal:get>

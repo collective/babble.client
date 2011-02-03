@@ -1,18 +1,25 @@
-div.online-contacts {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    border-left:1px solid #8CACBB;
+div.no-contacts-message {
+    padding-top:1em;
+    padding-left:1em;
 }
 
-div.online-contacts-max {
+dd.online-contacts {
+    padding: 0 !important;
+}
+
+dd.online-contacts-max {
+    padding: 0 !important;
     height: 18em;
     overflow-y: scroll;
     overflow-x: hidden;
-    border-left:1px solid #8CACBB;
 }
 
-div.online-contacts .portletItem, div.online-contacts-max .portletItem {
-    border-left:0px;
+div.chatportlet-online-contact {
+    padding:0.7em;
+}
+
+div.filter-contacts-message{
+	font-size: 10px;
 }
 
 .chatbox {
