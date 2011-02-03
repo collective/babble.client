@@ -22,17 +22,23 @@ function get_minimized_chats() {
 }
   
 test('createChatBox()', function() {
-    var title =  'chat-1';
-    equals($('#chatbox_'+title).length, 0, "The chatbox should not yet exist");
+    var username =  'patrick@mail.com';
 
-    var chatbox = createChatBox(title);
-    equals($('#chatbox_'+title).length, 1, "The chatbox should now exist");
-    same($('#chatbox_'+title), chatbox, "The returned chatbox should be the same as the jqueried one");
+    //First we test that the chatbox is not yet created
+    equals(jQuery("#chatbox_"+prep4JQ(username)).length, 0, "The chatbox should not yet exist");
 
-    var display = $('#chatbox_'+title+' .chat-content').css('display');
-    equals(display, 'block', "The chatbox's display should be 'block'");
+    // We then create it and make sure that it is there
+    var returned_chatbox = createChatBox(username);
+    var generated_checkbox = jQuery("#chatbox_"+prep4JQ(username));
+    equals(generated_checkbox.length, 1, "The chatbox should now exist");
+    
+    equals(generated_checkbox.attr('id'), returned_chatbox.attr('id'), "The returned chatbox should be the same as the jqueried one");
+
+    // var display = $('#chatbox_'+title+' .chat-content').css('display');
+    // equals(display, 'block', "The chatbox's display should be 'block'");
 })
 
+/*
 test('toggleChat()', function() {
     var title =  'chat-1';
     equals($('#chatbox_'+title).length, 1, "The chatbox should still exist");
@@ -60,4 +66,5 @@ test('toggleChat()', function() {
     equals(min_chats.length, 0, "The minimized_chats cookie should not have any entries");
 
 })
+*/
 

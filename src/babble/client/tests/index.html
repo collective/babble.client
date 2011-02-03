@@ -10,10 +10,15 @@
     <script type="text/javascript" src="http://code.jquery.com/jquery.js"></script>
     <script type="text/javascript" 
             src="http://github.com/jquery/qunit/raw/master/qunit/qunit.js"></script>  
-
-    <script type="text/javascript" src="../browser/resources/jquery.cookie.js"></script>  
-    <script type="text/javascript" src="../skins/babble_javascripts/chat.js.dtml"></script>  
-    <script type="text/javascript" src="test_chat.js"></script>  
+    <script type="text/javascript" src="++resource++jquery.cookie.js"></script>  
+    <script type="text/javascript" src="++resource++jquery.ba-dotimeout.min.js"></script>  
+    <script type="text/javascript" src="portal_skins/babble_javascripts/chat.js"></script>  
+    <script type="text/javascript" src="++resource++test_chat.js"></script>  
+    <script type="text/javascript">
+        // We need this here to clear any cookie that might still be there...
+        var username = 'patrick@mail.com';
+        jQuery.cookie('chats-open-'+prep4JQ(username), null, {path: '/'});
+    </script>
 </head>  
 <body>  
     <h1 id="qunit-header">Babble QUnit Test Suite</h1>  
