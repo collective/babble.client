@@ -354,7 +354,7 @@ function createChatBox(title) {
         data: {
             box_id: "chatbox_"+title,
             contact: title
-        },
+            },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
