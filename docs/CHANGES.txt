@@ -1,7 +1,15 @@
 Changelog
 =========
 
-1.4b1 (unreleased)
+1.4b2 (Unreleased)
+------------------
+
+- Layed some groundwork for QUnit javascript unit testing [jcbrand]
+- Javascript fix for an IE7 quirk [jcbrand] 
+- Only show the portlet search bar when it's overflowing [jcbrand]
+- Fixed the portlet search bar' rendering in IE7 [jcbrand]
+
+1.4b1 (2011-01-18)
 ------------------
 
 - Fixed to work with email addresses as usernames. [jcbrand]

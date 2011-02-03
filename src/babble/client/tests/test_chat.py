@@ -111,7 +111,9 @@ class TestChat(TestCase):
         # Test some methods' handling of anon users
         self.logout()
         resp = traverse('@@babblechat/initialize')()
-        self.assertEquals(resp, None)
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
+
         member = self.mtool.getAuthenticatedMember()
         resp = traverse('@@babblechat/poll')(member.getId())
         self.assertEquals(resp, None)
