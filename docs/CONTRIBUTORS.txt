@@ -4,5 +4,5 @@ Contributors
 - Cillian de Roiste <deroiste@syslab.com>
 - Wolfgang Thomas <thomas@syslab.com>
 - Patrick Gerken <gerken@syslab.com>
-- Cleber J. Santos 
+- Cleber J. Santos <cleber@simplesconsultoria.com.br> 
 
