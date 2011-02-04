@@ -29,17 +29,24 @@ var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
 var poll_cycle = 10;        // The amount of polls to make in a cycle
 
+<dtml-let pollmax="portal_chat.poll_max">
+var poll_max = &dtml-pollmax;;  // The maximum polling period
+</dtml-let>
 
-// XXX: These are the DTML variables, which we now hardcode
-var poll_max = 20000;
-var poll_min = 5000;
-var username = "johndoe"
-var base_url = "http://localhost:8050/babble"
-// XXX: Up until here
+<dtml-let pollmin="portal_chat.poll_min">
+var poll_min = &dtml-pollmin;;  // The minimum polling period
+</dtml-let>
+
+<dtml-let member="portal_membership.getAuthenticatedMember().getId().encode('utf-8')">
+var username = "&dtml-member;";
+</dtml-let>
+
+<dtml-let baseurl="portal_url()">
+var base_url = "&dtml-baseurl;";
+</dtml-let>
 
 var timeout = 2000;
 var poll_interval = poll_min;   // The initial polling period
-
 
 var window_focus = true;
 var chat_focus = new Array();
