@@ -54,7 +54,7 @@ Documentation:
 --------------
 
 Full documentation for the **Babble** project can be found at
-http://opkode.net/babbledocs/index.html
+http://babblechat.org
 
 
 TODO:
