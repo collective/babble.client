@@ -135,7 +135,7 @@ def get_online_usernames(context):
         return []
 
     online_users = json.loads(resp)['online_users']
-    log.info('get_online_usernames: %s' % str(online_users))
+    log.debug('get_online_usernames: %s' % str(online_users))
     return online_users
 
 

@@ -47,7 +47,7 @@ class Chat(BabbleView):
 
         member = pm.getAuthenticatedMember()
         username = member.getId()
-        log.info('initialize called, username: %s' % username)
+        log.debug('initialize called, username: %s' % username)
         
         server = utils.getConnection(self.context)
         try:
@@ -182,7 +182,7 @@ class Chat(BabbleView):
         message = utils.urlize(message, blank=True, auto_escape=True) 
         password = getattr(member, 'chatpass') 
         username = member.getId()
-        log.info(u'Chat message from %s sent to %s' % (username, to))
+        log.debug(u'Chat message from %s sent to %s' % (username, to))
         server = utils.getConnection(self.context)
         try:
             resp = server.sendMessage(username, password, to, message)
