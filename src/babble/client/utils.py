@@ -148,7 +148,7 @@ def get_online_members(context):
     # pj = getToolByName(context, 'portal_javascripts')
     # if pj.getDebugMode():
     #     members = pm.listMembers()
-    #     log.info('members: %s' % str(members))
+    #     log.debug('members: %s' % str(members))
     #     if member in members:
     #         members.remove(member)
     #     return members
@@ -164,8 +164,7 @@ def get_online_members(context):
             continue
         online_members.append(member)
 
-    # Warning: Use only for debugging, use in production can cause downtime on the site.
-    #log.info('get_online_members: %s' % str(online_members))
+    log.debug('get_online_members: %s' % str(online_members))
     return online_members
 
 
