@@ -124,12 +124,12 @@ def get_online_usernames(context):
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error(\
-            'Error from get_online_contacts: server.getOnlineUsers: %s' \
+            'Error from get_online_usernames: server.getOnlineUsers: %s' \
             % err_msg)
         return []
     except socket_error, e:
         log.error(\
-            'Socket error from get_online_contacts: ' + \
+            'Socket error from get_online_usernames: ' + \
             'server.getOnlineUsers: %s \nis the chatserver running?' \
             %e)
         return []
@@ -191,14 +191,14 @@ def get_last_conversation(context, contact):
                             username, password, contact, True, False)
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
-        log.error('Error from chat.service: clearMessages: %s' % err_msg)
+        log.error('Error from babble.server: getUnclearedMessages: %s' % err_msg)
         return {'status': config.SERVER_FAULT, 'messages': {}}
 
     except socket.error, e:
         # Catch timeouts so that we can notify the caller
         log.error(\
-            'Socket error from get_online_contacts: ' + \
-            'server.getOnlineUsers: %s \nIs the chatserver running?' %e)
+            'Socket error from get_last_conversation: ' + \
+            'server.getUnclearedMessages: %s \nIs the chatserver running?' %e)
         return {'status': config.TIMEOUT, 'messages': {}}
     
     return json.loads(resp)
