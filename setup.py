@@ -31,7 +31,9 @@ setup(
         'setuptools',
         'simplejson',
         'babble.server',
-        'collective.js.blackbird',
+        'Products.CMFPlone',
+        'plone.app.portlets',
+        'collective.js.blackbird'
     ],
     tests_require=tests_require,
     extras_require=dict(tests=tests_require),
