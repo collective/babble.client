@@ -1,6 +1,11 @@
 Changelog
 =========
 
+1.5 (Unreleased)
+
+- Include permissions.zcml from Products.CMFCore and changed setup.py
+  dependencies for Plone 4.1 compatibility [jcbrand]
+
 1.4 (2011-03-18)
 ----------------
 
