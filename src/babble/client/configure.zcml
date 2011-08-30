@@ -8,10 +8,12 @@
     xmlns:zcml="http://namespaces.zope.org/zcml"
     i18n_domain="babble.client">
 
-    <include package=".browser" />
-    <include package=".portlets" />   
     <include package="collective.js.blackbird" />
     <include package="Products.CMFCore" file="permissions.zcml" />
+
+    <include package=".browser" />
+    <include package=".portlets" />   
+    <include package=".upgrade" />
 
     <genericsetup:registerProfile
         name="default"
