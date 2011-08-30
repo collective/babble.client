@@ -1,0 +1,19 @@
+<configure
+  xmlns="http://namespaces.zope.org/zope"
+  xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+  i18n_domain="babble.client">
+
+  <genericsetup:upgradeSteps
+    source="1"
+    destination="2"
+    profile="babble.client:default"
+    >
+    <genericsetup:upgradeStep
+        title="Correct JS and CSS resource paths"
+        description="chat.js is now a zope3 style resource 'babblechat.js'"
+        handler=".upgrade.updateResourcePaths"
+      />
+  </genericsetup:upgradeSteps>
+
+</configure>
+
