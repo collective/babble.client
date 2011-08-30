@@ -3,7 +3,7 @@
 
     <javascript 
         expression="python: not here.restrictedTraverse('@@plone_portal_state').anonymous()"
-        id="++resource++jquery.ba-dotimeout.min.js"
+        id="++resource++babble.client.thirdparty/jquery.ba-dotimeout.min.js"
         insert-after="jquery.js"
         />
 
@@ -16,12 +16,12 @@
         />
 
     <javascript 
-        id="++resource++jquery.cookie.js"
+        id="++resource++babble.client.thirdparty/jquery.cookie.js"
         insert-after="chat.js"
         />
 
     <javascript 
-        id="++resource++quicksearch.js"
+        id="++resource++babble.client.thirdparty/quicksearch.js"
         insert-after="chat.js"
         />
 

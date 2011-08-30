@@ -9,20 +9,11 @@
         directory="images"
         layer="babble.client.interfaces.IBabbleClientLayer"
         />
-
-    <browser:resource
-        name="jquery.ba-dotimeout.min.js"
-        file="thirdparty/jquery.ba-dotimeout.min.js"
-        />
-
-    <browser:resource
-        name="quicksearch.js"
-        file="thirdparty/quicksearch.js"
-        />
-
-    <browser:resource
-        name="jquery.cookie.js"
-        file="thirdparty/jquery.cookie.js"
+        
+    <browser:resourceDirectory
+        name="babble.client.thirdparty"
+        directory="thirdparty"
+        layer="babble.client.interfaces.IBabbleClientLayer"
         />
 
     <browser:resource
