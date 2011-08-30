@@ -3,7 +3,7 @@
 
     <stylesheet 
         title=""
-        id="++resource++chat.css"
+        id="++resource++babble.client.stylesheets/chat.css"
         media="screen" 
         rel="stylesheet" 
         rendering="import"
