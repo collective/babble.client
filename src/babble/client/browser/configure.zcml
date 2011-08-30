@@ -16,6 +16,12 @@
         layer="babble.client.interfaces.IBabbleClientLayer"
         />
 
+    <browser:resourceDirectory
+        name="babble.client.stylesheets"
+        directory="stylesheets"
+        layer="babble.client.interfaces.IBabbleClientLayer"
+        />
+
     <browser:resource
         name="chat.css"
         file="stylesheets/chat.css"
@@ -27,6 +33,7 @@
         name="babblechat"
         permission="zope2.View"
         allowed_interface=".interfaces.IChat"
+        layer="babble.client.interfaces.IBabbleClientLayer"
         /> 
 
     <browser:page
@@ -35,6 +42,7 @@
         class=".chat.ChatBox"
         name="render_chat_box"
         permission="zope2.View"
+        layer="babble.client.interfaces.IBabbleClientLayer"
         /> 
 
 </configure>
