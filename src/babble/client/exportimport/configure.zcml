@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="babble.client">
+
+    <genericsetup:importStep
+        name="babblechat_tool"
+        title="Babble Chat Tool"
+        description="Import portal_babblechat settings"
+        handler=".babblechat_tool.importBabbleChat">
+        <depends name="toolset"/>
+    </genericsetup:importStep>
+    
+    <adapter factory=".babblechat_tool.BabbleChatXMLAdapter"/>
+
+</configure>

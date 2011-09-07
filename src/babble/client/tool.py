@@ -2,6 +2,8 @@ import httplib
 import logging
 import xmlrpclib
 
+from zope.interface import implements
+
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 
@@ -10,6 +12,7 @@ from Products.CMFCore.utils import SimpleItemWithProperties
 from Products.CMFCore.utils import getToolByName
 
 from babble.client import BabbleMessageFactory as _
+from interfaces import IBabbleChatTool
 
 log = logging.getLogger('babble.client/tool.py')
 
@@ -38,12 +41,14 @@ class QuickTimeoutTransport(xmlrpclib.Transport):
             return CustomHTTPConnection(host)
 
 
-class MessageTool(UniqueObject, SimpleItemWithProperties):
+class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
+    implements(IBabbleChatTool)
     meta_type = 'Chat Tool'
     id = 'portal_babblechat'
     security = ClassSecurityInfo()
+    toolicon = 'skins/plone_images/topic_icon.png'
     _properties = (
-        {   'id':'name', 
+        {   'id':'service_name', 
             'type': 'string', 
             'mode':'w',
             'label': _('Service name:'),
@@ -82,7 +87,7 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
     use_local_service = False
     host = 'localhost'
     port = '8080'
-    name = 'chatservice'
+    service_name = 'chatservice'
     username = 'admin'
     password = 'admin'
     poll_max = 20000 
@@ -126,6 +131,5 @@ class MessageTool(UniqueObject, SimpleItemWithProperties):
 
         return self._v_connection
 
-
-InitializeClass(MessageTool)
+InitializeClass(BabbleChatTool)
 

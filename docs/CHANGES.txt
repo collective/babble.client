@@ -5,6 +5,9 @@ Changelog
 
 - Include permissions.zcml from Products.CMFCore and changed setup.py
   dependencies for Plone 4.1 compatibility [jcbrand]
+- Renamed the portal_chat tool, to portal_babblechat [jcbrand]
+- Add GenericSetup xml file, babblechat_tool.xml, to enable configuration of
+  the portal_babblechat tool. [jcbrand]
 
 1.4 (2011-03-18)
 ----------------

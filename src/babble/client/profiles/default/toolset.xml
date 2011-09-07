@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <tool-setup>
     <required tool_id="portal_babblechat"
-             class="babble.client.tool.MessageTool"/>
+             class="babble.client.tool.BabbleChatTool"/>
 </tool-setup>

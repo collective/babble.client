@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<object name="portal_babblechat" 
+        meta_type="BabbleChatTool"
+        host="localhost"
+        port="8080"
+        service_name="chatservice"
+        username="admin"
+        password="admin"
+        poll_max="20000"
+        poll_min="5000"/>

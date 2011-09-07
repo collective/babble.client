@@ -14,6 +14,7 @@
     <include package=".browser" />
     <include package=".portlets" />   
     <include package=".upgrade" />
+    <include package=".exportimport" />
 
     <genericsetup:registerProfile
         name="default"
