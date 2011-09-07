@@ -40,7 +40,7 @@ class QuickTimeoutTransport(xmlrpclib.Transport):
 
 class MessageTool(UniqueObject, SimpleItemWithProperties):
     meta_type = 'Chat Tool'
-    id = 'portal_chat'
+    id = 'portal_babblechat'
     security = ClassSecurityInfo()
     _properties = (
         {   'id':'name', 
