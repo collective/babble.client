@@ -6,6 +6,8 @@ from babble.client import utils
 from babble.client.tests.base import TestCase
 from babble.client import BabbleException
 from babble.server import config 
+from babble.client.interfaces import IBabbleClientLayer
+from zope.interface import alsoProvides
 
 class TestChat(TestCase):
     """ Tests the babble/client/browser/chat.py module
@@ -23,6 +25,11 @@ class TestChat(TestCase):
         self.mtool = self.portal.portal_membership
         self.create_user('member1', 'secret')
         self.create_user('member2', 'secret')
+
+        # Merely registering babble.client's browserlayer doesn't set it on the
+        # request. This happens during IBeforeTraverseEvent, so we have to do 
+        # it here manually
+        alsoProvides(self.portal.REQUEST, IBabbleClientLayer)
 
 
     def create_user(self, username, password, roles=['member'], domains=[]):
@@ -310,6 +317,10 @@ class TestEmailLoginChat(TestChat):
         self.create_user('member2', 'secret')
         self.create_user('member3@example.com', 'secret')
         self.create_user('member4@example.com', 'secret')
+        # Merely registering babble.client's browserlayer doesn't set it on the
+        # request. This happens during IBeforeTraverseEvent, so we have to do 
+        # it here manually
+        alsoProvides(self.portal.REQUEST, IBabbleClientLayer)
 
     def test_online_users_with_email_usernames(self):
         """ Same as test_messaging but with email usernames 
