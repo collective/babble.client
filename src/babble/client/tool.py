@@ -104,18 +104,18 @@ class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
         # portal_url. I don't yet know why this happens :-/
         if self.use_local_service and getToolByName(self, 'portal_url', None):
             zope_root = self.portal_url.getPortalObject().aq_parent
-            if hasattr(zope_root, self.name):
-                return zope_root[self.name]
+            if hasattr(zope_root, self.service_name):
+                return zope_root[self.service_name]
             else:
-                log.error("No Chat Service '%s' in the Zope root" % self.name)
+                log.error("No Chat Service '%s' in the Zope root" % self.service_name)
                 # This will raise KeyError 
-                return zope_root[self.name]
+                return zope_root[self.service_name]
 
         username = self.getProperty('username')
         password = self.getProperty('password')
         host = self.getProperty('host')
         port = self.getProperty('port')
-        name = self.getProperty('name')
+        name = self.getProperty('service_name')
         url = 'http://%s:%s@%s:%s/%s' % (username, password, host, port, name)
 
         if not hasattr(self, '_v_chat_service_url') \
