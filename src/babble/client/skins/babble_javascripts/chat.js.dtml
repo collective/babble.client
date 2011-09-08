@@ -29,11 +29,11 @@ var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
 var poll_cycle = 10;        // The amount of polls to make in a cycle
 
-<dtml-let pollmax="portal_babblechat.poll_max">
+<dtml-let pollmax="portal_chat.poll_max">
 var poll_max = &dtml-pollmax;;  // The maximum polling period
 </dtml-let>
 
-<dtml-let pollmin="portal_babblechat.poll_min">
+<dtml-let pollmin="portal_chat.poll_min">
 var poll_min = &dtml-pollmin;;  // The minimum polling period
 </dtml-let>
 

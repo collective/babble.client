@@ -44,7 +44,7 @@ class QuickTimeoutTransport(xmlrpclib.Transport):
 class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
     implements(IBabbleChatTool)
     meta_type = 'Chat Tool'
-    id = 'portal_babblechat'
+    id = 'portal_chat'
     security = ClassSecurityInfo()
     toolicon = 'skins/plone_images/topic_icon.png'
     _properties = (
@@ -132,4 +132,3 @@ class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
         return self._v_connection
 
 InitializeClass(BabbleChatTool)
-

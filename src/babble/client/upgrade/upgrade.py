@@ -21,23 +21,3 @@ def updateResourcePaths(context):
     csstool.unregisterResource('++resource++chat.css')
     log.info("Removed old js and css resources")
 
-def renameChatTool(context):
-    site = aq_parent(context)
-    context.runImportStepFromProfile("profile-babble.client:default", "toolset", True)
-    log.info("Reloaded toolset.xml")
-
-    if hasattr(site, 'portal_chat'):
-        oldtool = site.portal_chat
-        newtool = site.portal_babblechat
-
-        newtool.host = oldtool.host
-        newtool.port = oldtool.port
-        newtool.service_name = oldtool.name
-        newtool.username = oldtool.username
-        newtool.password = oldtool.password
-        newtool.poll_max = oldtool.poll_max
-        newtool.poll_min = oldtool.poll_min
-        
-        site.manage_delObjects(['portal_chat'])
-        log.info("Removed old tool portal_chat")
-

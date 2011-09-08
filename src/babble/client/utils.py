@@ -113,7 +113,7 @@ def urlize(text, url_limit=None, nofollow=False, blank=False, auto_escape=False)
 
 def getConnection(context):
     """ Returns a connection to the chat service """
-    mtool = getToolByName(context, 'portal_babblechat')
+    mtool = getToolByName(context, 'portal_chat')
     return mtool.getConnection()
 
 

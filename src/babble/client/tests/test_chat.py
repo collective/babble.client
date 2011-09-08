@@ -17,7 +17,7 @@ class TestChat(TestCase):
         self.loginAsPortalOwner()
         view = self.app.unrestrictedTraverse('+/addChatService.html')
         view(add_input_name='chatservice', title='Chat Service', submit_add=1)
-        self.portal.portal_babblechat.use_local_service = True
+        self.portal.portal_chat.use_local_service = True
 
         # The 'temp_folder' is not created for some reason, so do it here...
         self.app._setOb('temp_folder', Folder('temp_folder'))
@@ -305,7 +305,7 @@ class TestEmailLoginChat(TestChat):
         self.loginAsPortalOwner()
         view = self.app.unrestrictedTraverse('+/addChatService.html')
         view(add_input_name='chatservice', title='Chat Service', submit_add=1)
-        self.portal.portal_babblechat.use_local_service = True
+        self.portal.portal_chat.use_local_service = True
 
         # The 'temp_folder' is not created for some reason, so do it here...
         self.app._setOb('temp_folder', Folder('temp_folder'))

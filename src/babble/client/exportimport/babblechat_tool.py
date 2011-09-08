@@ -27,11 +27,11 @@ class BabbleChatXMLAdapter(XMLAdapterBase, PropertyManagerHelpers):
         self.context.password = str(node.getAttribute('password'))
         self.context.poll_max = str(node.getAttribute('poll_max'))
         self.context.poll_min = str(node.getAttribute('poll_min'))
-        log.info('portal_babblechat properties imported.')
+        log.info('portal_chat properties imported.')
 
 
 def importBabbleChat(context):
-    """Import portal_babblechat settings from an XML file.
+    """Import portal_chat settings from an XML file.
     """
     site = context.getSite()
     body = context.readDataFile(_FILENAME)
@@ -39,7 +39,7 @@ def importBabbleChat(context):
         log.debug('Nothing to import.')
         return
 
-    tool = site.portal_babblechat
+    tool = site.portal_chat
     importer = queryMultiAdapter((tool, context), IBody)
     if importer is None:
         log.warning('Import adapter missing.')

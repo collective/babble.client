@@ -25,6 +25,7 @@
     <browser:resource
         name="chat.css"
         file="stylesheets/chat.css"
+        layer="babble.client.interfaces.IBabbleClientLayer"
         />
 
     <browser:page
