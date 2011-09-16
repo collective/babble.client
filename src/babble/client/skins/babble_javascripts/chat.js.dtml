@@ -563,6 +563,12 @@ function keypressed(event, textarea, title) {
                     log.info("Message succesfully sent. \n");
 
                     message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
+                    list = message.match(/\b(http:\/\/www\.\S+\.\w+|www\.\S+\.\w+|http:\/\/(?=[^w]){3}\S+[\.:]\S+)[^ ]+\b/g);
+                    if (list) {
+                        for (i = 0; i < list.length; i++) {
+                            message = message.replace( list[i], "<a target='_blank' href='" + escape( list[i] ) + "'>"+ list[i] + "</a>" );
+                        }
+                    }
                     var now = new Date();
                     var minutes = now.getMinutes().toString();
                     if (minutes.length==1) {minutes = '0'+minutes;}
