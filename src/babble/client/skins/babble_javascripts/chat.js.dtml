@@ -203,8 +203,8 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
         chat_content.empty()
     }
     for (var i=0; i<messages.length; i++) {
-        message = messages[i]
-        var text = message[3].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+        message = messages[i];
+        var text = message[3]; //.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
         var year = message[1].substring(0,4);
         var month = message[1].substring(5,7);
         var day = message[1].substring(8,10);

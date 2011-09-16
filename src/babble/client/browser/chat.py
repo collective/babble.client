@@ -1,3 +1,4 @@
+import cgi
 import logging
 import random
 import socket
@@ -179,7 +180,8 @@ class Chat(BabbleView):
         if not hasattr(member, 'chatpass'):
             return 
 
-        message = utils.urlize(message, blank=True, auto_escape=True) 
+        message = cgi.escape(message)
+        message = utils.urlize(message, blank=True, auto_escape=False) 
         password = getattr(member, 'chatpass') 
         username = member.getId()
         log.debug(u'Chat message from %s sent to %s' % (username, to))
@@ -194,7 +196,6 @@ class Chat(BabbleView):
         if json.loads(resp)['status'] != SUCCESS:
             raise BabbleException('sendMessage from %s to %s failed' \
                                                         % (username, to))
-
         return resp
 
 

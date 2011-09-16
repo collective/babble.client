@@ -5,9 +5,11 @@ Changelog
 
 - Include permissions.zcml from Products.CMFCore and changed setup.py
   dependencies for Plone 4.1 compatibility [jcbrand]
-- Renamed the portal_chat tool, to portal_babblechat [jcbrand]
 - Add GenericSetup xml file, babblechat_tool.xml, to enable configuration of
   the portal_babblechat tool. [jcbrand]
+- Use Zope3 resource registries. [jcbrand]
+- Escape html before sending. [jcbrand]
+- Urlize messages and on the sender's side. [jcbrand]
 
 1.4 (2011-03-18)
 ----------------
@@ -37,13 +39,11 @@ Changelog
 - Send anonymous users to a login_form when they click on contacts in the
   portlet. [jcbrand]
 
-
 1.3.4 (2010-10-18)
 ------------------
 
 - Fixed display of single number seconds if in 0-9 [pilz]
 - Converted message dates from server back to local time [pilz]
-
 
 1.3.3 (2010-10-01)
 ------------------
