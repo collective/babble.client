@@ -33,13 +33,12 @@ var poll_cycle = 10;        // The amount of polls to make in a cycle
 // XXX: These are the DTML variables, which we now hardcode
 var poll_max = 20000;
 var poll_min = 5000;
-var username = "johndoe"
-var base_url = "http://localhost:8050/babble"
+var username = "johndoe";
+var base_url = "http://localhost:8050/babble";
 // XXX: Up until here
 
 var timeout = 2000;
 var poll_interval = poll_min;   // The initial polling period
-
 
 var window_focus = true;
 var chat_focus = new Array();
@@ -47,17 +46,17 @@ var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
 if (!log) {
-var log = {
-    toggle: function() {},
-    move:   function() {},
-    resize: function() {},
-    clear:  function() {},
-    debug:  function() {},
-    info:   function() {},
-    warn:   function() {},
-    error:  function() {},
-    profile: function() {}
-};
+    var log = {
+        toggle: function() {},
+        move:   function() {},
+        resize: function() {},
+        clear:  function() {},
+        debug:  function() {},
+        info:   function() {},
+        warn:   function() {},
+        error:  function() {},
+        profile: function() {}
+    };
 }
 
 function prep4JQ(str) {
@@ -89,18 +88,18 @@ function prep4JQ(str) {
     str = str.replace(/\|/g, '\\|');
     str = str.replace(/\//g, '\\/');
     str = str.replace(/\@/g, '\\@');
-    return str
+    return str;
 }
 
 function getMinimizedChats() {
-var cookie = jQuery.cookie('chats_minimized_'+username);
-if (cookie)
-    return cookie.split(/\|/);
-return Array()
+    var cookie = jQuery.cookie('chats_minimized_'+username);
+    if (cookie)
+        return cookie.split(/\|/);
+    return Array();
 }
 
 function sanitizePath(call) {
-    return base_url + call
+    return base_url + call;
 }
 
 function oc(a) {
@@ -138,7 +137,7 @@ function initialize() {
             }
         }
     }
-    path = sanitizePath('/@@babblechat/initialize')
+    path = sanitizePath('/@@babblechat/initialize');
     jQuery.ajax({
         url: path,
         cache: false,
@@ -159,84 +158,81 @@ function initialize() {
                 return false;
             }
             poll_interval = poll_min;
-            poll_count = 0
+            poll_count = 0;
             poll();
         }
     });
 }
 
 function appendMessages(username, fullname, messages, minimized, clear_and_replace) {
-/* 
-    username: The username of the conversation *partner*
-    fullname: The fullname of the conversation partner
-    minimized: Should the chatbox be minmized?
-    clear_and_replace: Clear and replace all messages that might be in the chatbox (if
-        it exists).
-*/
-messages_found += 1;
-if (!new_chats)
-    new_chats = Array();
+    /* username: The username of the conversation *partner*
+       fullname: The fullname of the conversation partner
+       minimized: Should the chatbox be minmized?
+       clear_and_replace: Clear and replace all messages that might be in the chatbox (if it exists).
+    */
+    messages_found += 1;
+    if (!new_chats)
+        new_chats = Array();
 
-new_chats[username] = true;
-var chat = jQuery('#chatbox_'+prep4JQ(username));
-if (chat.length <= 0) {
-    createChat(username, minimized);
-    // createChat will fetch all uncleared messages (including the new ones
-    // we have here), therefore we can just return here
-    return
-}
-if (chat.css('display') == 'none') {
-    chat.css('display','block');
-    reorderChats();
-}
-var chat_content = chat.find(".chat-content");
-if (clear_and_replace) {
-    chat_content.empty()
-}
-for (var i=0; i<messages.length; i++) {
-    message = messages[i]
-    var text = message[3].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-    var year = message[1].substring(0,4);
-    var month = message[1].substring(5,7);
-    var day = message[1].substring(8,10);
-    var hour = message[2].substring(0,2);
-    var minute = message[2].substring(3,5);
-    var timeob = new Date(new Date(year, month, day, hour, minute) - new Date().getTimezoneOffset() * 60000);
-    var localtime = timeob.toLocaleTimeString().substring(0,5);
-    if (message[0] == username) {
-        message_html = '<div class="chat-message">' + 
-                            '<span class="chat-message-them">'+fullname+' '+localtime+':&nbsp;&nbsp;</span>' + 
-                            '<span class="chat-message-content">'+text+'</span>' + 
-                        '</div>'
+    new_chats[username] = true;
+    var chat = jQuery('#chatbox_'+prep4JQ(username));
+    if (chat.length <= 0) {
+        createChat(username, minimized);
+        // createChat will fetch all uncleared messages (including the new ones
+        // we have here), therefore we can just return here
+        return;
     }
-    else {
-        message_html = '<div class="chat-message">' + 
-                            '<span class="chat-message-me">me '+localtime+':&nbsp;&nbsp;</span>' + 
-                            '<span class="chat-message-content">'+text+'</span>' + 
-                        '</div>'
+    if (chat.css('display') == 'none') {
+        chat.css('display','block');
+        reorderChats();
     }
-    chat_content.append(message_html);
+    var chat_content = chat.find(".chat-content");
+    if (clear_and_replace) {
+        chat_content.empty();
+    }
+    for (var i=0; i<messages.length; i++) {
+        message = messages[i];
+        var text = message[3].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+        var year = message[1].substring(0,4);
+        var month = message[1].substring(5,7);
+        var day = message[1].substring(8,10);
+        var hour = message[2].substring(0,2);
+        var minute = message[2].substring(3,5);
+        var timeob = new Date(new Date(year, month, day, hour, minute) - new Date().getTimezoneOffset() * 60000);
+        var localtime = timeob.toLocaleTimeString().substring(0,5);
+        if (message[0] == username) {
+            message_html = '<div class="chat-message">' + 
+                                '<span class="chat-message-them">'+fullname+' '+localtime+':&nbsp;&nbsp;</span>' + 
+                                '<span class="chat-message-content">'+text+'</span>' + 
+                            '</div>';
+        }
+        else {
+            message_html = '<div class="chat-message">' + 
+                                '<span class="chat-message-me">me '+localtime+':&nbsp;&nbsp;</span>' + 
+                                '<span class="chat-message-content">'+text+'</span>' + 
+                            '</div>';
+        }
+        chat_content.append(message_html);
+    }
+    chat_content.scrollTop(chat_content[0].scrollHeight);
 }
-chat_content.scrollTop(chat_content[0].scrollHeight);
-}
-
 
 function reorderChats() {
-var index = 0;
-for (var i=0; i < chats.length; i++) {
-    title = chats[i];
-    var chatbox =  jQuery("#chatbox_"+prep4JQ(title));
-    if (chatbox.css('display') != 'none') {
-        if (index == 0) {
-            chatbox.css('right', '20px');
-        } 
-        else {
-            width = (index)*(225+7)+20;
-            chatbox.css('right', width+'px');
+    var index = 0;
+    for (var i=0; i < chats.length; i++) {
+        title = chats[i];
+        var chatbox =  jQuery("#chatbox_"+prep4JQ(title));
+        if (chatbox.css('display') != 'none') {
+            if (index === 0) {
+                chatbox.css('right', '20px');
+            } 
+            else {
+                width = (index)*(225+7)+20;
+                chatbox.css('right', width+'px');
+            }
+            index++;
         }
-        index++;
     }
-}
 }
 
 function positionNewChat(chatbox) {
@@ -246,7 +242,7 @@ function positionNewChat(chatbox) {
             num_chats++;
         }
     }
-    if (num_chats == 0) {
+    if (num_chats === 0) {
         chatbox.css('right', '20px');
     } 
     else {
@@ -259,10 +255,9 @@ function closeChat(title) {
     jQuery('#chatbox_'+prep4JQ(title)).css('display','none');
     reorderChats();
     var cookie = jQuery.cookie('chats-open-'+username);
+    var open_chats = Array();
     if (cookie)
-        var open_chats = cookie.split('|');
-    else
-        var open_chats = Array();
+        open_chats = cookie.split('|');
 
     new_chats = Array();
     for (var i=0; i < open_chats.length; i++) {
@@ -339,7 +334,7 @@ function createChat(title, minimize) {
             chatbox.find('.chat-input').css('display','none');
         }
     }
-    handleChatEvents(title)
+    handleChatEvents(title);
     chatbox.show();
     var chat_content = chatbox.find('.chat-content');
     chat_content.scrollTop(chat_content[0].scrollHeight);
@@ -358,7 +353,7 @@ function createChatBox(title) {
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
-            return
+            return;
         },
         success: function(data) {
             jQuery('body').append(data).find('.chat-message .time').each(function (){
@@ -397,116 +392,114 @@ function handleChatEvents(title) {
 }
 
 function poll() {
-/* The way doTimout works, it will execute the code in the callback
+    /* The way doTimout works, it will execute the code in the callback
     * function *after* poll_interval has passed.
     */
-jQuery.doTimeout('message_poll', poll_interval, function(){
-    poll_server();
-    if (messages_found > 0) {
-        // Reset the poll
-        log.info('resetting the poll');
-        messages_found = 0;
-        poll_count = 0;
-        poll_interval = poll_min;
-        poll();
-        return
-    } 
-    poll_count++;
-    if (poll_count >= poll_cycle) { 
-        if (poll_interval < poll_max)
-            poll_interval *= 2;
-            
-        if (poll_interval > poll_max)
-            poll_interval = poll_max;
+    jQuery.doTimeout('message_poll', poll_interval, function(){
+        poll_server();
+        if (messages_found > 0) {
+            // Reset the poll
+            log.info('resetting the poll');
+            messages_found = 0;
+            poll_count = 0;
+            poll_interval = poll_min;
+            poll();
+            return;
+        } 
+        poll_count++;
+        if (poll_count >= poll_cycle) { 
+            if (poll_interval < poll_max)
+                poll_interval *= 2;
+                
+            if (poll_interval > poll_max)
+                poll_interval = poll_max;
 
-        // Reset the poll
-        poll_count = 0;
-        poll();
-        return
-    }
-    return true;
-});
+            // Reset the poll
+            poll_count = 0;
+            poll();
+            return;
+        }
+        return true;
+    });
 }
 
-
 function poll_server() {
-path = sanitizePath('/@@babblechat/poll');
-jQuery.ajax({
-    url: path,
-    cache: false,
-    async: true,
-    timeout: timeout,
-    dataType: "json",
-    data: {username: username}, 
-    error: function (XMLHttpRequest, textStatus, errorThrown) {
-        log.error(textStatus);
-        log.error(errorThrown);
-        // XXX: Don't output 'connection error' to the portlet
-        /*
-        for (var i=0; i<chats.length; i++) {
-            var user = chats[i];
-            content = jQuery("#chatbox_"+prep4JQ(user)+" .chat-content");
-            content.append(
-                '<div class="chat-message">' + 
-                    '<span class="chat-message-error">Connection Error</span>' + 
-                '</div>'
-            );
-            content.scrollTop(content[0].scrollHeight);
-            poll_interval = poll_max; 
-        }
-        */
-    },
-    success: function(data) {
-        if (Number(data.status)  == TIMEOUT) {
-            // When the server times out while fetching messages, we have
-            // to call initialize again, to get all uncleared_messages,
-            // otherwise we might lose some messages that might have been
-            // marked as read by the timed out process!
+    path = sanitizePath('/@@babblechat/poll');
+    jQuery.ajax({
+        url: path,
+        cache: false,
+        async: true,
+        timeout: timeout,
+        dataType: "json",
+        data: {username: username}, 
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            log.error(textStatus);
+            log.error(errorThrown);
+            // XXX: Don't output 'connection error' to the portlet
+            /*
+            for (var i=0; i<chats.length; i++) {
+                var user = chats[i];
+                content = jQuery("#chatbox_"+prep4JQ(user)+" .chat-content");
+                content.append(
+                    '<div class="chat-message">' + 
+                        '<span class="chat-message-error">Connection Error</span>' + 
+                    '</div>'
+                );
+                content.scrollTop(content[0].scrollHeight);
+                poll_interval = poll_max; 
+            }
+            */
+        },
+        success: function(data) {
+            if (Number(data.status)  == TIMEOUT) {
+                // When the server times out while fetching messages, we have
+                // to call initialize again, to get all uncleared_messages,
+                // otherwise we might lose some messages that might have been
+                // marked as read by the timed out process!
 
-            // First, we have to cancel the existing poll, without
-            // executing it's callback
-            jQuery.doTimeout('message_poll');
+                // First, we have to cancel the existing poll, without
+                // executing it's callback
+                jQuery.doTimeout('message_poll');
 
-            // No we start a poll calling getUnclearedMessages
-            // getUnclearedMessages will determine wether this poll will
-            // call again, or whether it will be replaced with the default
-            // message_poll.
-            jQuery.doTimeout('message_recovery_poll', poll_interval, function() {
-                getUnclearedMessages();
-            });
+                // No we start a poll calling getUnclearedMessages
+                // getUnclearedMessages will determine wether this poll will
+                // call again, or whether it will be replaced with the default
+                // message_poll.
+                jQuery.doTimeout('message_recovery_poll', poll_interval, function() {
+                    getUnclearedMessages();
+                });
+            }
+            for (var user in data.messages) {
+                var messages = data.messages[user][1];
+                if (!messages.length) 
+                    continue
+                var fullname = data.messages[user][0];
+                log.info('We received messages for ' + fullname);
+                appendMessages(user, fullname, messages, 0);
+            };
         }
-        for (var user in data.messages) {
-            var messages = data.messages[user][1];
-            if (!messages.length) 
-                continue
-            var fullname = data.messages[user][0];
-            log.info('We received messages for ' + fullname);
-            appendMessages(user, fullname, messages, 0);
-        };
-    }
-});
+    });
 }
 
 
 function getUnclearedMessages() {
-/* 
-    If poll() times out, then we will have to call this method instead to
-    get all uncleared messages, to avoid losing messages that were marked as
-    read during the timed out process. 
-*/
-path = sanitizePath('/@@babblechat/get_uncleared_messages');
-jQuery.ajax({
-    url: path,
-    cache: false,
-    async: true,
-    error: function (XMLHttpRequest, textStatus, errorThrown) {
-        log.error(textStatus);
-        log.error(errorThrown);
-        // This will let doTimout continue, i.e get_uncleared_messages will be called again.
-        return true; 
-    },
-    success: function(data) {
-        if (Number(data.status) == TIMEOUT) {
+    /* If poll() times out, then we will have to call this method instead to
+       get all uncleared messages, to avoid losing messages that were marked as
+       read during the timed out process. 
+    */
+    path = sanitizePath('/@@babblechat/get_uncleared_messages');
+    jQuery.ajax({
+        url: path,
+        cache: false,
+        async: true,
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            log.error(textStatus);
+            log.error(errorThrown);
+            // This will let doTimout continue, i.e get_uncleared_messages will be called again.
+            return true; 
+        },
+        success: function(data) {
+            if (Number(data.status) == TIMEOUT) {
                 // This will let doTimout continue, i.e get_uncleared_messages will be called again.
                 return true; 
             }

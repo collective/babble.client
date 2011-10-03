@@ -1,13 +1,17 @@
 import datetime
-from pytz import utc
+import re
 import simplejson as json
-from OFS.Folder import Folder
-from babble.client import utils
-from babble.client.tests.base import TestCase
-from babble.client import BabbleException
-from babble.server import config 
-from babble.client.interfaces import IBabbleClientLayer
+from pytz import utc
 from zope.interface import alsoProvides
+from OFS.Folder import Folder
+from babble.client import BabbleException
+from babble.client import utils
+from babble.client.interfaces import IBabbleClientLayer
+from babble.client.tests.base import TestCase
+from babble.server import config 
+
+# Regex to test for ISO8601, i.e: '2011-09-30T15:49:35.417693+00:00'
+RE = re.compile(r'^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}\.\d{6}[+-]\d{2}:\d{2}$')
 
 class TestChat(TestCase):
     """ Tests the babble/client/browser/chat.py module
@@ -194,13 +198,23 @@ class TestChat(TestCase):
         messages = resp['messages']
         self.assertEquals(resp['status'], config.SUCCESS)
         self.assertEquals(messages[username2][0], member2.getProperty('fullname', username2))
-        self.assertEquals(messages[username2][1], [hello_message])
+        self.assertEquals(resp['messages'][username2][0], member2.getProperty('fullname', username2))
+        self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
+        self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
+        self.assertEquals(resp['messages'][username2][1][0][2], hello_message[2])
+        self.assertEquals(resp['messages'][username2][1][0][3], hello_message[3])
+        # Check that the last item in the message tuple is an iso8601 timestamp
+        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][4])), True)
 
         # Also test that utils' get_last_conversation returns this message
         messages = utils.get_last_conversation(portal, username2)
-        self.assertEquals(messages.keys(), ['status', 'messages'])
+        self.assertEquals(messages.keys(), ['status', 'timestamp', 'messages'])
         self.assertEquals(messages['status'], config.SUCCESS)
-        self.assertEquals(messages['messages'], {username2: [hello_message]})
+        self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
+        self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
+        self.assertEquals(resp['messages'][username2][1][0][2], hello_message[2])
+        self.assertEquals(resp['messages'][username2][1][0][3], hello_message[3])
+        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][4])), True)
 
         # Now we clear the messages
         resp = traverse('@@babblechat/clear_messages')(username2)
@@ -208,7 +222,7 @@ class TestChat(TestCase):
         self.assertEquals(resp['status'], config.SUCCESS)
 
         messages = utils.get_last_conversation(portal, username2)
-        self.assertEquals(messages, {'status': config.SUCCESS, 'messages':{}})
+        self.assertEquals(messages, {'status': config.SUCCESS, 'timestamp': config.NULL_DATE, 'messages':{}})
 
         resp = json.loads(traverse('@@babblechat/get_uncleared_messages')())
         self.assertEquals(resp['status'], config.SUCCESS)
