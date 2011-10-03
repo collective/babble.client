@@ -134,6 +134,7 @@ class TestChat(TestCase):
         self.assertEquals(resp, None)
         messages = utils.get_last_conversation(portal, username1)
         self.assertEquals(messages['status'], config.AUTH_FAIL)
+        self.assertEquals(messages['timestamp'], config.NULL_DATE)
         self.assertEquals(messages['messages'], {})
 
         # Test methods' response to a user ('portal_owner') who wasn't
@@ -153,6 +154,7 @@ class TestChat(TestCase):
 
         messages = utils.get_last_conversation(portal, username1)
         self.assertEquals(messages['status'], config.SERVER_FAULT)
+        self.assertEquals(messages['timestamp'], config.NULL_DATE)
         self.assertEquals(messages['messages'], {})
         
         # Make sure username2 is registered on the chatserver by calling

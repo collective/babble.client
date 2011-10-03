@@ -173,7 +173,9 @@ def get_last_conversation(context, contact):
     """
     pm = getToolByName(context, 'portal_membership')
     if pm.isAnonymousUser():
-        return {'status': config.AUTH_FAIL, 'messages': {}}
+        return {'status': config.AUTH_FAIL, 
+                'timestamp': config.NULL_DATE, 
+                'messages': {}}
 
     server = getConnection(context)
     member = pm.getAuthenticatedMember()
@@ -183,7 +185,9 @@ def get_last_conversation(context, contact):
     else:
         log.error("get_last_conversation: %s does not have prop 'chatpass'\n"
                   "This should not happen!" % username)
-        return {'status': config.SERVER_FAULT, 'messages': {}}
+        return {'status': config.SERVER_FAULT, 
+                'timestamp': config.NULL_DATE, 
+                'messages': {}}
 
     try:
         #pars: username, sender, read, clear
@@ -192,14 +196,18 @@ def get_last_conversation(context, contact):
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from babble.server: getUnclearedMessages: %s' % err_msg)
-        return {'status': config.SERVER_FAULT, 'messages': {}}
+        return {'status': config.SERVER_FAULT, 
+                'timestamp': config.NULL_DATE, 
+                'messages': {}}
 
     except socket.error, e:
         # Catch timeouts so that we can notify the caller
         log.error(\
             'Socket error from get_last_conversation: ' + \
             'server.getUnclearedMessages: %s \nIs the chatserver running?' %e)
-        return {'status': config.TIMEOUT, 'messages': {}}
+        return {'status': config.TIMEOUT, 
+                'timestamp': config.NULL_DATE, 
+                'messages': {}}
     
     return json.loads(resp)
 
