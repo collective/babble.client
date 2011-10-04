@@ -60,7 +60,7 @@ http://babblechat.org
 TODO:
 -----
 
-- Currently Javascript tests can't run anymore because of DTML,
-  therefore, consider replacing dtml with collective.xrtresource.
+- Remove the DTML variables by getting them from the DOM. Then we can use jUnit
+  for unit testing the js.
 
 

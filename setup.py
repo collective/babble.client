@@ -30,7 +30,7 @@ setup(
     install_requires=[
         'setuptools',
         'simplejson',
-        'babble.server >= 1.0',
+        'babble.server >= 1.0b1dev',
         'Products.CMFPlone',
         'plone.app.portlets',
         'collective.js.blackbird'

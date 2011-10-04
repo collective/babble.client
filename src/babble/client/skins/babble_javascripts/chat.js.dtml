@@ -2,7 +2,6 @@
 GNU General Public License (GPL)
 
 This program is free software; you can redistribute it and/or
-example/dexterity/tests/.svn/text-base/test_integration.py.svn-base:        addform = addview.form_instance
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation; either version 2
 of the License, or (at your option) any later version.
@@ -29,6 +28,11 @@ var messages_found = 0;
 var poll_count = 0;         // The amount of server polls that have been made
 var poll_cycle = 10;        // The amount of polls to make in a cycle
 
+//TODO:
+// We should refactor the DTML statements to rather fetch these variables from
+// the DOM.
+//
+// This will allow us to use jUnit to do unit testing.
 <dtml-let pollmax="portal_chat.poll_max">
 var poll_max = &dtml-pollmax;;  // The maximum polling period
 </dtml-let>
