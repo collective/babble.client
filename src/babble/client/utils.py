@@ -190,9 +190,9 @@ def get_last_conversation(context, contact):
                 'messages': {}}
 
     try:
-        #pars: username, sender, read, clear
+        #pars: username, sender, clear
         resp = server.getUnclearedMessages(
-                            username, password, contact, True, False)
+                            username, password, contact, False)
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from babble.server: getUnclearedMessages: %s' % err_msg)

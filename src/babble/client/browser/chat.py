@@ -69,7 +69,7 @@ class Chat(BabbleView):
         return json.dumps({'status': SUCCESS})
 
 
-    def get_uncleared_messages(self, sender=None, read=True, clear=False):
+    def get_uncleared_messages(self, sender=None, clear=False):
         """ Retrieve the uncleared messages from the chat server 
         """
         pm = getToolByName(self.context, 'portal_membership')
@@ -91,12 +91,11 @@ class Chat(BabbleView):
 
         server = utils.getConnection(self.context)
         try:
-            # passed pars: (username, password, sender, read, clear)
+            # passed pars: (username, password, sender, clear)
             resp = server.getUnclearedMessages(
                                             username, 
                                             password, 
                                             sender, 
-                                            read, 
                                             clear
                                             )
         except xmlrpclib.Fault, e:
@@ -142,7 +141,7 @@ class Chat(BabbleView):
 
         password = getattr(member, 'chatpass') 
         server = utils.getConnection(self.context)
-        # pars: username, password, read
+        # pars: username, password
         try:
             server.confirmAsOnline(username)
             msgs = server.getMessages(username, password, timestamp)
@@ -215,7 +214,6 @@ class Chat(BabbleView):
         """
         return self.get_uncleared_messages(
                                         sender=contact, 
-                                        read=True, 
                                         clear=True
                                         )
 
