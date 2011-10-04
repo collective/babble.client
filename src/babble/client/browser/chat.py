@@ -17,6 +17,7 @@ from babble.client import BabbleException
 from babble.client.config import SUCCESS
 from babble.client.config import TIMEOUT
 from babble.client.config import AUTH_FAIL
+from babble.client.config import NULL_DATE
 
 log = logging.getLogger('babble.client/browser/chat.py')
 
@@ -107,6 +108,7 @@ class Chat(BabbleView):
             log.error('get_uncleared__messages: timeout error for  %s' % username)
             return json.dumps({
                             'status': TIMEOUT, 
+                            'timestamp': NULL_DATE,
                             'messages': {},
                             })
 
@@ -124,11 +126,12 @@ class Chat(BabbleView):
 
         return json.dumps({
                 'status': json_dict['status'], 
+                'timestamp': json_dict['timestamp'],
                 'messages': msg_dict,
                 })
 
 
-    def poll(self, username):
+    def poll(self, username, timestamp):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
@@ -142,17 +145,18 @@ class Chat(BabbleView):
         # pars: username, password, read
         try:
             server.confirmAsOnline(username)
-            msgs = server.getUnreadMessages(username, password, True)
+            msgs = server.getMessages(username, password, timestamp)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('poll: timeout error for  %s' % username)
             return json.dumps({
                             'status': TIMEOUT, 
+                            'timestamp': NULL_DATE,
                             'messages': {},
                             })
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
-            log.error('Error from chat.service: getUnreadMessages: %s' % err_msg)
+            log.error('Error from chat.service: getMessages: %s' % err_msg)
             raise BabbleException(err_msg)
 
         json_dict = json.loads(msgs)
@@ -164,6 +168,7 @@ class Chat(BabbleView):
 
         return json.dumps({
                 'status': json_dict['status'], 
+                'timestamp': json_dict['timestamp'],
                 'messages': msg_dict,
                 })
 
@@ -193,10 +198,14 @@ class Chat(BabbleView):
             log.error('Error from chat.service: sendMessage: %s' % err_msg)
             raise BabbleException(err_msg)
 
-        if json.loads(resp)['status'] != SUCCESS:
+        json_dict = json.loads(resp)
+        if json_dict['status'] != SUCCESS:
             raise BabbleException('sendMessage from %s to %s failed' \
                                                         % (username, to))
-        return resp
+        return json.dumps({
+                'status': json_dict['status'], 
+                'timestamp': json_dict['timestamp'],
+                })
 
 
     def clear_messages(self, contact):
@@ -221,6 +230,10 @@ class ChatBox(BabbleView):
     def render_chat_box(self, box_id, contact):
         """ """
         response = utils.get_last_conversation(self.context, contact)
-        return self.template(messages=response['messages'], box_id=box_id, title=contact)
+        return self.template(
+                        messages=response['messages'], 
+                        timestamp=response['timestamp'],
+                        box_id=box_id, 
+                        title=contact)
 
 

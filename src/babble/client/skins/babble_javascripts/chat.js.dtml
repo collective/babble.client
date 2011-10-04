@@ -53,6 +53,9 @@ var chat_focus = new Array();
 var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
+var global_timestamp = '0001-01-01T00:00:00';
+var sent_since_timestamp = [];
+
 if (!log) {
 var log = {
     toggle: function() {},
@@ -175,13 +178,13 @@ function init() {
 }
 
 function appendMessages(username, fullname, messages, minimized, clear_and_replace) {
-/* 
-    username: The username of the conversation *partner*
-    fullname: The fullname of the conversation partner
-    minimized: Should the chatbox be minmized?
-    clear_and_replace: Clear and replace all messages that might be in the chatbox (if
-        it exists).
-*/
+    /* username: The username of the conversation *partner*
+        fullname: The fullname of the conversation partner
+        minimized: Should the chatbox be minmized?
+        clear_and_replace: Clear and replace all messages that might be in the chatbox (if
+            it exists).
+    */
+
     messages_found += 1;
     if (!new_chats)
         new_chats = Array();
@@ -218,6 +221,9 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
                                 '<span class="chat-message-content">'+text+'</span>' + 
                             '</div>'
         }
+        else if (messages[i][4] in oc(sent_since_timestamp)) {
+            continue
+        } 
         else {
             message_html = '<div class="chat-message">' + 
                                 '<span class="chat-message-me">me '+localtime+':&nbsp;&nbsp;</span>' + 
@@ -378,8 +384,12 @@ function createChatBox(title) {
                 date.setHours(hour - date.getTimezoneOffset() / 60);
                 date.setMinutes(minutes);
                 jthis.replaceWith(date.toLocaleTimeString().substring(0,5));
-            });
-
+            })
+            var timestamp = jQuery('div#chatbox_'+title).attr('timestamp');
+            if ((timestamp != undefined)&&(timestamp > global_timestamp)) {
+                global_timestamp = timestamp;
+                sent_since_timestamp = [];
+            }
         }
     });
     return jQuery('#chatbox_'+prep4JQ(title));
@@ -444,7 +454,7 @@ function poll_server() {
         async: true,
         timeout: timeout,
         dataType: "json",
-        data: {username: username}, 
+        data: {username: username, timestamp: global_timestamp}, 
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error('poll_server: ' + textStatus);
             log.error('poll_server: ' + errorThrown);
@@ -491,6 +501,10 @@ function poll_server() {
                 log.info('We received messages for ' + fullname);
                 appendMessages(user, fullname, messages, 0);
             };
+            if (data.timestamp > global_timestamp)  {
+                global_timestamp = data.timestamp;
+                sent_since_timestamp = [];
+            }
         }
     });
 }
@@ -534,7 +548,7 @@ function getUnclearedMessages() {
     });
 }
 
-function keypressed(event, textarea, title) {
+function keypressed(event, textarea, title, timestamp) {
 	if(event.keyCode == 13 && event.shiftKey == 0) {
         var textbox = jQuery(textarea);
 		var message = textbox.val();
@@ -546,6 +560,7 @@ function keypressed(event, textarea, title) {
                 url: path,
                 cache: false,
                 async: true,
+                dataType: "json",
                 data: {to: title, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     log.error(textStatus);
@@ -561,6 +576,7 @@ function keypressed(event, textarea, title) {
                 },
                 success: function(data) { 
                     log.info("Message succesfully sent. \n");
+                    sent_since_timestamp = sent_since_timestamp.concat([data.timestamp]);
 
                     message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
                     list = message.match(/\b(http:\/\/www\.\S+\.\w+|www\.\S+\.\w+|http:\/\/(?=[^w]){3}\S+[\.:]\S+)[^ ]+\b/g);
