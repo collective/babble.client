@@ -1,8 +1,8 @@
 Changelog
 =========
 
-2.0 (unreleased)
-----------------
+2.0a1 (2011-10-05)
+------------------
 
 - Add more finegrained message timestamps. This fixes the problem where only
   the chatbox in the currently active browser tab was updated. [jcbrand]
