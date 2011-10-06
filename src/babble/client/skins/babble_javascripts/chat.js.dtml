@@ -185,10 +185,8 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
     /* username: The username of the conversation *partner*
         fullname: The fullname of the conversation partner
         minimized: Should the chatbox be minmized?
-        clear_and_replace: Clear and replace all messages that might be in the chatbox (if
-            it exists).
+        clear_and_replace: Clear and replace all messages that might be in the chatbox (if it exists).
     */
-
     messages_found += 1;
     if (!new_chats)
         new_chats = Array();

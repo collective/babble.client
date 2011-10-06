@@ -4,6 +4,7 @@ import random
 import socket
 import xmlrpclib
 import simplejson as json
+from datetime import datetime
 from zope.interface import implements
 
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
@@ -96,6 +97,7 @@ class Chat(BabbleView):
                                             username, 
                                             password, 
                                             sender, 
+                                            datetime.min.isoformat(),
                                             clear
                                             )
         except xmlrpclib.Fault, e:
@@ -144,7 +146,8 @@ class Chat(BabbleView):
         # pars: username, password
         try:
             server.confirmAsOnline(username)
-            msgs = server.getMessages(username, password, timestamp)
+            msgs = server.getUnclearedMessages(username, password, None, timestamp, False)
+            # msgs = server.getMessages(username, password, timestamp)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('poll: timeout error for  %s' % username)
