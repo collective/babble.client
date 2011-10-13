@@ -173,7 +173,7 @@ class Chat(BabbleView):
         json_dict = json.loads(msgs)
         # Add the message sender's fullname to the messages dict and return
         msg_dict = {} 
-        for username, messages  in json_dict['messages'].items(): 
+        for username, messages  in json_dict.get('messages', {}).items(): 
             fullname = self.get_fullname(username)
             msg_dict[username] = (fullname, messages)
 

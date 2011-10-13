@@ -57,7 +57,7 @@ var chat_focus = new Array();
 var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
-var global_received_date = '0001-01-01T00:00:00';
+var global_received_date = '0001-01-01T00:00:00+00:00';
 var sent_since_date = [];
 
 if (!log) {
@@ -209,12 +209,12 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
     }
     for (var i=0; i<messages.length; i++) {
         message = messages[i];
-        var text = message[3]; //.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
-        var year = message[1].substring(0,4);
-        var month = message[1].substring(5,7);
-        var day = message[1].substring(8,10);
-        var hour = message[2].substring(0,2);
-        var minute = message[2].substring(3,5);
+        var text = message[1];
+        var year = message[2].substring(0,4);
+        var month = message[2].substring(5,7);
+        var day = message[2].substring(8,10);
+        var hour = message[2].substring(11,13);
+        var minute = message[2].substring(14,16);
         var timeob = new Date(new Date(year, month, day, hour, minute) - new Date().getTimezoneOffset() * 60000);
         var localtime = timeob.toLocaleTimeString().substring(0,5);
         if (message[0] == username) {
@@ -223,7 +223,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
                                 '<span class="chat-message-content">'+text+'</span>' + 
                             '</div>'
         }
-        else if (messages[i][4] in oc(sent_since_date)) {
+        else if (messages[i][2] in oc(sent_since_date)) {
             continue
         } 
         else {

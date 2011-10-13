@@ -24,19 +24,19 @@
                 tal:condition="python:message[0] == title"
                 class="chat-message-them">
                 <tal:inline tal:replace="fullname" />
-                <span class="time" tal:content="structure python: message[2]" />
+                <span class="time" tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]"/>
                 &nbsp;&nbsp;
             </span>  
             <span 
                 tal:condition="python:message[0] != title"
                 class="chat-message-me">
                 me
-                <span class="time" tal:content="structure python: message[2]" />
+                <span class="time" tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]"/>
                 &nbsp;&nbsp;
             </span>  
 
             <span class="chat-message-content"
-                  tal:content="structure python:view.reverse_escape(message[3])">
+                    tal:content="structure python: message[1]">
             </span>  
         </div>
     </div> 
