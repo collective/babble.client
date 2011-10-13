@@ -6,5 +6,6 @@ TIMEOUT = 1
 SERVER_FAULT = 2
 
 from datetime import datetime
-NULL_DATE = datetime.min.isoformat()
+from pytz import utc
+NULL_DATE = datetime.min.replace(tzinfo=utc).isoformat()
 

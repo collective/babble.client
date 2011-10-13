@@ -1,6 +1,6 @@
 <div class="chatbox"
      tal:attributes="id options/box_id;
-                    timestamp options/timestamp;"
+                    last_msg_date options/last_msg_date;"
      tal:define="title options/title">
 
     <div class="chat-head"> 

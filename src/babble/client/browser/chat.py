@@ -70,7 +70,7 @@ class Chat(BabbleView):
         return json.dumps({'status': SUCCESS})
 
 
-    def get_uncleared_messages(self, sender=None, clear=False):
+    def get_uncleared_messages(self, sender=None, mark_cleared=False, until=None):
         """ Retrieve the uncleared messages from the chat server 
         """
         pm = getToolByName(self.context, 'portal_membership')
@@ -92,24 +92,25 @@ class Chat(BabbleView):
 
         server = utils.getConnection(self.context)
         try:
-            # passed pars: (username, password, sender, clear)
-            resp = server.getUnclearedMessages(
-                                            username, 
-                                            password, 
-                                            sender, 
-                                            datetime.min.isoformat(),
-                                            clear
-                                            )
+            # username, password, sender, since, cleared, mark_cleared
+            resp = server.getMessages(
+                                    username, 
+                                    password, 
+                                    sender, 
+                                    None,
+                                    until,
+                                    False,
+                                    mark_cleared )
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
+            log.error('Error from chat.service: getMessages: %s' % err_msg)
             raise BabbleException(err_msg)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('get_uncleared__messages: timeout error for  %s' % username)
             return json.dumps({
                             'status': TIMEOUT, 
-                            'timestamp': NULL_DATE,
+                            'last_msg_date': NULL_DATE,
                             'messages': {},
                             })
 
@@ -117,7 +118,8 @@ class Chat(BabbleView):
 
         if json_dict['status'] != SUCCESS:
             raise BabbleException(
-                    'getUnclearedMessages for %s failed' % username)
+                        'getMessages for %s failed. %s' \
+                        % (username, json_dict.get('errmsg','')))
 
         # Add the message sender's fullname to the messages dict and return
         msg_dict = {} 
@@ -127,12 +129,12 @@ class Chat(BabbleView):
 
         return json.dumps({
                 'status': json_dict['status'], 
-                'timestamp': json_dict['timestamp'],
+                'last_msg_date': json_dict['last_msg_date'],
                 'messages': msg_dict,
                 })
 
 
-    def poll(self, username, timestamp):
+    def poll(self, username, last_msg_date):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
@@ -146,14 +148,21 @@ class Chat(BabbleView):
         # pars: username, password
         try:
             server.confirmAsOnline(username)
-            msgs = server.getUnclearedMessages(username, password, None, timestamp, False)
-            # msgs = server.getMessages(username, password, timestamp)
+            # username, password, sender, since, cleared, mark_cleared
+            msgs = server.getMessages(
+                                    username, 
+                                    password, 
+                                    None, 
+                                    last_msg_date,
+                                    None,
+                                    False,
+                                    False )
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('poll: timeout error for  %s' % username)
             return json.dumps({
                             'status': TIMEOUT, 
-                            'timestamp': NULL_DATE,
+                            'last_msg_date': NULL_DATE,
                             'messages': {},
                             })
         except xmlrpclib.Fault, e:
@@ -170,7 +179,7 @@ class Chat(BabbleView):
 
         return json.dumps({
                 'status': json_dict['status'], 
-                'timestamp': json_dict['timestamp'],
+                'last_msg_date': json_dict['last_msg_date'],
                 'messages': msg_dict,
                 })
 
@@ -206,18 +215,19 @@ class Chat(BabbleView):
                                                         % (username, to))
         return json.dumps({
                 'status': json_dict['status'], 
-                'timestamp': json_dict['timestamp'],
+                'last_msg_date': json_dict['last_msg_date'],
                 })
 
 
-    def clear_messages(self, contact):
+    def clear_messages(self, contact, until):
         """ Mark the messages in a chat contact's messagebox as cleared.
             This means that they won't be loaded and displayed again next time
             that chat box is opened.
         """
         return self.get_uncleared_messages(
                                         sender=contact, 
-                                        clear=True
+                                        mark_cleared=True,
+                                        until=until
                                         )
 
 class ChatBox(BabbleView):
@@ -233,7 +243,7 @@ class ChatBox(BabbleView):
         response = utils.get_last_conversation(self.context, contact)
         return self.template(
                         messages=response['messages'], 
-                        timestamp=response['timestamp'],
+                        last_msg_date=response['last_msg_date'],
                         box_id=box_id, 
                         title=contact)
 

@@ -58,11 +58,9 @@ class TestChat(TestCase):
         self.assertEquals(online_members, [])
 
         self.logout()
-        member = self.mtool.getAuthenticatedMember()
-        username = member.getId()
         server = utils.getConnection(self.portal)
-        resp = json.loads(server.confirmAsOnline(username))
-        self.assertEquals(resp['status'], config.AUTH_FAIL)
+        resp = json.loads(server.confirmAsOnline(None))
+        self.assertEquals(resp['status'], config.ERROR)
 
         self.login(name=username1)
 
@@ -130,12 +128,10 @@ class TestChat(TestCase):
         self.assertEquals(resp, None)
         resp = traverse('@@babblechat/send_message')(username1, 'message')
         self.assertEquals(resp, None)
-        resp = traverse('@@babblechat/clear_messages')(username1)
+        resp = traverse('@@babblechat/clear_messages')(username1, None)
         self.assertEquals(resp, None)
         messages = utils.get_last_conversation(portal, username1)
         self.assertEquals(messages['status'], config.AUTH_FAIL)
-        self.assertEquals(messages['timestamp'], config.NULL_DATE)
-        self.assertEquals(messages['messages'], {})
 
         # Test methods' response to a user ('portal_owner') who wasn't
         # initialized
@@ -149,13 +145,11 @@ class TestChat(TestCase):
         self.assertEquals(resp, None)
 
         method = traverse('@@babblechat/clear_messages')
-        pars = [username1]
+        pars = [username1, None]
         self.assertRaises(AttributeError, method, *pars)
 
         messages = utils.get_last_conversation(portal, username1)
-        self.assertEquals(messages['status'], config.SERVER_FAULT)
-        self.assertEquals(messages['timestamp'], config.NULL_DATE)
-        self.assertEquals(messages['messages'], {})
+        self.assertEquals(messages['status'], config.ERROR)
         
         # Make sure username2 is registered on the chatserver by calling
         # initialize
@@ -170,31 +164,28 @@ class TestChat(TestCase):
         resp = traverse('@@babblechat/send_message')(username1, 'hello')
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
-        self.assertEqual(bool(RE.search(resp['timestamp'])), True)
-        message_timestamp = resp['timestamp']
+        self.assertEqual(bool(RE.search(resp['last_msg_date'])), True)
+        message_timestamp = resp['last_msg_date']
 
         # Poll for username1 and see if we got our message
         self.login(name=username1)
         resp = traverse('@@babblechat/poll')(username1, config.NULL_DATE)
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
-        self.assertEquals(resp['timestamp'], message_timestamp)
+        self.assertEquals(resp['last_msg_date'], message_timestamp)
 
         # Check that a message was received from username2
         self.assertEquals(resp['messages'].keys(), [username2])
 
         # Check the message format
-        date = datetime.date.today().strftime("%Y/%m/%d")
-        hello_message = [username2, date, timeminutes, 'hello']
+        hello_message = [username2, 'hello', 'dummydate']
         member2 = self.mtool.getMemberById(username2)
         self.assertEquals(resp['messages'][username2][0], member2.getProperty('fullname', username2))
         self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
         self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
-        self.assertEquals(resp['messages'][username2][1][0][2], hello_message[2])
-        self.assertEquals(resp['messages'][username2][1][0][3], hello_message[3])
         # Check that the last item in the message tuple is an iso8601 timestamp
-        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][4])), True)
-        self.assertEqual(resp['messages'][username2][1][0][4], message_timestamp)
+        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][2])), True)
+        self.assertEqual(resp['messages'][username2][1][0][2], message_timestamp)
 
         # Check that the next poll (with new timestamp) returns no new messages
         resp = traverse('@@babblechat/poll')(username1, message_timestamp)
@@ -212,30 +203,26 @@ class TestChat(TestCase):
         self.assertEquals(resp['messages'][username2][0], member2.getProperty('fullname', username2))
         self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
         self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
-        self.assertEquals(resp['messages'][username2][1][0][2], hello_message[2])
-        self.assertEquals(resp['messages'][username2][1][0][3], hello_message[3])
         # Check that the last item in the message tuple is an iso8601 timestamp
-        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][4])), True)
-        self.assertEqual(resp['messages'][username2][1][0][4], message_timestamp)
+        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][2])), True)
+        self.assertEqual(resp['messages'][username2][1][0][2], message_timestamp)
 
         # Also test that utils' get_last_conversation returns this message
         messages = utils.get_last_conversation(portal, username2)
-        self.assertEquals(messages.keys(), ['status', 'timestamp', 'messages'])
+        self.assertEquals(messages.keys(), ['status', 'messages', 'last_msg_date'])
         self.assertEquals(messages['status'], config.SUCCESS)
         self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
         self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
-        self.assertEquals(resp['messages'][username2][1][0][2], hello_message[2])
-        self.assertEquals(resp['messages'][username2][1][0][3], hello_message[3])
-        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][4])), True)
-        self.assertEqual(resp['messages'][username2][1][0][4], message_timestamp)
+        self.assertEqual(bool(RE.search(resp['messages'][username2][1][0][2])), True)
+        self.assertEqual(resp['messages'][username2][1][0][2], message_timestamp)
 
         # Now we clear the messages
-        resp = traverse('@@babblechat/clear_messages')(username2)
+        resp = traverse('@@babblechat/clear_messages')(username2, None)
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
 
         messages = utils.get_last_conversation(portal, username2)
-        self.assertEquals(messages, {'status': config.SUCCESS, 'timestamp': config.NULL_DATE, 'messages':{}})
+        self.assertEquals(messages, {'status': config.SUCCESS, 'last_msg_date': config.NULL_DATE, 'messages':{}})
 
         resp = json.loads(traverse('@@babblechat/get_uncleared_messages')())
         self.assertEquals(resp['status'], config.SUCCESS)
@@ -254,7 +241,7 @@ class TestChat(TestCase):
         self.assertRaises(BabbleException, method, *pars)
 
         method = traverse('@@babblechat/clear_messages')
-        pars = [username2]
+        pars = [username2, None]
         self.assertRaises(BabbleException, method, *pars)
 
         method = traverse('@@babblechat/get_uncleared_messages')

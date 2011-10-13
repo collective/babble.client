@@ -57,8 +57,8 @@ var chat_focus = new Array();
 var new_chats = new Array();
 var chats = new Array();    // Records new chat windows being opened. 
 
-var global_timestamp = '0001-01-01T00:00:00';
-var sent_since_timestamp = [];
+var global_received_date = '0001-01-01T00:00:00';
+var sent_since_date = [];
 
 if (!log) {
 var log = {
@@ -223,7 +223,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
                                 '<span class="chat-message-content">'+text+'</span>' + 
                             '</div>'
         }
-        else if (messages[i][4] in oc(sent_since_timestamp)) {
+        else if (messages[i][4] in oc(sent_since_date)) {
             continue
         } 
         else {
@@ -297,7 +297,7 @@ function closeChat(title) {
     jQuery.ajax({
         url: path,
         cache: false,
-        data: {contact: title},
+        data: {contact: title, until: global_received_date },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
@@ -387,10 +387,10 @@ function createChatBox(title) {
                 date.setMinutes(minutes);
                 jthis.replaceWith(date.toLocaleTimeString().substring(0,5));
             })
-            var timestamp = jQuery('div#chatbox_'+title).attr('timestamp');
-            if ((timestamp != undefined)&&(timestamp > global_timestamp)) {
-                global_timestamp = timestamp;
-                sent_since_timestamp = [];
+            var last_msg_date = jQuery('div#chatbox_'+title).attr('last_msg_date');
+            if ((last_msg_date != undefined)&&(last_msg_date > global_received_date)) {
+                global_received_date = last_msg_date;
+                sent_since_date = [];
             }
         }
     });
@@ -456,7 +456,7 @@ function poll_server() {
         async: true,
         timeout: timeout,
         dataType: "json",
-        data: {username: username, timestamp: global_timestamp}, 
+        data: {username: username, last_msg_date: global_received_date}, 
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error('poll_server: ' + textStatus);
             log.error('poll_server: ' + errorThrown);
@@ -503,9 +503,9 @@ function poll_server() {
                 log.info('We received messages for ' + fullname);
                 appendMessages(user, fullname, messages, 0);
             };
-            if (data.timestamp > global_timestamp)  {
-                global_timestamp = data.timestamp;
-                sent_since_timestamp = [];
+            if (data.last_msg_date > global_received_date)  {
+                global_received_date = data.last_msg_date;
+                sent_since_date = [];
             }
         }
     });
@@ -550,7 +550,7 @@ function getUnclearedMessages() {
     });
 }
 
-function keypressed(event, textarea, title, timestamp) {
+function keypressed(event, textarea, title, last_msg_date) {
 	if(event.keyCode == 13 && event.shiftKey == 0) {
         var textbox = jQuery(textarea);
 		var message = textbox.val();
@@ -578,7 +578,7 @@ function keypressed(event, textarea, title, timestamp) {
                 },
                 success: function(data) { 
                     log.info("Message succesfully sent. \n");
-                    sent_since_timestamp = sent_since_timestamp.concat([data.timestamp]);
+                    sent_since_date = sent_since_date.concat([data.last_msg_date]);
 
                     message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
                     list = message.match(/\b(http:\/\/www\.\S+\.\w+|www\.\S+\.\w+|http:\/\/(?=[^w]){3}\S+[\.:]\S+)[^ ]+\b/g);
