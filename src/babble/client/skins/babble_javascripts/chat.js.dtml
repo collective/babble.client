@@ -187,6 +187,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
         minimized: Should the chatbox be minmized?
         clear_and_replace: Clear and replace all messages that might be in the chatbox (if it exists).
     */
+    log.info('appendMessages: username is ' + username)
     messages_found += 1;
     if (!new_chats)
         new_chats = Array();
@@ -208,6 +209,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
         chat_content.empty()
     }
     for (var i=0; i<messages.length; i++) {
+        //  XXX: Need to put in the full date if more than a day ago...
         message = messages[i];
         var text = message[1];
         var year = message[2].substring(0,4);
@@ -320,7 +322,9 @@ function startChat(contact) {
 }
 
 function createChat(title, minimize) {
+    log.info('createChat: title is ' + title)
     var cookie = jQuery.cookie('chats-open-'+username);
+    log.info('createChat: cookie is ' + cookie)
     if (cookie)
         var open_chats = cookie.split('|');
     else
