@@ -1,3 +1,4 @@
+# coding: UTF-8
 import datetime
 import re
 import simplejson as json
@@ -180,7 +181,7 @@ class TestChat(TestCase):
         # Check the message format
         hello_message = [username2, 'hello', 'dummydate']
         member2 = self.mtool.getMemberById(username2)
-        self.assertEquals(resp['messages'][username2][0], member2.getProperty('fullname', username2))
+        self.assertEquals(resp['messages'][username2][0], member2.getProperty('fullname', username2).decode('utf-8'))
         self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
         self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
         # Check that the last item in the message tuple is an iso8601 timestamp
@@ -199,8 +200,8 @@ class TestChat(TestCase):
         resp = json.loads(resp)
         messages = resp['messages']
         self.assertEquals(resp['status'], config.SUCCESS)
-        self.assertEquals(messages[username2][0], member2.getProperty('fullname', username2))
-        self.assertEquals(resp['messages'][username2][0], member2.getProperty('fullname', username2))
+        self.assertEquals(messages[username2][0], member2.getProperty('fullname', username2).decode('utf-8'))
+        self.assertEquals(resp['messages'][username2][0], member2.getProperty('fullname', username2).decode('utf-8'))
         self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
         self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
         # Check that the last item in the message tuple is an iso8601 timestamp
@@ -331,6 +332,8 @@ class TestEmailLoginChat(TestChat):
         self.create_user('member2', 'secret')
         self.create_user('member3@example.com', 'secret')
         self.create_user('member4@example.com', 'secret')
+        self.create_user(u'roché', 'secret')
+        self.create_user(u'störtebeker', 'secret')
         # Merely registering babble.client's browserlayer doesn't set it on the
         # request. This happens during IBeforeTraverseEvent, so we have to do 
         # it here manually
@@ -345,6 +348,16 @@ class TestEmailLoginChat(TestChat):
         """ Same as test_messaging but with email usernames 
         """
         self._test_messaging('member3@example.com', 'member4@example.com')
+
+    def test_online_users_with_non_ascii_usernames(self):
+        """ Same as test_messaging but with email usernames 
+        """
+        self._test_messaging(u'roché', u'störtebeker')
+
+    def test_messaging_with_non_ascii_usernames(self):
+        """ Same as test_messaging but with email usernames 
+        """
+        self._test_messaging(u'roché', u'störtebeker')
 
 
 def test_suite():
