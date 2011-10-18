@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '2.0a3'
+version = '2.0a4dev'
 
 tests_require=[]
 
@@ -30,7 +30,7 @@ setup(
     install_requires=[
         'setuptools',
         'simplejson',
-        'babble.server >= 1.0b2',
+        'babble.server >= 1.0b3',
         'Products.CMFPlone',
         'plone.app.portlets',
         'collective.js.blackbird'
