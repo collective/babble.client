@@ -191,19 +191,17 @@ def get_last_conversation(context, contact):
                 'messages': {}}
 
     try:
-        # username, password, sender, since, cleared, mark_cleared
-        resp = server.getMessages(
+        # self, username, password, partner, chatrooms, clear
+        resp = server.getUnclearedMessages(
                                 username, 
                                 password, 
                                 contact, 
-                                None,
-                                None,
-                                False,
-                                False)
+                                [],
+                                False, )
 
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
-        log.error('Error from babble.server: getMessages: %s' % err_msg)
+        log.error('Error from babble.server: getUnclearedMessages: %s' % err_msg)
         return {'status': config.SERVER_FAULT, 
                 'last_msg_date': config.NULL_DATE, 
                 'messages': {}}
@@ -212,7 +210,7 @@ def get_last_conversation(context, contact):
         # Catch timeouts so that we can notify the caller
         log.error(\
             'Socket error from get_last_conversation: ' + \
-            'server.getMessages: %s \nIs the chatserver running?' %e)
+            'server.getUnclearedMessages: %s \nIs the chatserver running?' %e)
         return {'status': config.TIMEOUT, 
                 'last_msg_date': config.NULL_DATE, 
                 'messages': {}}

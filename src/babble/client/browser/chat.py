@@ -92,18 +92,16 @@ class Chat(BabbleView):
 
         server = utils.getConnection(self.context)
         try:
-            # username, password, sender, since, cleared, mark_cleared
-            resp = server.getMessages(
+            # self, username, password, partner, chatrooms, clear
+            resp = server.getUnclearedMessages(
                                     username, 
                                     password, 
                                     sender, 
-                                    None,
-                                    until,
-                                    False,
+                                    [],
                                     mark_cleared )
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: getMessages: %s' % err_msg)
+            log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
             raise BabbleException(err_msg)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
@@ -118,7 +116,7 @@ class Chat(BabbleView):
 
         if json_dict['status'] != SUCCESS:
             raise BabbleException(
-                        'getMessages for %s failed. %s' \
+                        'getUnclearedMessages for %s failed. %s' \
                         % (username, json_dict.get('errmsg','')))
 
         # Add the message sender's fullname to the messages dict and return
@@ -134,7 +132,7 @@ class Chat(BabbleView):
                 })
 
 
-    def poll(self, username, last_msg_date):
+    def poll(self, username, last_msg_date, chatrooms=[]):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
@@ -148,15 +146,9 @@ class Chat(BabbleView):
         # pars: username, password
         try:
             server.confirmAsOnline(username)
-            # username, password, sender, since, cleared, mark_cleared
-            msgs = server.getMessages(
-                                    username, 
-                                    password, 
-                                    None, 
-                                    last_msg_date,
-                                    None,
-                                    False,
-                                    False )
+            # def getNewMessages(self, username, password, partner, chatrooms)
+            msgs = server.getNewMessages(username, password, None, chatrooms)
+            
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('poll: timeout error for  %s' % username)
@@ -167,7 +159,7 @@ class Chat(BabbleView):
                             })
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
-            log.error('Error from chat.service: getMessages: %s' % err_msg)
+            log.error('Error from chat.service: getNewMessages: %s' % err_msg)
             raise BabbleException(err_msg)
 
         json_dict = json.loads(msgs)

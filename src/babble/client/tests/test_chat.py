@@ -210,7 +210,7 @@ class TestChat(TestCase):
 
         # Also test that utils' get_last_conversation returns this message
         messages = utils.get_last_conversation(portal, username2)
-        self.assertEquals(messages.keys(), ['status', 'messages', 'last_msg_date'])
+        self.assertEquals(messages.keys(), ['status', 'messages', 'last_msg_date', 'chatroom_messages'])
         self.assertEquals(messages['status'], config.SUCCESS)
         self.assertEquals(resp['messages'][username2][1][0][0], hello_message[0])
         self.assertEquals(resp['messages'][username2][1][0][1], hello_message[1])
@@ -223,7 +223,9 @@ class TestChat(TestCase):
         self.assertEquals(resp['status'], config.SUCCESS)
 
         messages = utils.get_last_conversation(portal, username2)
-        self.assertEquals(messages, {'status': config.SUCCESS, 'last_msg_date': config.NULL_DATE, 'messages':{}})
+
+        check = {'status': config.SUCCESS, 'last_msg_date': config.NULL_DATE, 'messages':{}, 'chatroom_messages': {}}
+        self.assertEquals(messages, check)
 
         resp = json.loads(traverse('@@babblechat/get_uncleared_messages')())
         self.assertEquals(resp['status'], config.SUCCESS)
