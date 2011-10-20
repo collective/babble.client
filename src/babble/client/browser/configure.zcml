@@ -5,6 +5,12 @@
     i18n_domain="babble.client">
 
     <browser:resourceDirectory
+        name="babble.client.images"
+        directory="images"
+        layer="babble.client.interfaces.IBabbleClientLayer"
+        />
+        
+    <browser:resourceDirectory
         name="babble.client.thirdparty"
         directory="thirdparty"
         layer="babble.client.interfaces.IBabbleClientLayer"
@@ -39,5 +45,13 @@
         permission="zope2.View"
         layer="babble.client.interfaces.IBabbleClientLayer"
         /> 
+
+    <browser:page
+        name="sharing"
+        for="babble.client.chatroom.IChatRoom"
+        class=".sharing.SharingView"
+        permission="plone.DelegateRoles"
+        layer="babble.client.interfaces.IBabbleClientLayer"
+        />
 
 </configure>

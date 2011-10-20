@@ -4,9 +4,12 @@
     xmlns:cmf="http://namespaces.zope.org/cmf"
     xmlns:five="http://namespaces.zope.org/five"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:grok="http://namespaces.zope.org/grok"
     xmlns:plone="http://namespaces.plone.org/plone"
     xmlns:zcml="http://namespaces.zope.org/zcml"
     i18n_domain="babble.client">
+
+    <grok:grok package="." />
 
     <include package="Products.CMFCore" file="permissions.zcml"
             xmlns:zcml="http://namespaces.zope.org/zcml"
@@ -40,5 +43,8 @@
         name="test_chat.js"
         file="tests/test_chat.js"
         />
+        
+    <subscriber handler=".chatroom.handleChatRoomAdded" />
+    <subscriber handler=".chatroom.handleChatRoomLocalRolesModified" />
 
 </configure>

@@ -5,7 +5,6 @@ import string
 import logging
 import simplejson as json
 import xmlrpclib
-from datetime import datetime
 from socket import error as socket_error
 from Products.CMFCore.utils import getToolByName
 
@@ -217,4 +216,14 @@ def get_last_conversation(context, contact):
     
     return json.loads(resp)
 
+
+def get_chat_rooms(context):
+    """ """
+    mtool = getToolByName(context, 'portal_membership')
+    member = mtool.getAuthenticatedMember()
+    catalog = getToolByName(context, 'portal_catalog')
+    return catalog(
+                portal_type='babble.client.chatroom',
+                allowedRolesAndUsers=member.getId())
     	
+

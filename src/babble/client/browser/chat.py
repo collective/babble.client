@@ -147,7 +147,7 @@ class Chat(BabbleView):
         try:
             server.confirmAsOnline(username)
             # def getNewMessages(self, username, password, partner, chatrooms)
-            msgs = server.getNewMessages(username, password, None, chatrooms)
+            msgs = server.getNewMessages(username, password, '*', chatrooms)
             
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
@@ -230,13 +230,14 @@ class ChatBox(BabbleView):
     def reverse_escape(self, html):
         return utils.reverse_escape(html)
 
-    def render_chat_box(self, box_id, contact):
+    def render_chat_box(self, box_id, contact, title):
         """ """
         response = utils.get_last_conversation(self.context, contact)
         return self.template(
                         messages=response['messages'], 
                         last_msg_date=response['last_msg_date'],
                         box_id=box_id, 
-                        title=contact)
+                        name=contact,
+                        title=title,)
 
 

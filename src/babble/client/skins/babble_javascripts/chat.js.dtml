@@ -181,7 +181,7 @@ function init() {
     });
 }
 
-function appendMessages(username, fullname, messages, minimized, clear_and_replace) {
+function appendMessages(username, fullname, messages, minimized, clear_and_replace, prefix) {
     /* username: The username of the conversation *partner*
         fullname: The fullname of the conversation partner
         minimized: Should the chatbox be minmized?
@@ -193,7 +193,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
         new_chats = Array();
 
     new_chats[username] = true;
-    var chat = jQuery('#chatbox_'+prep4JQ(username));
+    var chat = jQuery('#'+prefix+'_'+prep4JQ(username));
     if (chat.length <= 0) {
         createChat(username, minimized);
         // createChat will fetch all uncleared messages (including the new ones
@@ -202,7 +202,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
     }
     if (chat.css('display') == 'none') {
         chat.css('display','block');
-        reorderChats();
+        reorderChats(prefix);
     }
     var chat_content = chat.find(".chat-content");
     if (clear_and_replace) {
@@ -239,11 +239,11 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
     chat_content.scrollTop(chat_content[0].scrollHeight);
 }
 
-function reorderChats() {
+function reorderChats(prefix) {
     var index = 0;
     for (var i=0; i < chats.length; i++) {
         title = chats[i];
-        var chatbox =  jQuery("#chatbox_"+prep4JQ(title));
+        var chatbox =  jQuery("#"+prefix+"_"+prep4JQ(title));
         if (chatbox.css('display') != 'none') {
             if (index == 0) {
                 chatbox.css('right', '20px');
@@ -257,10 +257,10 @@ function reorderChats() {
     }
 }
 
-function positionNewChat(chatbox) {
+function positionNewChat(chatbox, prefix) {
     var num_chats = 0;
     for (var i=0; i<chats.length; i++) {
-        if (jQuery("#chatbox_"+prep4JQ(chats[i])).css('display') != 'none') {
+        if (jQuery("#"+prefix+"_"+prep4JQ(chats[i])).css('display') != 'none') {
             num_chats++;
         }
     }
@@ -273,9 +273,9 @@ function positionNewChat(chatbox) {
     }
 }
 
-function closeChat(title) {
-    jQuery('#chatbox_'+prep4JQ(title)).css('display','none');
-    reorderChats();
+function closeChat(title, prefix) {
+    jQuery('#'+prefix+'_'+prep4JQ(title)).css('display','none');
+    reorderChats(prefix);
     var cookie = jQuery.cookie('chats-open-'+username);
     if (cookie)
         var open_chats = cookie.split('|');
@@ -310,19 +310,8 @@ function closeChat(title) {
     });
 }
 
-function startChat(contact) {
-    createChat(contact);
-    jQuery("#chatbox_"+prep4JQ(contact)+" .chat-textarea").focus();
-
-    // Reset the polling
-    messages_found = 0;
-    poll_count = 0;
-    poll_interval = poll_min;
-    poll();
-}
-
-function createChat(title, minimize) {
-    log.info('createChat: title is ' + title)
+function createChat(name, title, minimize, prefix) {
+    log.info('createChat: name is ' + name)
     var cookie = jQuery.cookie('chats-open-'+username);
     log.info('createChat: cookie is ' + cookie)
     if (cookie)
@@ -330,50 +319,61 @@ function createChat(title, minimize) {
     else
         var open_chats = Array();
 
-    if (!(title in oc(open_chats))) {
+    if (!(name in oc(open_chats))) {
         // Update the cookie if this new chat is not yet in it.
-        open_chats.push(title);
+        open_chats.push(name);
         var new_cookie = open_chats.join('|');
         jQuery.cookie('chats-open-'+username, new_cookie, {path: '/'});
         log.info('createChat: updated cookie = ' + new_cookie + '\n');
     }
 
-    var chatbox = jQuery("#chatbox_"+prep4JQ(title));
+    var chatbox = jQuery("#"+prefix+"_"+prep4JQ(name));
     if (chatbox.length > 0) {
         // The chatbox exists, merely hidden
         if (chatbox.css('display') == 'none') {
             chatbox.css('display','block');
-            reorderChats();
+            reorderChats(prefix);
         }
         chatbox.find(".chat-textarea").focus();
         return;
     }
-    chatbox = createChatBox(title);
-    positionNewChat(chatbox);
-    chats.push(title);
+    chatbox = createChatBox(name, title, prefix);
+    positionNewChat(chatbox, prefix);
+    chats.push(name);
     if (minimize == 1) {
         // Minimize the chat if it's in the minimized_chats cookie
         var minimized_chats = getMinimizedChats();
-        if (title in oc(minimized_chats)) {
+        if (name in oc(minimized_chats)) {
             chatbox.find('.chat-content').css('display','none');
             chatbox.find('.chat-input').css('display','none');
         }
     }
-    handleChatEvents(title)
+    handleChatEvents(name, prefix)
     chatbox.show();
     var chat_content = chatbox.find('.chat-content');
     chat_content.scrollTop(chat_content[0].scrollHeight);
 }
 
-function createChatBox(title) {
+function startChat(id, title, prefix) {
+    createChat(id, title, prefix);
+    jQuery("#"+prefix+"_"+prep4JQ(id)+" .chat-textarea").focus();
+    // Reset the polling
+    messages_found = 0;
+    poll_count = 0;
+    poll_interval = poll_min;
+    poll();
+}
+
+function createChatBox(name, title, prefix) {
     path = sanitizePath('/@@render_chat_box');
     jQuery.ajax({
         url: path,
         cache: false,
         async: false,
         data: {
-            box_id: "chatbox_"+title,
-            contact: title
+            box_id: prefix+"_"+name,
+            contact: name,
+            title: title,
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
@@ -391,19 +391,19 @@ function createChatBox(title) {
                 date.setMinutes(minutes);
                 jthis.replaceWith(date.toLocaleTimeString().substring(0,5));
             })
-            var last_msg_date = jQuery('div#chatbox_'+title).attr('last_msg_date');
+            var last_msg_date = jQuery('div#'+prefix+'_'+name).attr('last_msg_date');
             if ((last_msg_date != undefined)&&(last_msg_date > global_received_date)) {
                 global_received_date = last_msg_date;
                 sent_since_date = [];
             }
         }
     });
-    return jQuery('#chatbox_'+prep4JQ(title));
+    return jQuery('#'+prefix+'_'+prep4JQ(name));
 }
 
-function handleChatEvents(title) {
+function handleChatEvents(title, prefix) {
     chat_focus[title] = false;
-    var chat_area = jQuery("#chatbox_"+prep4JQ(title)+" .chat-textarea");
+    var chat_area = jQuery("#"+prefix+"_"+prep4JQ(title)+" .chat-textarea");
     chat_area.blur(function(){
         chat_focus[title] = false;
         chat_area.removeClass('chat-textarea-selected');
@@ -412,7 +412,7 @@ function handleChatEvents(title) {
         chat_area.addClass('chat-textarea-selected');
     });
 
-    var chatbox = jQuery("#chatbox_"+prep4JQ(title));
+    var chatbox = jQuery("#"+prefix+"_"+prep4JQ(title));
     chatbox.click(function() {
         if (chatbox.find('.chat-content').css('display') != 'none') {
             chatbox.find('.chat-textarea').focus();
@@ -464,20 +464,6 @@ function poll_server() {
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error('poll_server: ' + textStatus);
             log.error('poll_server: ' + errorThrown);
-            // XXX: Don't output 'connection error' to the portlet
-            /*
-            for (var i=0; i<chats.length; i++) {
-                var user = chats[i];
-                content = jQuery("#chatbox_"+prep4JQ(user)+" .chat-content");
-                content.append(
-                    '<div class="chat-message">' + 
-                        '<span class="chat-message-error">Connection Error</span>' + 
-                    '</div>'
-                );
-                content.scrollTop(content[0].scrollHeight);
-                poll_interval = poll_max; 
-            }
-            */
         },
         success: function(data) {
             if (Number(data.status)  == TIMEOUT) {
@@ -504,8 +490,16 @@ function poll_server() {
                 if (!messages.length) 
                     continue
                 var fullname = data.messages[user][0];
-                log.info('We received messages for ' + fullname);
-                appendMessages(user, fullname, messages, 0);
+                log.info('We received messages for user: ' + fullname);
+                appendMessages(user, fullname, messages, 0, 'chatbox');
+            };
+            for (var user in data.chatroom_messages) {
+                var chatroom_messages = data.chatroom_messages[user][1];
+                if (!messages.length) 
+                    continue
+                var title = data.chatroom_messages[user][0];
+                log.info('We received messages for chatroom: ' + title);
+                appendMessages(user, fullname, chatroom_messages, 0, 'chatroom');
             };
             if (data.last_msg_date > global_received_date)  {
                 global_received_date = data.last_msg_date;
@@ -554,7 +548,7 @@ function getUnclearedMessages() {
     });
 }
 
-function keypressed(event, textarea, title, last_msg_date) {
+function keypressed(event, textarea, title, last_msg_date, prefix) {
 	if(event.keyCode == 13 && event.shiftKey == 0) {
         var textbox = jQuery(textarea);
 		var message = textbox.val();
@@ -573,7 +567,7 @@ function keypressed(event, textarea, title, last_msg_date) {
                     if (errorThrown)
                         log.error(errorThrown)
 
-                    var chat_content = jQuery('#chatbox_'+prep4JQ(title)+' .chat-content');
+                    var chat_content = jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content');
                     chat_content.append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-error">Connection Error</span>' + 
@@ -595,7 +589,7 @@ function keypressed(event, textarea, title, last_msg_date) {
                     var minutes = now.getMinutes().toString();
                     if (minutes.length==1) {minutes = '0'+minutes;}
                     var time = now.toLocaleTimeString().substring(0,5);
-                    var chat_content = jQuery('#chatbox_'+prep4JQ(title)+' .chat-content');
+                    var chat_content = jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content');
                     chat_content.append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-me">me '+time+':&nbsp;&nbsp;</span>' + 
@@ -625,9 +619,9 @@ function keypressed(event, textarea, title, last_msg_date) {
 	}
 }
 
-function toggleChat(title) {
+function toggleChat(title, prefix) {
     var minimized_chats = getMinimizedChats();
-    if (jQuery('#chatbox_'+prep4JQ(title)+' .chat-content').css('display') == 'none') {  
+    if (jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content').css('display') == 'none') {  
         // Chat will be maximized
         var new_cookie = Array();
         for (var i=0; i < minimized_chats.length; i++) {
@@ -636,10 +630,10 @@ function toggleChat(title) {
             }
         }
         jQuery.cookie('chats_minimized_'+username, new_cookie.join('|'));
-        var chat_content = jQuery('#chatbox_'+prep4JQ(title)+' .chat-content');
+        var chat_content = jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content');
         chat_content.css('display','block');
         chat_content.scrollTop(chat_content[0].scrollHeight);
-        jQuery('#chatbox_'+prep4JQ(title)+' .chat-input').css('display','block');
+        jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-input').css('display','block');
     } 
     else {
         // Chat will be minimized
@@ -648,8 +642,8 @@ function toggleChat(title) {
             new_cookie += '|'+minimized_chats.join('|');
             jQuery.cookie('chats_minimized_'+username, new_cookie);
         }
-        jQuery('#chatbox_'+prep4JQ(title)+' .chat-content').css('display','none');
-        jQuery('#chatbox_'+prep4JQ(title)+' .chat-input').css('display','none');
+        jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content').css('display','none');
+        jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-input').css('display','none');
     }
 }
 
