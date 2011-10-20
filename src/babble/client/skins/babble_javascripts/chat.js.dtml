@@ -460,7 +460,7 @@ function poll_server() {
         async: true,
         timeout: timeout,
         dataType: "json",
-        data: {username: username, last_msg_date: global_received_date}, 
+        data: {username: username}, 
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error('poll_server: ' + textStatus);
             log.error('poll_server: ' + errorThrown);

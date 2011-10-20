@@ -125,7 +125,7 @@ class TestChat(TestCase):
         self.assertEquals(resp['status'], config.AUTH_FAIL)
 
         member = self.mtool.getAuthenticatedMember()
-        resp = traverse('@@babblechat/poll')(member.getId(), config.NULL_DATE)
+        resp = traverse('@@babblechat/poll')(member.getId(), [])
         self.assertEquals(resp, None)
         resp = traverse('@@babblechat/send_message')(username1, 'message')
         self.assertEquals(resp, None)
@@ -140,7 +140,7 @@ class TestChat(TestCase):
         self.loginAsPortalOwner()
 
         member = self.mtool.getAuthenticatedMember()
-        resp = traverse('@@babblechat/poll')(member.getId(), config.NULL_DATE)
+        resp = traverse('@@babblechat/poll')(member.getId(), [])
         self.assertEquals(resp, None)
         resp = traverse('@@babblechat/send_message')(username1, 'message')
         self.assertEquals(resp, None)
@@ -170,14 +170,12 @@ class TestChat(TestCase):
 
         # Poll for username1 and see if we got our message
         self.login(name=username1)
-        resp = traverse('@@babblechat/poll')(username1, config.NULL_DATE)
+        resp = traverse('@@babblechat/poll')(username1, [])
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
         self.assertEquals(resp['last_msg_date'], message_timestamp)
-
         # Check that a message was received from username2
         self.assertEquals(resp['messages'].keys(), [username2])
-
         # Check the message format
         hello_message = [username2, 'hello', 'dummydate']
         member2 = self.mtool.getMemberById(username2)
@@ -189,7 +187,7 @@ class TestChat(TestCase):
         self.assertEqual(resp['messages'][username2][1][0][2], message_timestamp)
 
         # Check that the next poll (with new timestamp) returns no new messages
-        resp = traverse('@@babblechat/poll')(username1, message_timestamp)
+        resp = traverse('@@babblechat/poll')(username1, [])
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
         self.assertEquals(resp['messages'], {})

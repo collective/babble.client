@@ -132,7 +132,7 @@ class Chat(BabbleView):
                 })
 
 
-    def poll(self, username, last_msg_date, chatrooms=[]):
+    def poll(self, username, chatrooms=[]):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
