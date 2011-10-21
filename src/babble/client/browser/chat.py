@@ -5,6 +5,7 @@ import socket
 import xmlrpclib
 import simplejson as json
 from zope.interface import implements
+from zope.component.hooks import getSite
 
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.browser import BrowserView
@@ -227,10 +228,12 @@ class ChatBox(BabbleView):
     template = ViewPageTemplateFile('templates/chatbox.pt')
 
     def get_box_title(self, box_id):
-        # XXX Somehow have to get the chatroom's title
+        """ """
         prefix, contact = box_id.split('_', 1)
         if prefix == 'chatbox':
             return self.get_fullname(contact)
+        elif prefix == 'chatroom':
+            return getSite().unrestrictedTraverse(contact).Title()
         return contact
 
     def reverse_escape(self, html):
