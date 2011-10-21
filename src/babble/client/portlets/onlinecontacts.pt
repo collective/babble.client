@@ -43,7 +43,7 @@
                 <a  tal:content="fullname" 
                     style="cursor: pointer;"
                     tal:condition="not: anonymous"
-                    tal:attributes="onclick string:jQuery.noConflict();; startChat('${contact/id}', '${fullname}', 'chatbox')"> 
+                    tal:attributes="onclick string:jQuery.noConflict();; startChat('chatbox_${contact/id}')"> 
                     Contact Name 
                 </a>
                 <a  tal:content="fullname" 

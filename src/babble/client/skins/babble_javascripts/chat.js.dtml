@@ -107,10 +107,10 @@ function prep4JQ(str) {
 }
 
 function getMinimizedChats() {
-var cookie = jQuery.cookie('chats_minimized_'+username);
-if (cookie)
-    return cookie.split(/\|/);
-return Array()
+    var cookie = jQuery.cookie('chats_minimized_'+username);
+    if (cookie)
+        return cookie.split(/\|/);
+    return []
 }
 
 function sanitizePath(call) {
@@ -138,16 +138,16 @@ function init() {
     if (!username)
         return true; // This will let doTimout continue, i.e init will be called again.
 
-    var open_chats = Array();
+    var open_chats = [];
     var cookie = jQuery.cookie('chats-open-'+username);
     log.info('init: cookie = ' + cookie + '\n');
     jQuery.cookie('chats-open-'+username, null, {path: '/'});
     if (cookie) {
         open_chats = cookie.split('|');
         for (var i=0; i<open_chats.length; i++) {
-            var user = open_chats[i];
-            if (user) { 
-                createChat(user, 1);
+            var chat_id = open_chats[i];
+            if (chat_id) { 
+                createChat(chat_id, 1);
             }
         }
     }
@@ -181,21 +181,22 @@ function init() {
     });
 }
 
-function appendMessages(username, fullname, messages, minimized, clear_and_replace, prefix) {
-    /* username: The username of the conversation *partner*
-        fullname: The fullname of the conversation partner
-        minimized: Should the chatbox be minmized?
+function appendMessages(chat_id, contact_id, fullname, messages, minimized, clear_and_replace) {
+    /*  chat_id:    The id attr of the chatbox 
+        contact_id: The contact_id of the conversation partner or chatroom
+        fullname:   The fullname of the conversation partner
+        minimized:  Should the chatbox be minmized?
         clear_and_replace: Clear and replace all messages that might be in the chatbox (if it exists).
     */
-    log.info('appendMessages: username is ' + username)
+    log.info('appendMessages: contact_id is ' + contact_id)
     messages_found += 1;
     if (!new_chats)
-        new_chats = Array();
+        new_chats = [];
 
-    new_chats[username] = true;
-    var chat = jQuery('#'+prefix+'_'+prep4JQ(username));
+    new_chats[chat_id] = true;
+    var chat = jQuery('#'+prep4JQ(chat_id));
     if (chat.length <= 0) {
-        createChat(username, minimized);
+        createChat(chat_id, minimized);
         // createChat will fetch all uncleared messages (including the new ones
         // we have here), therefore we can just return here
         return
@@ -219,7 +220,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
         var minute = message[2].substring(14,16);
         var timeob = new Date(new Date(year, month, day, hour, minute) - new Date().getTimezoneOffset() * 60000);
         var localtime = timeob.toLocaleTimeString().substring(0,5);
-        if (message[0] == username) {
+        if (message[0] == contact_id) {
             message_html = '<div class="chat-message">' + 
                                 '<span class="chat-message-them">'+fullname+' '+localtime+':&nbsp;&nbsp;</span>' + 
                                 '<span class="chat-message-content">'+text+'</span>' + 
@@ -273,18 +274,18 @@ function positionNewChat(chatbox) {
     // reorderChats();
 }
 
-function closeChat(title, prefix) {
-    jQuery('#'+prefix+'_'+prep4JQ(title)).css('display','none');
+function closeChat(chat_id, contact) {
+    jQuery('#'+prep4JQ(chat_id)).css('display','none');
     reorderChats();
     var cookie = jQuery.cookie('chats-open-'+username);
     if (cookie)
         var open_chats = cookie.split('|');
     else
-        var open_chats = Array();
+        var open_chats = [];
 
     new_chats = Array();
     for (var i=0; i < open_chats.length; i++) {
-        if (open_chats[i] != title) {
+        if (open_chats[i] != chat_id) {
             new_chats.push(open_chats[i]);
         }
     }
@@ -299,35 +300,35 @@ function closeChat(title, prefix) {
     jQuery.ajax({
         url: path,
         cache: false,
-        data: {contact: title, until: global_received_date },
+        data: {contact: contact, until: global_received_date },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
             log.error(errorThrown);
         },
         success: function() {
-            log.info(title + "'s messages succesfully cleared. \n");
+            log.info(chat_id + "'s messages succesfully cleared. \n");
         }
     });
 }
 
-function createChat(name, title, minimize, prefix) {
-    log.info('createChat: name is ' + name)
+function createChat(chat_id, minimize) {
+    log.info('createChat: chat_id is ' + chat_id)
     var cookie = jQuery.cookie('chats-open-'+username);
     log.info('createChat: cookie is ' + cookie)
     if (cookie)
         var open_chats = cookie.split('|');
     else
-        var open_chats = Array();
+        var open_chats = [];
 
-    if (!(name in oc(open_chats))) {
+    if (!(chat_id in oc(open_chats))) {
         // Update the cookie if this new chat is not yet in it.
-        open_chats.push(name);
+        open_chats.push(chat_id);
         var new_cookie = open_chats.join('|');
         jQuery.cookie('chats-open-'+username, new_cookie, {path: '/'});
         log.info('createChat: updated cookie = ' + new_cookie + '\n');
     }
 
-    var chatbox = jQuery("#"+prefix+"_"+prep4JQ(name));
+    var chatbox = jQuery("#"+prep4JQ(chat_id));
     if (chatbox.length > 0) {
         // The chatbox exists, merely hidden
         if (chatbox.css('display') == 'none') {
@@ -337,26 +338,26 @@ function createChat(name, title, minimize, prefix) {
         chatbox.find(".chat-textarea").focus();
         return;
     }
-    chatbox = createChatBox(name, title, prefix);
+    chatbox = createChatBox(chat_id);
     positionNewChat(chatbox);
-    chats.push(prefix+'_'+name);
+    chats.push(chat_id);
     if (minimize == 1) {
         // Minimize the chat if it's in the minimized_chats cookie
         var minimized_chats = getMinimizedChats();
-        if (name in oc(minimized_chats)) {
+        if (chat_id in oc(minimized_chats)) {
             chatbox.find('.chat-content').css('display','none');
             chatbox.find('.chat-input').css('display','none');
         }
     }
-    handleChatEvents(name, prefix)
+    handleChatEvents(chat_id)
     chatbox.show();
     var chat_content = chatbox.find('.chat-content');
     chat_content.scrollTop(chat_content[0].scrollHeight);
 }
 
-function startChat(id, title, prefix) {
-    createChat(id, title, prefix);
-    jQuery("#"+prefix+"_"+prep4JQ(id)+" .chat-textarea").focus();
+function startChat(chat_id) {
+    createChat(chat_id, 0);
+    jQuery("#"+prep4JQ(chat_id)+" .chat-textarea").focus();
     // Reset the polling
     messages_found = 0;
     poll_count = 0;
@@ -364,16 +365,14 @@ function startChat(id, title, prefix) {
     poll();
 }
 
-function createChatBox(name, title, prefix) {
-    path = sanitizePath('/@@render_chat_box');
+function createChatBox(chat_id) {
+    var path = sanitizePath('/@@render_chat_box');
     jQuery.ajax({
         url: path,
         cache: false,
         async: false,
         data: {
-            box_id: prefix+"_"+name,
-            contact: name,
-            title: title,
+            box_id: chat_id,
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
@@ -391,28 +390,27 @@ function createChatBox(name, title, prefix) {
                 date.setMinutes(minutes);
                 jthis.replaceWith(date.toLocaleTimeString().substring(0,5));
             })
-            var last_msg_date = jQuery('div#'+prefix+'_'+name).attr('last_msg_date');
+            var last_msg_date = jQuery('div#'+chat_id).attr('last_msg_date');
             if ((last_msg_date != undefined)&&(last_msg_date > global_received_date)) {
                 global_received_date = last_msg_date;
                 sent_since_date = [];
             }
         }
     });
-    return jQuery('#'+prefix+'_'+prep4JQ(name));
+    return jQuery('#'+prep4JQ(chat_id));
 }
 
-function handleChatEvents(title, prefix) {
-    chat_focus[title] = false;
-    var chat_area = jQuery("#"+prefix+"_"+prep4JQ(title)+" .chat-textarea");
+function handleChatEvents(chat_id) {
+    chat_focus[chat_id] = false;
+    var chat_area = jQuery("#"+prep4JQ(chat_id)+" .chat-textarea");
     chat_area.blur(function(){
-        chat_focus[title] = false;
+        chat_focus[chat_id] = false;
         chat_area.removeClass('chat-textarea-selected');
     }).focus(function(){
-        chat_focus[title] = true;
+        chat_focus[chat_id] = true;
         chat_area.addClass('chat-textarea-selected');
     });
-
-    var chatbox = jQuery("#"+prefix+"_"+prep4JQ(title));
+    var chatbox = jQuery("#"+prep4JQ(chat_id));
     chatbox.click(function() {
         if (chatbox.find('.chat-content').css('display') != 'none') {
             chatbox.find('.chat-textarea').focus();
@@ -485,21 +483,23 @@ function poll_server() {
                     getUnclearedMessages();
                 });
             }
-            for (var user in data.messages) {
-                var messages = data.messages[user][1];
+            for (var contact_id in data.messages) {
+                var messages = data.messages[contact_id][1];
                 if (!messages.length) 
                     continue
-                var fullname = data.messages[user][0];
-                log.info('We received messages for user: ' + fullname);
-                appendMessages(user, fullname, messages, 0, 'chatbox');
+                var fullname = data.messages[contact_id][0];
+                log.info('We received messages for contact_id: ' + fullname);
+                var chat_id = 'chatbox'+'_'+chatroom_id;
+                appendMessages(chat_id, contact_id, fullname, messages, 0, 0);
             };
-            for (var user in data.chatroom_messages) {
-                var chatroom_messages = data.chatroom_messages[user][1];
+            for (var chatroom_id in data.chatroom_messages) {
+                var chatroom_messages = data.chatroom_messages[chatroom_id][1];
                 if (!messages.length) 
                     continue
-                var title = data.chatroom_messages[user][0];
+                var title = data.chatroom_messages[chatroom_id][0];
                 log.info('We received messages for chatroom: ' + title);
-                appendMessages(user, fullname, chatroom_messages, 0, 'chatroom');
+                var chat_id = 'chatroom'+'_'+chatroom_id;
+                appendMessages(chat_id, chatroom_id, title, chatroom_messages, 0, 0);
             };
             if (data.last_msg_date > global_received_date)  {
                 global_received_date = data.last_msg_date;
@@ -530,14 +530,25 @@ function getUnclearedMessages() {
                 // This will let doTimout continue, i.e get_uncleared_messages will be called again.
                 return true; 
             }
-            for(var username in data.messages) {
-                var messages = data.messages[username][1];
+            for(var contact_id in data.messages) {
+                var messages = data.messages[contact_id][1];
                 if (!messages.length) 
                     continue
-                var tuple = data.messages[username]
-                var fullname = data.messages[username][0];
-                appendMessages(username, fullname, messages, 0, 1);
+                var tuple = data.messages[contact_id]
+                var fullname = data.messages[contact_id][0];
+                var chat_id = 'chatbox'+'_'+contact_id;
+                appendMessages(chat_id, contact_id, fullname, messages, 0, 1);
             };
+            for(var chatroom_id in data.chatroom_messages) {
+                var messages = data.messages[chatroom_id][1];
+                if (!messages.length) 
+                    continue
+                var tuple = data.messages[chatroom_id]
+                var title = data.messages[chatroom_id][0];
+                var chat_id = 'chatroom'+'_'+chatroom_id;
+                appendMessages(chat_id, chatroom_id, title, messages, 0, 1);
+            };
+
             // Cancel the current poll
             jQuery.doTimeout('message_recovery_poll');
             // Now call the normal poll again
@@ -548,7 +559,7 @@ function getUnclearedMessages() {
     });
 }
 
-function keypressed(event, textarea, title, last_msg_date, prefix) {
+function keypressed(event, textarea, contact_id, last_msg_date, chat_id) {
 	if(event.keyCode == 13 && event.shiftKey == 0) {
         var textbox = jQuery(textarea);
 		var message = textbox.val();
@@ -561,13 +572,13 @@ function keypressed(event, textarea, title, last_msg_date, prefix) {
                 cache: false,
                 async: true,
                 dataType: "json",
-                data: {to: title, message: message}, 
+                data: {to: contact_id, message: message}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     log.error(textStatus);
                     if (errorThrown)
                         log.error(errorThrown)
 
-                    var chat_content = jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content');
+                    var chat_content = jQuery('#'+prep4JQ(chat_id)+' .chat-content');
                     chat_content.append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-error">Connection Error</span>' + 
@@ -589,7 +600,7 @@ function keypressed(event, textarea, title, last_msg_date, prefix) {
                     var minutes = now.getMinutes().toString();
                     if (minutes.length==1) {minutes = '0'+minutes;}
                     var time = now.toLocaleTimeString().substring(0,5);
-                    var chat_content = jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content');
+                    var chat_content = jQuery('#'+prep4JQ(chat_id)+' .chat-content');
                     chat_content.append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-me">me '+time+':&nbsp;&nbsp;</span>' + 
@@ -619,31 +630,31 @@ function keypressed(event, textarea, title, last_msg_date, prefix) {
 	}
 }
 
-function toggleChat(title, prefix) {
+function toggleChat(chat_id) {
     var minimized_chats = getMinimizedChats();
-    if (jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content').css('display') == 'none') {  
+    if (jQuery('#'+prep4JQ(box_id)+' .chat-content').css('display') == 'none') {  
         // Chat will be maximized
         var new_cookie = Array();
         for (var i=0; i < minimized_chats.length; i++) {
-            if (minimized_chats[i] != title) {
+            if (minimized_chats[i] != chat_id) {
                 new_cookie.push(minimized_chats[i]);
             }
         }
-        jQuery.cookie('chats_minimized_'+username, new_cookie.join('|'));
-        var chat_content = jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content');
+        jQuery.cookie('chats_minimized_'+usergc, new_cookie.join('|'));
+        var chat_content = jQuery('#'+prep4JQ(chat_id)+' .chat-content');
         chat_content.css('display','block');
         chat_content.scrollTop(chat_content[0].scrollHeight);
-        jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-input').css('display','block');
+        jQuery('#'+prep4JQ(chat_id)+' .chat-input').css('display','block');
     } 
     else {
         // Chat will be minimized
-        if (!(title in oc(minimized_chats))) {
-            var new_cookie = title;
+        if (!(chat_id in oc(minimized_chats))) {
+            var new_cookie = chat_id;
             new_cookie += '|'+minimized_chats.join('|');
-            jQuery.cookie('chats_minimized_'+username, new_cookie);
+            jQuery.cookie('chats_minimized_'+usergc, new_cookie);
         }
-        jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-content').css('display','none');
-        jQuery('#'+prefix+'_'+prep4JQ(title)+' .chat-input').css('display','none');
+        jQuery('#'+prep4JQ(chat_id)+' .chat-content').css('display','none');
+        jQuery('#'+prep4JQ(chat_id)+' .chat-input').css('display','none');
     }
 }
 

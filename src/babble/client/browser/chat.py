@@ -4,7 +4,6 @@ import random
 import socket
 import xmlrpclib
 import simplejson as json
-from datetime import datetime
 from zope.interface import implements
 
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
@@ -23,7 +22,7 @@ from babble.client.config import NULL_DATE
 log = logging.getLogger('babble.client/browser/chat.py')
 
 class BabbleView(BrowserView):
-    """ Base view for commong methods """
+    """ Base view for common methods """
 
     def get_fullname(self, username):
         """ Get user via his ID and return his fullname
@@ -227,17 +226,24 @@ class ChatBox(BabbleView):
     implements(IChatBox)
     template = ViewPageTemplateFile('templates/chatbox.pt')
 
+    def get_box_title(self, box_id):
+        # XXX Somehow have to get the chatroom's title
+        prefix, contact = box_id.split('_', 1)
+        if prefix == 'chatbox':
+            return self.get_fullname(contact)
+        return contact
+
     def reverse_escape(self, html):
         return utils.reverse_escape(html)
 
-    def render_chat_box(self, box_id, contact, title):
+    def render_chat_box(self, box_id):
         """ """
+        contact = box_id.split('_', 1)[1]
         response = utils.get_last_conversation(self.context, contact)
         return self.template(
                         messages=response['messages'], 
                         last_msg_date=response['last_msg_date'],
                         box_id=box_id, 
-                        name=contact,
-                        title=title,)
+                        name=contact,)
 
 
