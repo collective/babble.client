@@ -202,7 +202,7 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
     }
     if (chat.css('display') == 'none') {
         chat.css('display','block');
-        reorderChats(prefix);
+        reorderChats();
     }
     var chat_content = chat.find(".chat-content");
     if (clear_and_replace) {
@@ -239,11 +239,10 @@ function appendMessages(username, fullname, messages, minimized, clear_and_repla
     chat_content.scrollTop(chat_content[0].scrollHeight);
 }
 
-function reorderChats(prefix) {
+function reorderChats() {
     var index = 0;
     for (var i=0; i < chats.length; i++) {
-        title = chats[i];
-        var chatbox =  jQuery("#"+prefix+"_"+prep4JQ(title));
+        var chatbox =  jQuery("#"+prep4JQ(chats[i]));
         if (chatbox.css('display') != 'none') {
             if (index == 0) {
                 chatbox.css('right', '20px');
@@ -257,25 +256,26 @@ function reorderChats(prefix) {
     }
 }
 
-function positionNewChat(chatbox, prefix) {
-    var num_chats = 0;
+function positionNewChat(chatbox) {
+    var open_chats = 0;
     for (var i=0; i<chats.length; i++) {
-        if (jQuery("#"+prefix+"_"+prep4JQ(chats[i])).css('display') != 'none') {
-            num_chats++;
+        if (jQuery("#"+prep4JQ(chats[i])).css('display') != 'none') {
+            open_chats++;
         }
     }
-    if (num_chats == 0) {
+    if (open_chats == 0) {
         chatbox.css('right', '20px');
     } 
     else {
-        width = (num_chats)*(225+7)+20;
+        width = (open_chats)*(225+7)+20;
         chatbox.css('right', width+'px');
     }
+    // reorderChats();
 }
 
 function closeChat(title, prefix) {
     jQuery('#'+prefix+'_'+prep4JQ(title)).css('display','none');
-    reorderChats(prefix);
+    reorderChats();
     var cookie = jQuery.cookie('chats-open-'+username);
     if (cookie)
         var open_chats = cookie.split('|');
@@ -332,14 +332,14 @@ function createChat(name, title, minimize, prefix) {
         // The chatbox exists, merely hidden
         if (chatbox.css('display') == 'none') {
             chatbox.css('display','block');
-            reorderChats(prefix);
+            reorderChats();
         }
         chatbox.find(".chat-textarea").focus();
         return;
     }
     chatbox = createChatBox(name, title, prefix);
-    positionNewChat(chatbox, prefix);
-    chats.push(name);
+    positionNewChat(chatbox);
+    chats.push(prefix+'_'+name);
     if (minimize == 1) {
         // Minimize the chat if it's in the minimized_chats cookie
         var minimized_chats = getMinimizedChats();
