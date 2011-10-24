@@ -43,8 +43,5 @@
         name="test_chat.js"
         file="tests/test_chat.js"
         />
-        
-    <subscriber handler=".chatroom.handleChatRoomAdded" />
-    <subscriber handler=".chatroom.handleChatRoomLocalRolesModified" />
 
 </configure>
