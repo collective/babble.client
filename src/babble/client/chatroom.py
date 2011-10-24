@@ -6,8 +6,11 @@ from five import grok
 from z3c.form.interfaces import IDisplayForm
 from zope import schema
 from zope.app.container.interfaces import IObjectAddedEvent
-from zope.component import adapter
+from zope.app.container.interfaces import IObjectEditedEvent
+from zope.app.container.interfaces import IObjectRemovedEvent
+from zope.component import getMultiAdapter
 from plone.directives import dexterity, form
+from zExceptions import Unauthorized
 from Products.CMFCore.utils import getToolByName
 from babble.client import BabbleMessageFactory as _
 from babble.client import config
@@ -34,32 +37,75 @@ def _getChatPassword(member):
                 "This should not happen!" % member.getId())
 
 
-@adapter(IChatRoom, IObjectAddedEvent)
+@grok.subscribe(IChatRoom, IObjectAddedEvent)
 def handleChatRoomAdded(chatroom, event):
     """ Register the chatroom with the messaging service.
     """
+    getMultiAdapter((chatroom, chatroom.REQUEST), name='babblechat').initialize()
     pm = getToolByName(chatroom, 'portal_membership')
     member = pm.getAuthenticatedMember()
     password = _getChatPassword(member)
     if password is None:
         return
 
-    participants = [r[0] for r in chatroom.get_local_roles()]
+    plone_utils = getToolByName(chatroom, 'plone_utils')
+    roles = plone_utils.getInheritedLocalRoles(chatroom)
+    participants = [r[0] for r in roles]
+    participants += [r[0] for r in chatroom.get_local_roles()]
     s = getConnection(chatroom)
     try:
-        s.createChatRoom(member.getId(), password, chatroom.id, participants)
+        result = json.loads(s.createChatRoom(
+                                    member.getId(), 
+                                    password, 
+                                    '/'.join(chatroom.getPhysicalPath()), 
+                                    participants)
+                                    )
     except xmlrpclib.Fault, e:
-        err_msg = e.faultString.strip('\n').split('\n')[-1]
-        log.error('Error from babble.server: createChatRoom: %s' % err_msg)
+        log.error('XMLRPC Error from babble.server: createChatRoom: %s' % e)
         return 
     except socket.error, e:
-        log.error('Error from babble.server: createChatRoom: %s' % e)
+        log.error('Socket Error from babble.server: createChatRoom: %s' % e)
         return 
 
+    if result['status'] == config.AUTH_FAIL:
+        raise Unauthorized
 
-@adapter(IChatRoom, ILocalRolesModifiedEvent)
-def handleChatRoomLocalRolesModified(chatroom, event):
-    """ """
+
+@grok.subscribe(IChatRoom, IObjectRemovedEvent)
+def handleChatRoomRemoved(chatroom, event):
+    """ Inform the messaging service of chatroom deletion.
+    """
+    if chatroom.REQUEST.controller_state.id == 'delete_confirmation':
+        # The object is not yet removed, the user have been presented a
+        # confirmation prompt.
+        return
+        
+    getMultiAdapter((chatroom, chatroom.REQUEST), name='babblechat').initialize()
+    pm = getToolByName(chatroom, 'portal_membership')
+    member = pm.getAuthenticatedMember()
+    password = _getChatPassword(member)
+    if password is None:
+        return
+
+    s = getConnection(chatroom)
+    try:
+        result = json.loads(s.removeChatRoom(
+                                    member.getId(), 
+                                    password, 
+                                    '/'.join(chatroom.getPhysicalPath()), 
+                                    ))
+    except xmlrpclib.Fault, e:
+        log.error('XMLRPC Error from babble.server: removeChatRoom: %s' % e)
+        return 
+    except socket.error, e:
+        log.error('Socket Error from babble.server: removeChatRoom: %s' % e)
+        return 
+
+    if result['status'] == config.AUTH_FAIL:
+        raise Unauthorized
+
+
+def _editChatRoom(chatroom):
     participants = []
     pm = getToolByName(chatroom, 'portal_membership')
     member = pm.getAuthenticatedMember()
@@ -81,6 +127,18 @@ def handleChatRoomLocalRolesModified(chatroom, event):
 
     if resp['status'] == config.NOT_FOUND:
         s.createChatRoom(member.getId(), password, chatroom.id, participants)
+
+
+@grok.subscribe(IChatRoom, IObjectEditedEvent)
+def handleChatRoomEdited(chatroom, event):
+    """ """
+    _editChatRoom(chatroom)
+        
+
+@grok.subscribe(IChatRoom, ILocalRolesModifiedEvent)
+def handleChatRoomLocalRolesModified(chatroom, event):
+    """ """
+    _editChatRoom(chatroom)
 
 
 class ChatRoom(dexterity.Container):
