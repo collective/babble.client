@@ -74,36 +74,9 @@ var log = {
 };
 }
 
-function prep4JQ(str) {
-    /* From JQUERY selector docs: 
-    * If you wish to use any of the meta-characters 
-    * (#;&,.+*~':"!^$[]()=>|/@ ) as a literal part of a name, 
-    * you must escape the character with two backslashes: \\.
-    */
-    str = str.replace(/\#/g, '\\#');
-    str = str.replace(/\;/g, '\\;');
-    str = str.replace(/\&/g, '\\&');
-    str = str.replace(/\,/g, '\\,');
-    str = str.replace(/\./g, '\\.');
-    str = str.replace(/\+/g, '\\+');
-    str = str.replace(/\*/g, '\\*');
-    str = str.replace(/\~/g, '\\~');
-    str = str.replace(/\'/g, "\\'");
-    str = str.replace(/\:/g, '\\:');
-    str = str.replace(/\"/g, '\\"');
-    str = str.replace(/\!/g, '\\!');
-    str = str.replace(/\^/g, '\\^');
-    str = str.replace(/\$/g, '\\$');
-    str = str.replace(/\[/g, '\\[');
-    str = str.replace(/\]/g, '\\]');
-    str = str.replace(/\(/g, '\\(');
-    str = str.replace(/\)/g, '\\)');
-    str = str.replace(/\=/g, '\\=');
-    str = str.replace(/\>/g, '\\>');
-    str = str.replace(/\|/g, '\\|');
-    str = str.replace(/\//g, '\\/');
-    str = str.replace(/\@/g, '\\@');
-    return str
+function hash(str) {
+    var shaobj = new jsSHA(str);
+    return shaobj.getHash("HEX")
 }
 
 function getMinimizedChats() {
@@ -182,7 +155,7 @@ function init() {
 }
 
 function appendMessages(chat_id, contact_id, fullname, messages, minimized, clear_and_replace) {
-    /*  chat_id:    The id attr of the chatbox 
+    /*  chat_id:    The id attr of the div containing the chat
         contact_id: The contact_id of the conversation partner or chatroom
         fullname:   The fullname of the conversation partner
         minimized:  Should the chatbox be minmized?
@@ -194,7 +167,7 @@ function appendMessages(chat_id, contact_id, fullname, messages, minimized, clea
         new_chats = [];
 
     new_chats[chat_id] = true;
-    var chat = jQuery('#'+prep4JQ(chat_id));
+    var chat = jQuery('#'+hash(chat_id));
     if (chat.length <= 0) {
         createChat(chat_id, minimized);
         // createChat will fetch all uncleared messages (including the new ones
@@ -243,7 +216,7 @@ function appendMessages(chat_id, contact_id, fullname, messages, minimized, clea
 function reorderChats() {
     var index = 0;
     for (var i=0; i < chats.length; i++) {
-        var chatbox =  jQuery("#"+prep4JQ(chats[i]));
+        var chatbox =  jQuery("#"+hash(chats[i]));
         if (chatbox.css('display') != 'none') {
             if (index == 0) {
                 chatbox.css('right', '20px');
@@ -260,7 +233,7 @@ function reorderChats() {
 function positionNewChat(chatbox) {
     var open_chats = 0;
     for (var i=0; i<chats.length; i++) {
-        if (jQuery("#"+prep4JQ(chats[i])).css('display') != 'none') {
+        if (jQuery("#"+hash(chats[i])).css('display') != 'none') {
             open_chats++;
         }
     }
@@ -271,11 +244,10 @@ function positionNewChat(chatbox) {
         width = (open_chats)*(225+7)+20;
         chatbox.css('right', width+'px');
     }
-    // reorderChats();
 }
 
-function closeChat(chat_id, contact) {
-    jQuery('#'+prep4JQ(chat_id)).css('display','none');
+function closeChat(chat_id, audience) {
+    jQuery('#'+hash(chat_id)).css('display','none');
     reorderChats();
     var cookie = jQuery.cookie('chats-open-'+username);
     if (cookie)
@@ -283,7 +255,7 @@ function closeChat(chat_id, contact) {
     else
         var open_chats = [];
 
-    new_chats = Array();
+    new_chats = [];
     for (var i=0; i < open_chats.length; i++) {
         if (open_chats[i] != chat_id) {
             new_chats.push(open_chats[i]);
@@ -297,18 +269,20 @@ function closeChat(chat_id, contact) {
         jQuery.cookie('chats-open-'+username, null, {path: '/'});
     }
     path = sanitizePath('/@@babblechat/clear_messages');
-    jQuery.ajax({
-        url: path,
-        cache: false,
-        data: {contact: contact, until: global_received_date },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            log.error(textStatus);
-            log.error(errorThrown);
-        },
-        success: function() {
-            log.info(chat_id + "'s messages succesfully cleared. \n");
-        }
-    });
+    if (audience != null) {
+        jQuery.ajax({
+            url: path,
+            cache: false,
+            data: {audience: audience },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                log.error(textStatus);
+                log.error(errorThrown);
+            },
+            success: function() {
+                log.info(chat_id + "'s messages succesfully cleared. \n");
+            }
+        });
+    }
 }
 
 function createChat(chat_id, minimize) {
@@ -328,7 +302,7 @@ function createChat(chat_id, minimize) {
         log.info('createChat: updated cookie = ' + new_cookie + '\n');
     }
 
-    var chatbox = jQuery("#"+prep4JQ(chat_id));
+    var chatbox = jQuery("#"+hash(chat_id));
     if (chatbox.length > 0) {
         // The chatbox exists, merely hidden
         if (chatbox.css('display') == 'none') {
@@ -336,6 +310,8 @@ function createChat(chat_id, minimize) {
             reorderChats();
         }
         chatbox.find(".chat-textarea").focus();
+        var chat_content = chatbox.find('.chat-content');
+        chat_content.scrollTop(chat_content[0].scrollHeight);
         return;
     }
     chatbox = createChatBox(chat_id);
@@ -352,12 +328,17 @@ function createChat(chat_id, minimize) {
     handleChatEvents(chat_id)
     chatbox.show();
     var chat_content = chatbox.find('.chat-content');
-    chat_content.scrollTop(chat_content[0].scrollHeight);
+    if (chat_content.length) {
+        chat_content.scrollTop(chat_content[0].scrollHeight);
+    }
+    else {
+        log.error('createChat: could not get .chat-content')
+    }
 }
 
 function startChat(chat_id) {
     createChat(chat_id, 0);
-    jQuery("#"+prep4JQ(chat_id)+" .chat-textarea").focus();
+    jQuery("#"+hash(chat_id)+" .chat-textarea").focus();
     // Reset the polling
     messages_found = 0;
     poll_count = 0;
@@ -372,7 +353,8 @@ function createChatBox(chat_id) {
         cache: false,
         async: false,
         data: {
-            box_id: chat_id,
+            chat_id: chat_id,
+            box_id: hash(chat_id) 
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             log.error(textStatus);
@@ -397,12 +379,12 @@ function createChatBox(chat_id) {
             }
         }
     });
-    return jQuery('#'+prep4JQ(chat_id));
+    return jQuery('#'+hash(chat_id));
 }
 
 function handleChatEvents(chat_id) {
     chat_focus[chat_id] = false;
-    var chat_area = jQuery("#"+prep4JQ(chat_id)+" .chat-textarea");
+    var chat_area = jQuery("#"+hash(chat_id)+" .chat-textarea");
     chat_area.blur(function(){
         chat_focus[chat_id] = false;
         chat_area.removeClass('chat-textarea-selected');
@@ -410,7 +392,7 @@ function handleChatEvents(chat_id) {
         chat_focus[chat_id] = true;
         chat_area.addClass('chat-textarea-selected');
     });
-    var chatbox = jQuery("#"+prep4JQ(chat_id));
+    var chatbox = jQuery("#"+hash(chat_id));
     chatbox.click(function() {
         if (chatbox.find('.chat-content').css('display') != 'none') {
             chatbox.find('.chat-textarea').focus();
@@ -489,16 +471,16 @@ function poll_server() {
                     continue
                 var fullname = data.messages[contact_id][0];
                 log.info('We received messages for contact_id: ' + fullname);
-                var chat_id = 'chatbox'+'_'+chatroom_id;
+                var chat_id = 'chatbox_'+contact_id;
                 appendMessages(chat_id, contact_id, fullname, messages, 0, 0);
             };
             for (var chatroom_id in data.chatroom_messages) {
                 var chatroom_messages = data.chatroom_messages[chatroom_id][1];
-                if (!messages.length) 
+                if (!chatroom_messages.length) 
                     continue
                 var title = data.chatroom_messages[chatroom_id][0];
                 log.info('We received messages for chatroom: ' + title);
-                var chat_id = 'chatroom'+'_'+chatroom_id;
+                var chat_id = 'chatroom_'+chatroom_id;
                 appendMessages(chat_id, chatroom_id, title, chatroom_messages, 0, 0);
             };
             if (data.last_msg_date > global_received_date)  {
@@ -548,7 +530,6 @@ function getUnclearedMessages() {
                 var chat_id = 'chatroom'+'_'+chatroom_id;
                 appendMessages(chat_id, chatroom_id, title, messages, 0, 1);
             };
-
             // Cancel the current poll
             jQuery.doTimeout('message_recovery_poll');
             // Now call the normal poll again
@@ -559,7 +540,7 @@ function getUnclearedMessages() {
     });
 }
 
-function keypressed(event, textarea, contact_id, last_msg_date, chat_id) {
+function keypressed(event, textarea, audience, hashed_id, chat_type) {
 	if(event.keyCode == 13 && event.shiftKey == 0) {
         var textbox = jQuery(textarea);
 		var message = textbox.val();
@@ -572,13 +553,13 @@ function keypressed(event, textarea, contact_id, last_msg_date, chat_id) {
                 cache: false,
                 async: true,
                 dataType: "json",
-                data: {to: contact_id, message: message}, 
+                data: {to: audience, message: message, chat_type: chat_type}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     log.error(textStatus);
                     if (errorThrown)
                         log.error(errorThrown)
 
-                    var chat_content = jQuery('#'+prep4JQ(chat_id)+' .chat-content');
+                    var chat_content = jQuery('#'+hashed_id+' .chat-content');
                     chat_content.append(
                         '<div class="chat-message">' + 
                             '<span class="chat-message-error">Connection Error</span>' + 
@@ -600,10 +581,10 @@ function keypressed(event, textarea, contact_id, last_msg_date, chat_id) {
                     var minutes = now.getMinutes().toString();
                     if (minutes.length==1) {minutes = '0'+minutes;}
                     var time = now.toLocaleTimeString().substring(0,5);
-                    var chat_content = jQuery('#'+prep4JQ(chat_id)+' .chat-content');
+                    var chat_content = jQuery('#'+hashed_id+' .chat-content');
                     chat_content.append(
                         '<div class="chat-message">' + 
-                            '<span class="chat-message-me">me '+time+':&nbsp;&nbsp;</span>' + 
+                            '<span class="chat-message-me">me '+time+':&nbsp; </span>' + 
                             '<span class="chat-message-content">'+message+'</span>' + 
                         '</div>');
                     chat_content.scrollTop(chat_content[0].scrollHeight);
@@ -632,7 +613,8 @@ function keypressed(event, textarea, contact_id, last_msg_date, chat_id) {
 
 function toggleChat(chat_id) {
     var minimized_chats = getMinimizedChats();
-    if (jQuery('#'+prep4JQ(box_id)+' .chat-content').css('display') == 'none') {  
+    var hashed_id = hash(chat_id); 
+    if (jQuery('#'+hashed_id+' .chat-content').css('display') == 'none') {  
         // Chat will be maximized
         var new_cookie = Array();
         for (var i=0; i < minimized_chats.length; i++) {
@@ -640,21 +622,21 @@ function toggleChat(chat_id) {
                 new_cookie.push(minimized_chats[i]);
             }
         }
-        jQuery.cookie('chats_minimized_'+usergc, new_cookie.join('|'));
-        var chat_content = jQuery('#'+prep4JQ(chat_id)+' .chat-content');
+        jQuery.cookie('chats_minimized_'+username, new_cookie.join('|'));
+        var chat_content = jQuery('#'+hashed_id+' .chat-content');
         chat_content.css('display','block');
         chat_content.scrollTop(chat_content[0].scrollHeight);
-        jQuery('#'+prep4JQ(chat_id)+' .chat-input').css('display','block');
+        jQuery('#'+hashed_id+' .chat-input').css('display','block');
     } 
     else {
         // Chat will be minimized
         if (!(chat_id in oc(minimized_chats))) {
             var new_cookie = chat_id;
             new_cookie += '|'+minimized_chats.join('|');
-            jQuery.cookie('chats_minimized_'+usergc, new_cookie);
+            jQuery.cookie('chats_minimized_'+username, new_cookie);
         }
-        jQuery('#'+prep4JQ(chat_id)+' .chat-content').css('display','none');
-        jQuery('#'+prep4JQ(chat_id)+' .chat-input').css('display','none');
+        jQuery('#'+hashed_id+' .chat-content').css('display','none');
+        jQuery('#'+hashed_id+' .chat-input').css('display','none');
     }
 }
 

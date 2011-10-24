@@ -70,7 +70,7 @@ class Chat(BabbleView):
         return json.dumps({'status': SUCCESS})
 
 
-    def get_uncleared_messages(self, sender=None, mark_cleared=False, until=None):
+    def get_uncleared_messages(self, audience=None, mark_cleared=False):
         """ Retrieve the uncleared messages from the chat server 
         """
         pm = getToolByName(self.context, 'portal_membership')
@@ -96,7 +96,7 @@ class Chat(BabbleView):
             resp = server.getUnclearedMessages(
                                     username, 
                                     password, 
-                                    sender, 
+                                    audience, 
                                     [],
                                     mark_cleared )
         except xmlrpclib.Fault, e:
@@ -132,7 +132,7 @@ class Chat(BabbleView):
                 })
 
 
-    def poll(self, username, chatrooms=[]):
+    def poll(self, username):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
@@ -146,9 +146,7 @@ class Chat(BabbleView):
         # pars: username, password
         try:
             server.confirmAsOnline(username)
-            # def getNewMessages(self, username, password, partner, chatrooms)
-            msgs = server.getNewMessages(username, password, '*', chatrooms)
-            
+            msgs = server.getNewMessages(username, password)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('poll: timeout error for  %s' % username)
@@ -169,14 +167,20 @@ class Chat(BabbleView):
             fullname = self.get_fullname(username)
             msg_dict[username] = (fullname, messages)
 
+        chatroom_msg_dict = {} 
+        for username, messages  in json_dict.get('chatroom_messages', {}).items(): 
+            fullname = self.get_fullname(username)
+            chatroom_msg_dict[username] = (fullname, messages)
+
         return json.dumps({
                 'status': json_dict['status'], 
                 'last_msg_date': json_dict['last_msg_date'],
                 'messages': msg_dict,
+                'chatroom_messages': chatroom_msg_dict,
                 })
 
 
-    def send_message(self, to, message):
+    def send_message(self, to, message, chat_type):
         """ Send a chat message 
         """
         pm = getToolByName(self.context, 'portal_membership')
@@ -194,59 +198,70 @@ class Chat(BabbleView):
         username = member.getId()
         log.debug(u'Chat message from %s sent to %s' % (username, to))
         server = utils.getConnection(self.context)
+
+        if chat_type == 'chatroom':
+            func = server.sendChatRoomMessage
+        else:
+            func = server.sendMessage
+
         try:
-            resp = server.sendMessage(username, password, to, message)
+            resp = func(username, password, to, message)
         except xmlrpclib.Fault, e:
-            err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: sendMessage: %s' % err_msg)
-            raise BabbleException(err_msg)
+            log.error('Error from chat.service: sendMessage: %s' % e)
+            raise BabbleException(e)
 
         json_dict = json.loads(resp)
         if json_dict['status'] != SUCCESS:
-            raise BabbleException('sendMessage from %s to %s failed' \
-                                                        % (username, to))
+            raise BabbleException('sendMessage from %s to %s failed. %s' \
+                                        % (username, to, json_dict))
         return json.dumps({
                 'status': json_dict['status'], 
                 'last_msg_date': json_dict['last_msg_date'],
                 })
 
 
-    def clear_messages(self, contact, until):
-        """ Mark the messages in a chat contact's messagebox as cleared.
-            This means that they won't be loaded and displayed again next time
-            that chat box is opened.
+    def clear_messages(self, audience):
+        """ Mark the messages with an audience (i.e user or chatroom) as 
+            cleared. This means that they won't be loaded and displayed again 
+            next time that chat box is opened.
         """
-        return self.get_uncleared_messages(
-                                        sender=contact, 
-                                        mark_cleared=True,
-                                        until=until
-                                        )
+        return self.get_uncleared_messages(audience=audience, mark_cleared=True)
 
 class ChatBox(BabbleView):
     """ """
     implements(IChatBox)
     template = ViewPageTemplateFile('templates/chatbox.pt')
 
-    def get_box_title(self, box_id):
+    def get_box_title(self, chat_id):
         """ """
-        prefix, contact = box_id.split('_', 1)
-        if prefix == 'chatbox':
+        if not '_' in chat_id:
+            return chat_id
+
+        chat_type, contact = chat_id.split('_', 1)
+        if chat_type == 'chatbox':
             return self.get_fullname(contact)
-        elif prefix == 'chatroom':
+        elif chat_type == 'chatroom':
             return getSite().unrestrictedTraverse(contact).Title()
         return contact
 
     def reverse_escape(self, html):
         return utils.reverse_escape(html)
 
-    def render_chat_box(self, box_id):
+    def render_chat_box(self, chat_id, box_id):
         """ """
-        contact = box_id.split('_', 1)[1]
-        response = utils.get_last_conversation(self.context, contact)
+        chat_type, audience = chat_id.split('_', 1)
+        response = utils.get_last_conversation(
+                                        self.context, 
+                                        audience, 
+                                        chat_type)
+        if chat_type == 'chatroom':
+            messages = response['chatroom_messages']
+        else:
+            messages = response['messages']
         return self.template(
-                        messages=response['messages'], 
-                        last_msg_date=response['last_msg_date'],
+                        messages=messages, 
+                        audience=audience,
                         box_id=box_id, 
-                        name=contact,)
-
+                        chat_type=chat_type,
+                        chat_id=chat_id ,)
 

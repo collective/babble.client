@@ -1,40 +1,38 @@
 <div class="chatbox"
-     tal:attributes="id options/box_id;
-                    last_msg_date options/last_msg_date;"
-     tal:define="contact options/name;
-                 title python:view.get_box_title(options['box_id'])">
+     tal:attributes="id options/box_id"
+     tal:define="chat_id options/chat_id;
+                 box_id options/box_id;
+                 audience options/audience;
+                 chat_type options/chat_type;
+                 title python:view.get_box_title(chat_id)">
 
-    <div class="chat-head"> 
+    <div class="chat-head"
+         tal:attributes="class string:chat-head-$chat_type"> 
         <div class="chat-title"
              tal:content="title">title</div> 
         <div class="chat-options"> 
             <a href="javascript:void(0)" 
-               tal:attributes="onclick string:javascript:toggleChat('${options/box_id}')">-</a> 
+               tal:attributes="onclick string:javascript:toggleChat('$chat_id')">-</a> 
             <a href="javascript:void(0)" 
-               tal:attributes="onclick string:javascript:closeChat('${options/box_id}', '$contact')">X</a> 
+               tal:attributes="onclick string:javascript:closeChat('$chat_id', '$audience')">X</a> 
         </div>  
         <br clear="all"/> 
     </div> 
     <div class="chat-content"
          tal:define="messages options/messages;">
 
-        <div tal:repeat="message python:messages.get(contact, [])"
+        <div tal:repeat="message python:messages.get(audience, [])"
                 class="chat-message">  
             <span 
-                tal:condition="python:message[0] == contact"
+                tal:condition="python:message[0] == audience"
                 class="chat-message-them">
                 <tal:inline tal:replace="title" />
                 <span class="time" tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]"/>
                 &nbsp;&nbsp;
             </span>  
-            <span 
-                tal:condition="python:message[0] != contact"
-                class="chat-message-me">
-                me
-                <span class="time" tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]"/>
-                &nbsp;&nbsp;
-            </span>  
-
+            <span tal:condition="python:message[0] != audience"
+                class="chat-message-me">me 
+                <tal:time tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]" tal:omit-tag="python:True"/>:&nbsp;</span>
             <span class="chat-message-content"
                     tal:content="structure python: message[1]">
             </span>  
@@ -42,6 +40,6 @@
     </div> 
     <div class="chat-input"> 
         <textarea class="chat-textarea"  
-            tal:attributes="onkeydown string:javascript:return keypressed(event, this, '$contact', '${options/box_id}');"></textarea>  
+            tal:attributes="onkeydown string:javascript:return keypressed(event, this, '$audience', '$box_id', '$chat_type');"></textarea>  
     </div>
 </div>
