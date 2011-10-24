@@ -168,15 +168,14 @@ def get_online_members(context):
     return online_members
 
 
-def get_last_conversation(context, contact):
-    """ Get all the uncleared messages between current member and contact
+def get_last_conversation(context, audience, chat_type):
+    """ Get all the uncleared messages between current member and their 
+        audience.
     """
     pm = getToolByName(context, 'portal_membership')
     if pm.isAnonymousUser():
-        return {'status': config.AUTH_FAIL, 
-                'last_msg_date': config.NULL_DATE, 
-                'messages': {}}
-
+        return config.AUTH_FAIL_RESPONSE
+        
     server = getConnection(context)
     member = pm.getAuthenticatedMember()
     username = member.getId()
@@ -185,35 +184,34 @@ def get_last_conversation(context, contact):
     else:
         log.error("get_last_conversation: %s does not have prop 'chatpass'\n"
                   "This should not happen!" % username)
-        return {'status': config.SERVER_FAULT, 
-                'last_msg_date': config.NULL_DATE, 
-                'messages': {}}
+        return config.SERVER_ERROR_RESPONSE
 
+    if chat_type == 'chatroom':
+        partner = None
+        chatrooms = [audience]
+    else:
+        partner = audience
+        chatrooms = []
     try:
         # self, username, password, partner, chatrooms, clear
         resp = server.getUnclearedMessages(
                                 username, 
                                 password, 
-                                contact, 
-                                [],
+                                partner, 
+                                chatrooms,
                                 False, )
-
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from babble.server: getUnclearedMessages: %s' % err_msg)
-        return {'status': config.SERVER_FAULT, 
-                'last_msg_date': config.NULL_DATE, 
-                'messages': {}}
-
+        return config.SERVER_ERROR_RESPONSE
+        
     except socket.error, e:
         # Catch timeouts so that we can notify the caller
         log.error(\
             'Socket error from get_last_conversation: ' + \
             'server.getUnclearedMessages: %s \nIs the chatserver running?' %e)
-        return {'status': config.TIMEOUT, 
-                'last_msg_date': config.NULL_DATE, 
-                'messages': {}}
-    
+        return config.TIMEOUT_RESPONSE
+
     return json.loads(resp)
 
 
