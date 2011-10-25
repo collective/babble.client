@@ -154,14 +154,11 @@ function init() {
     });
 }
 
-function appendMessages(chat_id, contact_id, fullname, messages, minimized, clear_and_replace) {
+function appendMessages(chat_id, messages, minimized, clear_and_replace) {
     /*  chat_id:    The id attr of the div containing the chat
-        contact_id: The contact_id of the conversation partner or chatroom
-        fullname:   The fullname of the conversation partner
         minimized:  Should the chatbox be minmized?
         clear_and_replace: Clear and replace all messages that might be in the chatbox (if it exists).
     */
-    log.info('appendMessages: contact_id is ' + contact_id)
     messages_found += 1;
     if (!new_chats)
         new_chats = [];
@@ -186,6 +183,7 @@ function appendMessages(chat_id, contact_id, fullname, messages, minimized, clea
         //  XXX: Need to put in the full date if more than a day ago...
         message = messages[i];
         var text = message[1];
+        var fullname = message[3];
         var year = message[2].substring(0,4);
         var month = message[2].substring(5,7);
         var day = message[2].substring(8,10);
@@ -193,18 +191,20 @@ function appendMessages(chat_id, contact_id, fullname, messages, minimized, clea
         var minute = message[2].substring(14,16);
         var timeob = new Date(new Date(year, month, day, hour, minute) - new Date().getTimezoneOffset() * 60000);
         var localtime = timeob.toLocaleTimeString().substring(0,5);
-        if (message[0] == contact_id) {
-            message_html = '<div class="chat-message">' + 
-                                '<span class="chat-message-them">'+fullname+' '+localtime+':&nbsp;&nbsp;</span>' + 
-                                '<span class="chat-message-content">'+text+'</span>' + 
-                            '</div>'
-        }
-        else if (messages[i][2] in oc(sent_since_date)) {
-            continue
+        if (message[0] == username) {
+            if (messages[i][2] in oc(sent_since_date)) {
+                continue
+            }
+            else {
+                message_html = '<div class="chat-message">' + 
+                                    '<span class="chat-message-me">me '+localtime+':&nbsp;&nbsp;</span>' + 
+                                    '<span class="chat-message-content">'+text+'</span>' + 
+                                '</div>'
+            }
         } 
         else {
             message_html = '<div class="chat-message">' + 
-                                '<span class="chat-message-me">me '+localtime+':&nbsp;&nbsp;</span>' + 
+                                '<span class="chat-message-them">'+fullname+' '+localtime+':&nbsp;&nbsp;</span>' + 
                                 '<span class="chat-message-content">'+text+'</span>' + 
                             '</div>'
         }
@@ -315,6 +315,10 @@ function createChat(chat_id, minimize) {
         return;
     }
     chatbox = createChatBox(chat_id);
+    if (chatbox.length == 0) {
+        log.error('Could not create chatbox with id: ' + chat_id);
+        return
+    }
     positionNewChat(chatbox);
     chats.push(chat_id);
     if (minimize == 1) {
@@ -466,22 +470,18 @@ function poll_server() {
                 });
             }
             for (var contact_id in data.messages) {
-                var messages = data.messages[contact_id][1];
+                var messages = data.messages[contact_id];
                 if (!messages.length) 
                     continue
-                var fullname = data.messages[contact_id][0];
-                log.info('We received messages for contact_id: ' + fullname);
                 var chat_id = 'chatbox_'+contact_id;
-                appendMessages(chat_id, contact_id, fullname, messages, 0, 0);
+                appendMessages(chat_id, messages, 0, 0);
             };
             for (var chatroom_id in data.chatroom_messages) {
-                var chatroom_messages = data.chatroom_messages[chatroom_id][1];
+                var chatroom_messages = data.chatroom_messages[chatroom_id];
                 if (!chatroom_messages.length) 
                     continue
-                var title = data.chatroom_messages[chatroom_id][0];
-                log.info('We received messages for chatroom: ' + title);
                 var chat_id = 'chatroom_'+chatroom_id;
-                appendMessages(chat_id, chatroom_id, title, chatroom_messages, 0, 0);
+                appendMessages(chat_id, chatroom_messages, 0, 0);
             };
             if (data.last_msg_date > global_received_date)  {
                 global_received_date = data.last_msg_date;
@@ -513,22 +513,18 @@ function getUnclearedMessages() {
                 return true; 
             }
             for(var contact_id in data.messages) {
-                var messages = data.messages[contact_id][1];
+                var messages = data.messages[contact_id];
                 if (!messages.length) 
                     continue
-                var tuple = data.messages[contact_id]
-                var fullname = data.messages[contact_id][0];
-                var chat_id = 'chatbox'+'_'+contact_id;
-                appendMessages(chat_id, contact_id, fullname, messages, 0, 1);
+                var chat_id = 'chatbox_'+contact_id;
+                appendMessages(chat_id, messages, 0, 1);
             };
             for(var chatroom_id in data.chatroom_messages) {
-                var messages = data.messages[chatroom_id][1];
+                var messages = data.messages[chatroom_id];
                 if (!messages.length) 
                     continue
-                var tuple = data.messages[chatroom_id]
-                var title = data.messages[chatroom_id][0];
-                var chat_id = 'chatroom'+'_'+chatroom_id;
-                appendMessages(chat_id, chatroom_id, title, messages, 0, 1);
+                var chat_id = 'chatroom_'+chatroom_id;
+                appendMessages(chat_id, messages, 0, 1);
             };
             // Cancel the current poll
             jQuery.doTimeout('message_recovery_poll');

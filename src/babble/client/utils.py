@@ -194,12 +194,12 @@ def get_last_conversation(context, audience, chat_type):
         chatrooms = []
     try:
         # self, username, password, partner, chatrooms, clear
-        resp = server.getUnclearedMessages(
+        return json.loads(server.getUnclearedMessages(
                                 username, 
                                 password, 
                                 partner, 
                                 chatrooms,
-                                False, )
+                                False, ))
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from babble.server: getUnclearedMessages: %s' % err_msg)
@@ -211,8 +211,6 @@ def get_last_conversation(context, audience, chat_type):
             'Socket error from get_last_conversation: ' + \
             'server.getUnclearedMessages: %s \nIs the chatserver running?' %e)
         return config.TIMEOUT_RESPONSE
-
-    return json.loads(resp)
 
 
 def get_chat_rooms(context):
