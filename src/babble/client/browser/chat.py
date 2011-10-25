@@ -14,31 +14,15 @@ from Products.CMFCore.utils import getToolByName
 from babble.client.browser.interfaces import IChat
 from babble.client.browser.interfaces import IChatBox
 from babble.client import utils
+from babble.client import config
 from babble.client import BabbleException
 from babble.client.config import SUCCESS
 from babble.client.config import TIMEOUT
-from babble.client.config import AUTH_FAIL
-from babble.client.config import NULL_DATE
 
-log = logging.getLogger('babble.client/browser/chat.py')
-
-class BabbleView(BrowserView):
-    """ Base view for common methods """
-
-    def get_fullname(self, username):
-        """ Get user via his ID and return his fullname
-        """
-        pm = getToolByName(self.context, 'portal_membership')
-        member = pm.getMemberById(username)
-        if not member:
-            return username # Not sure what to do here...
-
-        if not member.hasProperty('fullname'):
-            return username
-        return member.getProperty('fullname') or username
+log = logging.getLogger(__name__)
 
 
-class Chat(BabbleView):
+class Chat(BrowserView):
     implements(IChat)
 
     def initialize(self):
@@ -46,7 +30,7 @@ class Chat(BabbleView):
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
-            return json.dumps({'status': AUTH_FAIL})
+            return json.dumps(config.AUTH_FAIL_RESPONSE)
 
         member = pm.getAuthenticatedMember()
         username = member.getId()
@@ -106,11 +90,7 @@ class Chat(BabbleView):
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('get_uncleared__messages: timeout error for  %s' % username)
-            return json.dumps({
-                            'status': TIMEOUT, 
-                            'last_msg_date': NULL_DATE,
-                            'messages': {},
-                            })
+            return json.dumps(config.TIMEOUT_RESPONSE)
 
         json_dict = json.loads(resp)
 
@@ -118,18 +98,7 @@ class Chat(BabbleView):
             raise BabbleException(
                         'getUnclearedMessages for %s failed. %s' \
                         % (username, json_dict.get('errmsg','')))
-
-        # Add the message sender's fullname to the messages dict and return
-        msg_dict = {} 
-        for username, messages  in json_dict['messages'].items(): 
-            fullname = self.get_fullname(username)
-            msg_dict[username] = (fullname, messages)
-
-        return json.dumps({
-                'status': json_dict['status'], 
-                'last_msg_date': json_dict['last_msg_date'],
-                'messages': msg_dict,
-                })
+        return resp
 
 
     def poll(self, username):
@@ -146,38 +115,16 @@ class Chat(BabbleView):
         # pars: username, password
         try:
             server.confirmAsOnline(username)
-            msgs = server.getNewMessages(username, password)
+            return server.getNewMessages(username, password)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.error('poll: timeout error for  %s' % username)
-            return json.dumps({
-                            'status': TIMEOUT, 
-                            'last_msg_date': NULL_DATE,
-                            'messages': {},
-                            })
+            return json.dumps(config.TIMEOUT_RESPONSE)
+            
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
             log.error('Error from chat.service: getNewMessages: %s' % err_msg)
             raise BabbleException(err_msg)
-
-        json_dict = json.loads(msgs)
-        # Add the message sender's fullname to the messages dict and return
-        msg_dict = {} 
-        for username, messages  in json_dict.get('messages', {}).items(): 
-            fullname = self.get_fullname(username)
-            msg_dict[username] = (fullname, messages)
-
-        chatroom_msg_dict = {} 
-        for username, messages  in json_dict.get('chatroom_messages', {}).items(): 
-            fullname = self.get_fullname(username)
-            chatroom_msg_dict[username] = (fullname, messages)
-
-        return json.dumps({
-                'status': json_dict['status'], 
-                'last_msg_date': json_dict['last_msg_date'],
-                'messages': msg_dict,
-                'chatroom_messages': chatroom_msg_dict,
-                })
 
 
     def send_message(self, to, message, chat_type):
@@ -196,6 +143,7 @@ class Chat(BabbleView):
         message = utils.urlize(message, blank=True, auto_escape=False) 
         password = getattr(member, 'chatpass') 
         username = member.getId()
+        fullname = member.getProperty('fullname') or username
         log.debug(u'Chat message from %s sent to %s' % (username, to))
         server = utils.getConnection(self.context)
 
@@ -203,9 +151,8 @@ class Chat(BabbleView):
             func = server.sendChatRoomMessage
         else:
             func = server.sendMessage
-
         try:
-            resp = func(username, password, to, message)
+            resp = func(username, password, fullname, to, message)
         except xmlrpclib.Fault, e:
             log.error('Error from chat.service: sendMessage: %s' % e)
             raise BabbleException(e)
@@ -227,10 +174,26 @@ class Chat(BabbleView):
         """
         return self.get_uncleared_messages(audience=audience, mark_cleared=True)
 
-class ChatBox(BabbleView):
+
+
+class ChatBox(BrowserView):
     """ """
     implements(IChatBox)
     template = ViewPageTemplateFile('templates/chatbox.pt')
+
+
+    def get_fullname(self, username):
+        """ Get user via his ID and return his fullname
+        """
+        pm = getToolByName(self.context, 'portal_membership')
+        member = pm.getMemberById(username)
+        if not member:
+            return username # Not sure what to do here...
+
+        if not member.hasProperty('fullname'):
+            return username
+        return member.getProperty('fullname') or username
+
 
     def get_box_title(self, chat_id):
         """ """
@@ -244,8 +207,10 @@ class ChatBox(BabbleView):
             return getSite().unrestrictedTraverse(contact).Title()
         return contact
 
+
     def reverse_escape(self, html):
         return utils.reverse_escape(html)
+
 
     def render_chat_box(self, chat_id, box_id):
         """ """
