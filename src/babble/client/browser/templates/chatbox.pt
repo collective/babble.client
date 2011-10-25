@@ -1,6 +1,7 @@
 <div class="chatbox"
      tal:attributes="id options/box_id"
      tal:define="chat_id options/chat_id;
+                 member context/@@plone_portal_state/member;
                  box_id options/box_id;
                  audience options/audience;
                  chat_type options/chat_type;
@@ -24,13 +25,13 @@
         <div tal:repeat="message python:messages.get(audience, [])"
                 class="chat-message">  
             <span 
-                tal:condition="python:message[0] == audience"
+                tal:condition="python:message[0] != member.getId()"
                 class="chat-message-them">
-                <tal:inline tal:replace="title" />
+                <tal:inline tal:replace="python:message[3]" />
                 <span class="time" tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]"/>
                 &nbsp;&nbsp;
             </span>  
-            <span tal:condition="python:message[0] != audience"
+            <span tal:condition="python:message[0] == member.getId()"
                 class="chat-message-me">me 
                 <tal:time tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]" tal:omit-tag="python:True"/>:&nbsp;</span>
             <span class="chat-message-content"
