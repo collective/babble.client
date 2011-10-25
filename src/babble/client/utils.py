@@ -10,7 +10,7 @@ from Products.CMFCore.utils import getToolByName
 
 from babble.client import config
 
-log = logging.getLogger('babble.client/utils.py:')
+log = logging.getLogger(__name__)
 
 # Configuration for urlize() function.
 LEADING_PUNCTUATION  = ['(', '<', '&lt;']

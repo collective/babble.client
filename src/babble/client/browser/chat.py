@@ -12,11 +12,12 @@ from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.browser import BrowserView
 from Products.CMFCore.utils import getToolByName
 
+from babble.client import BabbleException
+from babble.client import config
+from babble.client import iso8601
+from babble.client import utils
 from babble.client.browser.interfaces import IChat
 from babble.client.browser.interfaces import IChatBox
-from babble.client import utils
-from babble.client import config
-from babble.client import BabbleException
 from babble.client.config import SUCCESS
 from babble.client.config import TIMEOUT
 
@@ -176,7 +177,6 @@ class Chat(BrowserView):
         return self.get_uncleared_messages(audience=audience, mark_cleared=True)
 
 
-
 class ChatBox(BrowserView):
     """ """
     implements(IChatBox)
@@ -213,7 +213,18 @@ class ChatBox(BrowserView):
         return utils.reverse_escape(html)
 
 
-    def render_chat_box(self, chat_id, box_id):
+    def _to_local_timezone(self, messages, tzoffset):
+        tzoffset = iso8601.FixedOffset(0, int(tzoffset), '')
+        for key in messages.keys():
+            for mtuple in messages[key]:
+                # Change message times to local timezone
+                olddate = iso8601.parse_date(mtuple[2])
+                date = (olddate + tzoffset.offset).replace(tzinfo=tzoffset)
+                mtuple[2] = date.isoformat()
+        return messages
+
+
+    def render_chat_box(self, chat_id, box_id, tzoffset):
         """ """
         chat_type, audience = chat_id.split('_', 1)
         response = utils.get_last_conversation(
@@ -226,6 +237,8 @@ class ChatBox(BrowserView):
             messages = response['chatroom_messages']
         else:
             messages = response['messages']
+
+        messages = self._to_local_timezone(messages, tzoffset)
         return self.template(
                         messages=messages, 
                         audience=audience,

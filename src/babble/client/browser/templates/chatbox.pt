@@ -26,11 +26,17 @@
                 class="chat-message">  
             <span 
                 tal:condition="python:message[0] != member.getId()"
-                class="chat-message-them"><tal:inline tal:replace="python:message[3]"/>
-                <tal:time tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]" tal:omit-tag="python:True"/>:&nbsp;</span>
+                class="chat-message-them">
+                <span 
+                    class="chat-message-time"
+                    tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]" tal:omit-tag="python:True"/> 
+                <tal:inline tal:replace="python:message[3]"/>:&nbsp;</span>
             <span tal:condition="python:message[0] == member.getId()"
-                class="chat-message-me">me 
-                <tal:time tal:content="structure python: message[2].split('T')[1].rsplit(':',2)[0]" tal:omit-tag="python:True"/>:&nbsp;</span>
+                class="chat-message-me">
+                <span 
+                    class="chat-message-time"
+                    tal:content="structure python:
+                    message[2].split('T')[1].rsplit(':',2)[0]" tal:omit-tag="python:True"/> me:&nbsp;</span>
             <span class="chat-message-content"
                     tal:content="structure python: message[1]">
             </span>  

@@ -160,7 +160,12 @@ class ChatRoom(dexterity.Container):
 
         s = getConnection(self)
         try:
-            resp = s.getMessages(username, password, '*', [self.id])
+            resp = s.getMessages(
+                            username, 
+                            password, 
+                            None, 
+                            ['/'.join(self.getPhysicalPath())]
+                            )
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.error('Error from babble.server: getMessages: %s' % err_msg)

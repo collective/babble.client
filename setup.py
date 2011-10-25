@@ -33,7 +33,7 @@ setup(
         'babble.server >= 1.0b3',
         'Products.CMFPlone',
         'plone.app.portlets',
-        'collective.js.blackbird'
+        'collective.js.blackbird',
     ],
     tests_require=tests_require,
     extras_require=dict(tests=tests_require),
