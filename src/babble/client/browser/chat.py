@@ -7,6 +7,7 @@ import simplejson as json
 from zope.interface import implements
 from zope.component.hooks import getSite
 
+from zExceptions import NotFound
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.browser import BrowserView
 from Products.CMFCore.utils import getToolByName
@@ -219,6 +220,8 @@ class ChatBox(BrowserView):
                                         self.context, 
                                         audience, 
                                         chat_type)
+        if response['status'] != config.SUCCESS:
+            raise NotFound
         if chat_type == 'chatroom':
             messages = response['chatroom_messages']
         else:
