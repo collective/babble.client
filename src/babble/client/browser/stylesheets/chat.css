@@ -44,6 +44,10 @@ div.filter-contacts-message{
 	color: #ffffff;
 }
 
+.chat-head-minimized-with-messages {
+    background-color: #5C0803;
+}
+
 .chat-blink {
 	background-color: #176689;
 	border-right:1px solid #176689;

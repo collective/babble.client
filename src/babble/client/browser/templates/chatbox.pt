@@ -8,7 +8,7 @@
                  title python:view.get_box_title(chat_id)">
 
     <div class="chat-head"
-         tal:attributes="class string:chat-head-$chat_type"> 
+         tal:attributes="class string:chat-head chat-head-$chat_type"> 
         <div class="chat-title"
              tal:content="title">title</div> 
         <div class="chat-options"> 

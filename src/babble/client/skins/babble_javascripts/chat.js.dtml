@@ -264,9 +264,8 @@ function toLocalTime(timestr) {
     return timeob.toLocaleTimeString().substring(0,5);
 }
 
-function appendMessages(chat_id, messages, minimized, clear_and_replace) {
+function appendMessages(chat_id, messages, clear_and_replace) {
     /*  chat_id:    The id attr of the div containing the chat
-        minimized:  Should the chatbox be minmized?
         clear_and_replace: Clear and replace all messages that might be in the chatbox (if it exists).
     */
     messages_found += 1;
@@ -276,7 +275,7 @@ function appendMessages(chat_id, messages, minimized, clear_and_replace) {
     new_chats[chat_id] = true;
     var chat = jQuery('#'+hash(chat_id));
     if (chat.length <= 0) {
-        createChat(chat_id, minimized);
+        createChat(chat_id);
         // createChat will fetch all uncleared messages (including the new ones
         // we have here), therefore we can just return here
         return;
@@ -314,6 +313,11 @@ function appendMessages(chat_id, messages, minimized, clear_and_replace) {
         }
         chat_content.append(message_html);
     }
+    if (chat_content.css('display') == 'none') {
+        // The chatbox is minimized, so we change it's header color to alert
+        // the user.
+        chat.find('.chat-head').addClass('chat-head-minimized-with-messages');
+    }
     chat_content.scrollTop(chat_content[0].scrollHeight);
 }
 
@@ -340,12 +344,12 @@ function getUnclearedMessages() {
             }
             jQuery.each(data.messages, function(contact_id, messages) {
                 if (messages.length) {
-                    appendMessages('chatbox_'+contact_id, messages, 0, 0);
+                    appendMessages('chatbox_'+contact_id, messages, 1);
                 }
             });
             jQuery.each(data.chatroom_messages, function(chatroom_id, messages) {
                 if (messages.length) {
-                    appendMessages('chatroom_'+chatroom_id, messages, 0, 0);
+                    appendMessages('chatroom_'+chatroom_id, messages, 1);
                 }
             });
             // Cancel the current poll
@@ -393,12 +397,12 @@ function poll_server() {
             }
             jQuery.each(data.messages, function(contact_id, messages) {
                 if (messages.length) {
-                    appendMessages('chatbox_'+contact_id, messages, 0, 0);
+                    appendMessages('chatbox_'+contact_id, messages, 0);
                 }
             });
             jQuery.each(data.chatroom_messages, function(chatroom_id, messages) {
                 if (messages.length) {
-                    appendMessages('chatroom_'+chatroom_id, messages, 0, 0);
+                    appendMessages('chatroom_'+chatroom_id, messages, 0);
                 }
             });
             if (data.last_msg_date > global_received_date)  {
@@ -517,9 +521,10 @@ function keypressed(event, textarea, audience, hashed_id, chat_type) {
 function toggleChat(chat_id) {
     var minimized_chats = getMinimizedChats();
     var hashed_id = hash(chat_id); 
+    var new_cookie;
     if (jQuery('#'+hashed_id+' .chat-content').css('display') == 'none') {  
         // Chat will be maximized
-        var new_cookie = Array();
+        new_cookie = [];
         for (var i=0; i < minimized_chats.length; i++) {
             if (minimized_chats[i] != chat_id) {
                 new_cookie.push(minimized_chats[i]);
@@ -529,12 +534,13 @@ function toggleChat(chat_id) {
         var chat_content = jQuery('#'+hashed_id+' .chat-content');
         chat_content.css('display','block');
         chat_content.scrollTop(chat_content[0].scrollHeight);
+        jQuery('#'+hashed_id+' .chat-head').removeClass('chat-head-minimized-with-messages');
         jQuery('#'+hashed_id+' .chat-input').css('display','block');
     } 
     else {
         // Chat will be minimized
         if (!(chat_id in oc(minimized_chats))) {
-            var new_cookie = chat_id;
+            new_cookie = chat_id;
             new_cookie += '|'+minimized_chats.join('|');
             jQuery.cookie('chats_minimized_'+username, new_cookie);
         }
