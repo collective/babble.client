@@ -6,8 +6,8 @@ from five import grok
 from z3c.form.interfaces import IDisplayForm
 from zope import schema
 from zope.app.container.interfaces import IObjectAddedEvent
-from zope.app.container.interfaces import IObjectEditedEvent
 from zope.app.container.interfaces import IObjectRemovedEvent
+from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 from zope.component import getMultiAdapter
 from plone.directives import dexterity, form
 from zExceptions import Unauthorized
@@ -129,7 +129,7 @@ def _editChatRoom(chatroom):
         s.createChatRoom(member.getId(), password, chatroom.id, participants)
 
 
-@grok.subscribe(IChatRoom, IObjectEditedEvent)
+@grok.subscribe(IChatRoom, IObjectModifiedEvent)
 def handleChatRoomEdited(chatroom, event):
     """ """
     _editChatRoom(chatroom)
