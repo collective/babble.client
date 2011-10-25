@@ -32,6 +32,13 @@ div.filter-contacts-message{
     z-index: 3; /* So that it's higher than the content actions */
 }
 
+.chat-head {
+	padding:7px;
+	color: #ffffff;
+    margin: 0;
+	font-size: 100%;
+}
+
 .chat-head-chatbox {
 	background-color: #578308;
 	padding:7px;
@@ -91,8 +98,13 @@ div.filter-contacts-message{
 	overflow:hidden;
 }
 
-.chat-textarea-selected {
+.chat-textarea-chatbox-selected {
 	border: 2px solid #578308;
+	margin:0;
+}
+
+.chat-textarea-chatroom-selected {
+	border: 2px solid #2D617A;
 	margin:0;
 }
 
@@ -142,8 +154,12 @@ div.filter-contacts-message{
     padding-right: 1em;
 }
 
-.chat-title {
+div.chat-title {
 	float: left;
 	font-weight: bold;
+}
+
+div.chat-title a {
+    color: white;
 }
 

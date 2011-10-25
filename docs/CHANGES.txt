@@ -4,14 +4,10 @@ Changelog
 2.0a4 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
-
-2.0a4 (unreleased)
-------------------
-
-- Nothing changed yet.
-
+- New content type chatroom. This enables chatboxes where multiple users can
+  chat with one another. [jcbrand]
+- Minimized chatboxes turn red when they receive messages. [jcbrand]
+- Chatbox headers are now clickable. [jcbrand]
 
 2.0a3 (2011-10-18)
 ------------------

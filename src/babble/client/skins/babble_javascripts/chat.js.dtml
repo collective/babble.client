@@ -145,14 +145,15 @@ function closeChat(chat_id, audience) {
 }
 
 function handleChatEvents(chat_id) {
+    var chat_type = chat_id.split('_')[0];
     chat_focus[chat_id] = false;
     var chat_area = jQuery("#"+hash(chat_id)+" .chat-textarea");
     chat_area.blur(function(){
         chat_focus[chat_id] = false;
-        chat_area.removeClass('chat-textarea-selected');
+        chat_area.removeClass('chat-textarea-'+chat_type+'-selected');
     }).focus(function(){
         chat_focus[chat_id] = true;
-        chat_area.addClass('chat-textarea-selected');
+        chat_area.addClass('chat-textarea-'+chat_type+'-selected');
     });
     var chatbox = jQuery("#"+hash(chat_id));
     chatbox.click(function() {

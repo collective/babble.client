@@ -5,12 +5,19 @@
                  box_id options/box_id;
                  audience options/audience;
                  chat_type options/chat_type;
+                 base_url python:context.portal_url();
                  title python:view.get_box_title(chat_id)">
 
     <div class="chat-head"
          tal:attributes="class string:chat-head chat-head-$chat_type"> 
-        <div class="chat-title"
-             tal:content="title">title</div> 
+        <div class="chat-title">
+            <a  tal:condition="python:chat_type == 'chatroom'"
+                tal:attributes="href audience"
+                tal:content="title">title</a>
+            <a  tal:condition="python:chat_type == 'chatbox'"
+                tal:attributes="href string:${base_url}/author/${audience}"
+                tal:content="title">title</a>
+        </div> 
         <div class="chat-options"> 
             <a href="javascript:void(0)" 
                tal:attributes="onclick string:javascript:toggleChat('$chat_id')">-</a> 
@@ -20,6 +27,7 @@
         <br clear="all"/> 
     </div> 
     <div class="chat-content"
+         tal:attributes="class string:chat-content chat-content-$chat_type"
          tal:define="messages options/messages;">
 
         <div tal:repeat="message python:messages.get(audience, [])"
@@ -42,7 +50,8 @@
             </span>  
         </div>
     </div> 
-    <div class="chat-input"> 
+    <div class="chat-input"
+         tal:attributes="class string:chat-input chat-input-$chat_type">
         <textarea class="chat-textarea"  
             tal:attributes="onkeydown string:javascript:return keypressed(event, this, '$audience', '$box_id', '$chat_type');"></textarea>  
     </div>
