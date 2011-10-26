@@ -7,15 +7,18 @@ from z3c.form.interfaces import IDisplayForm
 from zope import schema
 from zope.app.container.interfaces import IObjectAddedEvent
 from zope.app.container.interfaces import IObjectRemovedEvent
-from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 from zope.component import getMultiAdapter
+from zope.component.hooks import getSite
+from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 from plone.directives import dexterity, form
+from plone.indexer.decorator import indexer
 from zExceptions import Unauthorized
 from Products.CMFCore.utils import getToolByName
 from babble.client import BabbleMessageFactory as _
 from babble.client import config
 from babble.client.events import ILocalRolesModifiedEvent
 from babble.client.utils import getConnection
+from babble.client import iso8601
 
 log = logging.getLogger(__name__)
 
@@ -27,6 +30,7 @@ class IChatRoom(form.Schema):
             )
     form.omitted(u'conversation')
     form.no_omit(IDisplayForm, u'conversation')
+    form.widget(conversation="plone.app.z3cform.wysiwyg.WysiwygFieldWidget")
 
 
 def _getChatPassword(member):
@@ -141,40 +145,80 @@ def handleChatRoomLocalRolesModified(chatroom, event):
     _editChatRoom(chatroom)
 
 
+@indexer(IChatRoom)
+def conversation(obj):
+    return obj.conversation
+
+
 class ChatRoom(dexterity.Container):
     grok.implements(IChatRoom)
 
+    def __init__(self, id=None, **kwargs):
+        super(ChatRoom, self)(id, **kwargs)
+        self.cached_conversation = self.conversation
+
     @property
     def conversation(self):
-        pm = getToolByName(self, 'portal_membership')
+        site = getSite()
+        pm = getToolByName(site, 'portal_membership')
         if pm.isAnonymousUser():
             # XXX: What do we do when anonymous has sharing rights?
             return _("Please log in to view this conversation")
 
+        # self doesn't have a full acquisition chain, so we use the brain from the
+        # catalog
+        catalog = getToolByName(site, 'portal_catalog')
+        ps = catalog(
+                    portal_type=self.portal_type, 
+                    id=self.id,
+                    creation_date=self.creation_date,
+                    modification_date=self.modification_date)
+        if len(ps) != 1:
+            return _("CatalogError: Could not retrieve the conversation. Please "
+                     "contact your site administrator.")
+
+        brain = ps[0]
         member = pm.getAuthenticatedMember()
         username = member.getId()
         password = _getChatPassword(member)
         if password is None:
             return _("Error fetching the conversation. You do not have chat "
-                     "password. Please contact your system administrator.")
+                     "password. Please contact your site administrator.")
 
-        s = getConnection(self)
+        s = getConnection(site)
         try:
-            resp = s.getMessages(
-                            username, 
-                            password, 
-                            None, 
-                            ['/'.join(self.getPhysicalPath())]
-                            )
+            response = json.loads(s.getMessages(
+                                    username, 
+                                    password, 
+                                    None, 
+                                    [brain.getPath()],
+                                    None,
+                                    None ))
         except xmlrpclib.Fault, e:
-            err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from babble.server: getMessages: %s' % err_msg)
-            return self.conversation
+            log.error('Error from babble.server: getMessages: %s' % e)
+            return self.cached_conversation
+
         except socket.error, e:
             log.error('Error from babble.server: getMessages: %s' % e)
-            return self.conversation
+            return self.cached_conversation
 
-        self.conversation = resp
-        return self.conversation
-            
+        lines = [] 
+        messages = response.get('chatroom_messages', {}).get(brain.getPath(), [])
+        for m in messages:
+            date = iso8601.parse_date(m[2]).strftime('%Y-%m-%d %H:%M')
+            if m[0] == member.getId():
+                line = \
+                    '<div class="chat-message">' + \
+                        '<span class="chat-message-them">'+date+' '+m[3]+':&nbsp;&nbsp;</span>' + \
+                        '<span class="chat-message-content">'+m[1]+'</span>' + \
+                    '</div>'
+            else:
+                line = \
+                    '<div class="chat-message">' + \
+                        '<span class="chat-message-me">'+date+' me:&nbsp;&nbsp;</span>' + \
+                        '<span class="chat-message-content">'+m[1]+'</span>' + \
+                    '</div>'
+            lines.append(line)
+        self.cached_conversation = ''.join(lines)
+        return self.cached_conversation
 
