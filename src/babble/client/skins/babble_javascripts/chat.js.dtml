@@ -608,6 +608,9 @@ function init() {
 }
 
 jQuery(document).ready(function() {
+    jQuery('#form-widgets-conversation').each(function () {
+        $(this).scrollTop(this.scrollHeight);
+    });
     var chatdata = jQuery('span#babble-client-chatdata');
     poll_max = chatdata.attr('poll_max');
     poll_min = chatdata.attr('poll_min');

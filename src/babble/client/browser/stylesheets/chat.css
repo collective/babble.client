@@ -1,3 +1,11 @@
+div#form-widgets-conversation {
+    overflow-y: scroll;
+    height: 300px;
+    padding: 1em 0 1em 1em;
+	border :1px solid #ccc;
+}
+
+
 div.no-contacts-message {
     padding-top:1em;
     padding-left:1em;
