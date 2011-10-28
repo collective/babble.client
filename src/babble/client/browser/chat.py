@@ -4,6 +4,7 @@ import random
 import socket
 import xmlrpclib
 import simplejson as json
+import transaction
 from zope.interface import implements
 from zope.component.hooks import getSite
 
@@ -27,15 +28,19 @@ log = logging.getLogger(__name__)
 class Chat(BrowserView):
     implements(IChat)
 
-    def initialize(self):
+    def initialize(self, username=None):
         """ Check if the user is registered, and register if not... 
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
             return json.dumps(config.AUTH_FAIL_RESPONSE)
 
-        member = pm.getAuthenticatedMember()
-        username = member.getId()
+        if username is None:
+            member = pm.getAuthenticatedMember()
+            username = member.getId()
+        else:
+            member = pm.getMemberById(username)
+
         log.debug('initialize called, username: %s' % username)
         
         server = utils.getConnection(self.context)
@@ -52,6 +57,9 @@ class Chat(BrowserView):
             password = str(random.random())
             json.loads(server.register(username, password))
             setattr(member, 'chatpass', password)
+            # Commit this transaction so that the chatpass is not lost if
+            # something fails after this step
+            transaction.commit()
 
         return json.dumps({'status': SUCCESS})
 
