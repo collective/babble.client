@@ -34,7 +34,7 @@ var timeout = 2000;
 var window_focus = true;
 
 if (!log) {
-log = {
+var log = {
     toggle: function() {},
     move:   function() {},
     resize: function() {},
