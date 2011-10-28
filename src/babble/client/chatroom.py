@@ -18,7 +18,7 @@ from babble.client import BabbleMessageFactory as _
 from babble.client import config
 from babble.client.events import ILocalRolesModifiedEvent
 from babble.client.utils import getConnection
-from babble.client import iso8601
+from babble.client.utils import get_html_formatted_messages
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +117,10 @@ def _editChatRoom(chatroom):
     if password is None:
         return
 
-    participants = [r[0] for r in chatroom.get_local_roles()]
+    plone_utils = getToolByName(chatroom, 'plone_utils')
+    roles = plone_utils.getInheritedLocalRoles(chatroom)
+    participants = [r[0] for r in roles]
+    participants += [r[0] for r in chatroom.get_local_roles()]
     s = getConnection(chatroom)
     try:
         resp = json.loads(s.editChatRoom(member.getId(), password, chatroom.id, participants))
@@ -154,7 +157,7 @@ class ChatRoom(dexterity.Container):
     grok.implements(IChatRoom)
 
     def __init__(self, id=None, **kwargs):
-        super(ChatRoom, self)(id, **kwargs)
+        super(ChatRoom, self).__init__(id, **kwargs)
         self.cached_conversation = self.conversation
 
     @property
@@ -202,23 +205,7 @@ class ChatRoom(dexterity.Container):
             log.error('Error from babble.server: getMessages: %s' % e)
             return self.cached_conversation
 
-        lines = [] 
         messages = response.get('chatroom_messages', {}).get(brain.getPath(), [])
-        for m in messages:
-            date = iso8601.parse_date(m[2]).strftime('%Y-%m-%d %H:%M')
-            if m[0] == member.getId():
-                line = \
-                    '<div class="chat-message">' + \
-                        '<span class="chat-message-them">'+date+' '+m[3]+':&nbsp;&nbsp;</span>' + \
-                        '<span class="chat-message-content">'+m[1]+'</span>' + \
-                    '</div>'
-            else:
-                line = \
-                    '<div class="chat-message">' + \
-                        '<span class="chat-message-me">'+date+' me:&nbsp;&nbsp;</span>' + \
-                        '<span class="chat-message-content">'+m[1]+'</span>' + \
-                    '</div>'
-            lines.append(line)
-        self.cached_conversation = ''.join(lines)
+        self.cached_conversation = get_html_formatted_messages(username, messages)
         return self.cached_conversation
 

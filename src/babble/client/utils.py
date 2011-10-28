@@ -9,6 +9,7 @@ from socket import error as socket_error
 from Products.CMFCore.utils import getToolByName
 
 from babble.client import config
+from babble.client import iso8601
 
 log = logging.getLogger(__name__)
 
@@ -222,4 +223,24 @@ def get_chat_rooms(context):
                 portal_type='babble.client.chatroom',
                 allowedRolesAndUsers=member.getId())
     	
+
+def get_html_formatted_messages(username, messages):
+    """ """
+    lines = [] 
+    for m in messages:
+        date = iso8601.parse_date(m[2]).strftime('%Y-%m-%d %H:%M')
+        if m[0] == username:
+            line = \
+                '<div class="chat-message">' + \
+                    '<span class="chat-message-them">'+date+' '+m[3]+':&nbsp;&nbsp;</span>' + \
+                    '<span class="chat-message-content">'+m[1]+'</span>' + \
+                '</div>'
+        else:
+            line = \
+                '<div class="chat-message">' + \
+                    '<span class="chat-message-me">'+date+' me:&nbsp;&nbsp;</span>' + \
+                    '<span class="chat-message-content">'+m[1]+'</span>' + \
+                '</div>'
+        lines.append(line)
+    return ''.join(lines)
 
