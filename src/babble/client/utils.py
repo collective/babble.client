@@ -229,7 +229,7 @@ def get_html_formatted_messages(username, messages):
     lines = [] 
     for m in messages:
         date = iso8601.parse_date(m[2]).strftime('%Y-%m-%d %H:%M')
-        if m[0] == username:
+        if m[0] != username:
             line = \
                 '<div class="chat-message">' + \
                     '<span class="chat-message-them">'+date+' '+m[3]+':&nbsp;&nbsp;</span>' + \
