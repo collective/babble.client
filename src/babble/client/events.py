@@ -6,12 +6,10 @@ from zope.interface import Interface
 from zope.interface import implements
 from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 
-from zope.app.container.interfaces import IObjectRemovedEvent
 from zope.app.component.hooks import getSite
 
 from five import grok
 
-from Products.CMFCore.interfaces import IMemberData
 from Products.CMFCore.utils import getToolByName
 from Products.PlonePAS.interfaces.events import IUserInitialLoginInEvent
 

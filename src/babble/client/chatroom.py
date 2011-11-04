@@ -121,9 +121,16 @@ def _editChatRoom(chatroom):
     roles = plone_utils.getInheritedLocalRoles(chatroom)
     participants = [r[0] for r in roles]
     participants += [r[0] for r in chatroom.get_local_roles()]
+    chatroom_path = '/'.join(chatroom.getPhysicalPath())
     s = getConnection(chatroom)
     try:
-        resp = json.loads(s.editChatRoom(member.getId(), password, chatroom.id, participants))
+        resp = json.loads(
+                    s.editChatRoom(
+                            member.getId(), 
+                            password, 
+                            chatroom_path, 
+                            participants
+                    ))
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
         log.error('Error from babble.server: editChatRoom: %s' % err_msg)
@@ -133,7 +140,11 @@ def _editChatRoom(chatroom):
         return 
 
     if resp['status'] == config.NOT_FOUND:
-        s.createChatRoom(member.getId(), password, chatroom.id, participants)
+        s.createChatRoom(
+                    member.getId(), 
+                    password, 
+                    chatroom_path,
+                    participants)
 
 
 @grok.subscribe(IChatRoom, IObjectModifiedEvent)
