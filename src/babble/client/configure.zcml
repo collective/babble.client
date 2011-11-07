@@ -9,6 +9,7 @@
     xmlns:zcml="http://namespaces.zope.org/zcml"
     i18n_domain="babble.client">
 
+    <includeDependencies package="." />
     <grok:grok package="." />
 
     <include package="Products.CMFCore" file="permissions.zcml"
