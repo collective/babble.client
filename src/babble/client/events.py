@@ -14,6 +14,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.PlonePAS.interfaces.events import IUserInitialLoginInEvent
 
 from babble.client.utils import getConnection
+from babble.client.interfaces import IBabbleClientLayer
 
 
 class ILocalRolesModifiedEvent(IObjectModifiedEvent):
@@ -28,6 +29,9 @@ class LocalRolesModifiedEvent(ObjectEvent):
 @grok.subscribe(Interface, IUserInitialLoginInEvent)
 def registerUserForChatRooms(user, event):
     """ """
+    if not IBabbleClientLayer.providedBy(user.REQUEST):
+        return
+        
     site = getSite()
     username = user.getId()
 
