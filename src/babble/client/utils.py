@@ -169,7 +169,7 @@ def get_online_members(context):
     return online_members
 
 
-def get_last_conversation(context, audience, chat_type):
+def get_last_conversation(context, audience, chat_type='chatbox'):
     """ Get all the uncleared messages between current member and their 
         audience.
     """

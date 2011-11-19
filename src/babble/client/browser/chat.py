@@ -64,8 +64,11 @@ class Chat(BrowserView):
         return json.dumps({'status': SUCCESS})
 
 
-    def get_uncleared_messages(self, audience=None, mark_cleared=False):
-        """ Retrieve the uncleared messages from the chat server 
+    def get_uncleared_messages(self, audience='*', mark_cleared=False):
+        """ Retrieve the uncleared messages from the chat server.
+
+            If audience == '*', messages from all conversation partners are 
+            returned.
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
@@ -137,7 +140,7 @@ class Chat(BrowserView):
             raise BabbleException(err_msg)
 
 
-    def send_message(self, to, message, chat_type):
+    def send_message(self, to, message, chat_type='chatbox'):
         """ Send a chat message 
         """
         pm = getToolByName(self.context, 'portal_membership')
