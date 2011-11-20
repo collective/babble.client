@@ -3,8 +3,6 @@ import os
 
 version = '2.0a4dev'
 
-tests_require=[]
-
 setup(
     name='babble.client',
     version=version,
@@ -30,7 +28,7 @@ setup(
     install_requires=[
         'setuptools',
         'simplejson',
-        'babble.server >= 1.0b4',
+        'babble.server == 1.0b4',
         'Products.CMFPlone',
         'five.grok',
         'plone.app.dexterity',
@@ -38,8 +36,9 @@ setup(
         'plone.app.portlets',
         'collective.js.blackbird',
     ],
-    tests_require=tests_require,
-    extras_require=dict(tests=tests_require),
+    extras_require={
+    'test': 'plone.app.referenceablebehavior',
+    },
     entry_points="""
     [z3c.autoinclude.plugin]
     target = plone

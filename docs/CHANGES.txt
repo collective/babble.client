@@ -8,6 +8,7 @@ Changelog
   chat with one another. [jcbrand]
 - Minimized chatboxes turn red when they receive messages. [jcbrand]
 - Chatbox headers are now clickable. [jcbrand]
+- New portlet to show chatrooms. [jcbrand]
 
 2.0a3 (2011-10-18)
 ------------------
