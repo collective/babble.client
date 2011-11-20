@@ -1,5 +1,5 @@
 <tal:get define="portlet_id view/get_id;
-                 chatrooms view/get_online_members;"
+                 chatrooms view/get_chat_rooms;"
                  tal:condition="chatrooms"
      i18n:domain="babble.client">
 
@@ -39,13 +39,13 @@
                             anonymous view/is_anonymous;"
                 tal:attributes="class python:oddrow and 'even chatportlet-available-chatroom' or 'odd chatportlet-available-chatroom'">
 
-                <a  tal:content="chatroom/title_or_id" 
+                <a  tal:content="chatroom/Title" 
                     style="cursor: pointer;"
                     tal:condition="not: anonymous"
                     tal:attributes="onclick string:jQuery.noConflict();; startChat('chatroom_${chatroom/getPath}')"> 
                     Chat Room Name 
                 </a>
-                <a  tal:content="chatroom/title_or_id" 
+                <a  tal:content="chatroom/Title" 
                     style="cursor: pointer;"
                     tal:condition="anonymous"
                     href="login_form">

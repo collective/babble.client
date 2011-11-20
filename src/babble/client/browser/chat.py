@@ -24,7 +24,6 @@ from babble.client.config import TIMEOUT
 
 log = logging.getLogger(__name__)
 
-
 class Chat(BrowserView):
     implements(IChat)
 

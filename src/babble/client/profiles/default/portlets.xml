@@ -7,4 +7,10 @@
    description="A portlet which shows you a list of all online users and enables you to contact them."
    />
 
+ <portlet
+   addview="babble.client.chatrooms"
+   title="Chat Rooms"
+   description="This portlet displays the chat rooms available to the current user and enables them to open and participate in them"
+   />
+
 </portlets>
