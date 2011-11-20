@@ -15,4 +15,16 @@
         editview=".onlinecontacts.EditForm"
         />
 
+
+    <plone:portlet
+        name="babble.client.chatrooms"
+        interface=".chatrooms.IChatRooms"
+        assignment=".chatrooms.Assignment"
+        view_permission="zope2.View"
+        edit_permission="cmf.ManagePortal"
+        renderer=".chatrooms.Renderer"
+        addview=".chatrooms.AddForm"
+        editview=".chatrooms.EditForm"
+        />
+
 </configure>

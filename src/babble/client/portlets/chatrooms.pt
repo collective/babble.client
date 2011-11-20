@@ -1,0 +1,60 @@
+<tal:get define="portlet_id view/get_id;
+                 chatrooms view/get_online_members;"
+                 tal:condition="chatrooms"
+     i18n:domain="babble.client">
+
+<tal:script condition="python:len(chatrooms) > 7" replace="structure string: 
+<script type='text/javascript'>
+    jQuery(document).ready(function(){
+        doc_title = document.title;
+        jQuery([window, document]).blur(function(){
+            window_focus = false;
+        }).focus(function(){
+            window_focus = true;
+            document.title = doc_title;
+        });
+        jQuery('dl#$portlet_id dd#$portlet_id-chatrooms div').quicksearch({
+            position: 'append',
+            attached: 'dd#$portlet_id-footer',
+            loaderText: 'Filtering chatr ooms',
+            delay: 100
+        })
+    });
+</script>"/>
+
+<dl class="portlet available-chatrooms" 
+    tal:attributes="id portlet_id">
+    <dt class="portletHeader">
+        <span tal:replace="view/title">Who's online?</span>
+    </dt>
+
+    <metal:macro define-macro="current-available-chatrooms">
+        <dd class="portletItem" 
+            id="available-chatrooms"
+            tal:attributes="class python:len(chatrooms) > 7 and 'available-chatrooms-max portletItem' or 'available-chatrooms portletItem';
+                            id string:$portlet_id-chatrooms">
+        <tal:items tal:repeat="chatroom chatrooms">
+            <div class="chatportlet-available-chatroom"
+                tal:define="oddrow repeat/chatroom/odd;
+                            anonymous view/is_anonymous;"
+                tal:attributes="class python:oddrow and 'even chatportlet-available-chatroom' or 'odd chatportlet-available-chatroom'">
+
+                <a  tal:content="chatroom/title_or_id" 
+                    style="cursor: pointer;"
+                    tal:condition="not: anonymous"
+                    tal:attributes="onclick string:jQuery.noConflict();; startChat('chatroom_${chatroom/getPath}')"> 
+                    Chat Room Name 
+                </a>
+                <a  tal:content="chatroom/title_or_id" 
+                    style="cursor: pointer;"
+                    tal:condition="anonymous"
+                    href="login_form">
+                    Chat Room Name 
+                </a>
+            </div>
+        </tal:items>
+        </dd>
+        <dd class="portletFooter" tal:condition="python:len(chatrooms) > 7" tal:attributes="id string:$portlet_id-footer"></dd>
+    </metal:macro>
+</dl>
+</tal:get>

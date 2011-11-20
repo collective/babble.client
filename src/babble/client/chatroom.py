@@ -23,7 +23,9 @@ from babble.client.utils import get_html_formatted_messages
 log = logging.getLogger(__name__)
 
 class IChatRoom(form.Schema):
-    """ """
+    """ A ChatRoom represents a multi-user conversation. Any logged in user who
+        has the 'view' permission on a chat room may participate.
+    """
     conversation = schema.Text(
             title=_(u'label_conversation', default=u'Conversation'),
             default=_(u'No conversation yet'),

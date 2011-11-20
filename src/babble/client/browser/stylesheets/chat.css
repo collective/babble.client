@@ -5,28 +5,31 @@ div#form-widgets-conversation {
 	border :1px solid #ccc;
 }
 
-
 div.no-contacts-message {
     padding-top:1em;
     padding-left:1em;
 }
 
-dd.online-contacts {
+dd.online-contacts,
+dd.available-chatroooms {
     padding: 0 !important;
 }
 
-dd.online-contacts-max {
+dd.online-contacts-max,
+dd.available-chatrooms-max {
     padding: 0 !important;
     height: 18em;
     overflow-y: scroll;
     overflow-x: hidden;
 }
 
-div.chatportlet-online-contact {
+div.chatportlet-online-contact,
+div.chatportlet-available-chatroom {
     padding:0.7em;
 }
 
-div.filter-contacts-message{
+div.filter-contacts-message, 
+div.filter-chatroomss-message{
 	font-size: 10px;
 }
 
