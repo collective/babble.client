@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '2.0a4'
+version = '2.0a5dev'
 
 setup(
     name='babble.client',
@@ -28,7 +28,7 @@ setup(
     install_requires=[
         'setuptools',
         'simplejson',
-        'babble.server == 1.0b4',
+        'babble.server >= 1.0b4',
         'Products.CMFPlone',
         'five.grok',
         'plone.app.dexterity',
