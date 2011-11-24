@@ -183,8 +183,11 @@ def get_last_conversation(context, audience, chat_type='chatbox'):
     if hasattr(member, 'chatpass'):
         password = getattr(member, 'chatpass') 
     else:
-        log.error("get_last_conversation: %s does not have prop 'chatpass'\n"
-                  "This should not happen!" % username)
+        log.error("get_last_conversation: %s does not have property 'chatpass'. "
+                  "This usually happens when you have deleted and recreated a "
+                  "user in Plone, while the Babble ChatService user remains. "
+                  "Delete the ChatService user as well and retry. \n"
+                  "You can ignore this message during creating of a new Plone site." % username)
         return config.SERVER_ERROR_RESPONSE
 
     if chat_type == 'chatroom':

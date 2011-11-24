@@ -1,3 +1,4 @@
+import logging
 import simplejson as json
 
 from zope.component import getMultiAdapter
@@ -15,6 +16,8 @@ from Products.PlonePAS.interfaces.events import IUserInitialLoginInEvent
 
 from babble.client.utils import getConnection
 from babble.client.interfaces import IBabbleClientLayer
+
+log = logging.getLogger(__name__)
 
 
 class ILocalRolesModifiedEvent(IObjectModifiedEvent):
@@ -41,7 +44,15 @@ def registerUserForChatRooms(user, event):
     
     mtool = getToolByName(site, 'portal_membership')
     member = mtool.getMemberById(username)
-    password = getattr(member, 'chatpass')
+    try:
+        password = getattr(member, 'chatpass')
+    except AttributeError, e:
+        log.error(e)
+        log.error("%s does not have property 'chatpass'.\n"
+                  "This usually happens when you have deleted and recreated a "
+                  "user in Plone, while the Babble ChatService user remains. "
+                  "Delete the ChatService user as well and retry." % username)
+        return
 
     catalog = getToolByName(site, 'portal_catalog')
     chatrooms = catalog(portal_type='babble.client.chatroom',
