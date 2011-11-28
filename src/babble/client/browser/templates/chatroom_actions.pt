@@ -1,0 +1,16 @@
+<form>
+<label for="form-widgets-conversation" class="horizontal">
+    Conversation
+</label>
+
+<div class="formHelp">
+Below is a read-only history of all the messages sent in this chat room. 
+If you would like to write a message to this chatroom, click the following button to
+<br/>
+<input type="button" 
+        value="Send a Message"
+        name="babble.client.chatroom.participate"
+        tal:define="path python:'/'.join(context.getPhysicalPath())"
+        tal:attributes="onclick string:jQuery.noConflict();; startChat('chatroom_${path}')"/> 
+</div>
+</form>

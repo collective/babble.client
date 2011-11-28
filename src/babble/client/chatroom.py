@@ -27,7 +27,6 @@ class IChatRoom(form.Schema):
         has the 'view' permission on a chat room may participate.
     """
     conversation = schema.Text(
-            title=_(u'label_conversation', default=u'Conversation'),
             default=_(u'No conversation yet'),
             )
     form.omitted(u'conversation')
@@ -81,7 +80,8 @@ def handleChatRoomAdded(chatroom, event):
 def handleChatRoomRemoved(chatroom, event):
     """ Inform the messaging service of chatroom deletion.
     """
-    if chatroom.REQUEST.controller_state.id == 'delete_confirmation':
+    if not chatroom.REQUEST.get('controller_state') or \
+            chatroom.REQUEST.controller_state.id == 'delete_confirmation':
         # The object is not yet removed, the user have been presented a
         # confirmation prompt.
         return

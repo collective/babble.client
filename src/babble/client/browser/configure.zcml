@@ -64,4 +64,14 @@
         permission="zope2.View" 
         />
 
+    <browser:viewlet  
+        for="*"
+        name="babble.client.chatroom_actions"
+        manager="plone.app.layout.viewlets.interfaces.IAboveContentBody"
+        class=".viewlets.ChatData"
+        layer="babble.client.interfaces.IBabbleClientLayer"
+        template="./templates/chatroom_actions.pt"
+        permission="zope2.View" 
+        />
+
 </configure>
