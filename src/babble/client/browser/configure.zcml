@@ -65,7 +65,7 @@
         />
 
     <browser:viewlet  
-        for="*"
+        for="babble.client.chatroom.IChatRoom"
         name="babble.client.chatroom_actions"
         manager="plone.app.layout.viewlets.interfaces.IAboveContentBody"
         class=".viewlets.ChatData"
