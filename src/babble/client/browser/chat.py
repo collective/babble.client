@@ -47,7 +47,7 @@ class Chat(BrowserView):
             resp = json.loads(server.isRegistered(username))
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
-            log.error('initialize: timeout error for  %s' % username)
+            log.warn('initialize: timeout error for  %s' % username)
             # We return the same output as the poll would have
             # returned...
             return json.dumps({'status': TIMEOUT})
@@ -78,7 +78,7 @@ class Chat(BrowserView):
         if hasattr(member, 'chatpass'):
             password = getattr(member, 'chatpass') 
         else:
-            log.error("The member %s is registered in the Chat Service, but "
+            log.warn("The member %s is registered in the Chat Service, but "
             "doesn't have his password anymore. This could be because an "
             "existing Chat Service is being used with a new Plone instance. "
             "Deleting the user's entry in the Chat Service's acl_users and "
@@ -97,11 +97,11 @@ class Chat(BrowserView):
                                     mark_cleared )
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
-            log.error('Error from chat.service: getUnclearedMessages: %s' % err_msg)
+            log.warn('Error from chat.service: getUnclearedMessages: %s' % err_msg)
             raise BabbleException(err_msg)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
-            log.error('get_uncleared__messages: timeout error for  %s' % username)
+            log.warn('get_uncleared__messages: timeout error for  %s' % username)
             return json.dumps(config.TIMEOUT_RESPONSE)
 
         json_dict = json.loads(resp)
@@ -130,12 +130,12 @@ class Chat(BrowserView):
             return server.getNewMessages(username, password)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
-            log.error('poll: timeout error for  %s' % username)
+            log.warn('poll: timeout error for  %s' % username)
             return json.dumps(config.TIMEOUT_RESPONSE)
             
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
-            log.error('Error from chat.service: getNewMessages: %s' % err_msg)
+            log.warn('Error from chat.service: getNewMessages: %s' % err_msg)
             raise BabbleException(err_msg)
 
 
@@ -166,7 +166,7 @@ class Chat(BrowserView):
         try:
             resp = func(username, password, fullname, to, message)
         except xmlrpclib.Fault, e:
-            log.error('Error from chat.service: sendMessage: %s' % e)
+            log.warn('Error from chat.service: sendMessage: %s' % e)
             raise BabbleException(e)
 
         json_dict = json.loads(resp)
@@ -244,7 +244,7 @@ class ChatBox(BrowserView):
         if response['status'] != config.SUCCESS:
             pm = getToolByName(self.context, 'portal_membership')
             member = pm.getAuthenticatedMember()
-            log.error("Could not find %s's last chat conversation!")
+            log.warn("Could not find %s's last chat conversation!")
             messages = []
         if chat_type == 'chatroom':
             messages = response['chatroom_messages']

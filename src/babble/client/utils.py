@@ -108,7 +108,7 @@ def urlize(text, url_limit=None, nofollow=False, blank=False, auto_escape=False)
     try:
         out = unicode(out, 'utf-8')
     except UnicodeDecodeError:
-        log.error("urlize: Could not make unicode out of 'words'")
+        log.warn("urlize: Could not make unicode out of 'words'")
     return out
 
 
@@ -124,12 +124,12 @@ def get_online_usernames(context):
         resp = server.getOnlineUsers()
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
-        log.error(\
+        log.warning(\
             'Error from get_online_usernames: server.getOnlineUsers: %s' \
             % err_msg)
         return []
     except socket_error, e:
-        log.error(\
+        log.warning(\
             'Socket error from get_online_usernames: ' + \
             'server.getOnlineUsers: %s \nis the chatserver running?' \
             %e)
@@ -183,7 +183,7 @@ def get_last_conversation(context, audience, chat_type='chatbox'):
     if hasattr(member, 'chatpass'):
         password = getattr(member, 'chatpass') 
     else:
-        log.error("get_last_conversation: %s does not have property 'chatpass'. "
+        log.warn("get_last_conversation: %s does not have property 'chatpass'. "
                   "This usually happens when you have deleted and recreated a "
                   "user in Plone, while the Babble ChatService user remains. "
                   "Delete the ChatService user as well and retry. \n"
@@ -206,12 +206,12 @@ def get_last_conversation(context, audience, chat_type='chatbox'):
                                 False, ))
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
-        log.error('Error from babble.server: getUnclearedMessages: %s' % err_msg)
+        log.warn('Error from babble.server: getUnclearedMessages: %s' % err_msg)
         return config.SERVER_ERROR_RESPONSE
         
     except socket.error, e:
         # Catch timeouts so that we can notify the caller
-        log.error(\
+        log.warn(\
             'Socket error from get_last_conversation: ' + \
             'server.getUnclearedMessages: %s \nIs the chatserver running?' %e)
         return config.TIMEOUT_RESPONSE
