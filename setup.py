@@ -34,7 +34,6 @@ setup(
         'plone.app.dexterity',
         'plone.app.referenceablebehavior',
         'plone.app.portlets',
-        'collective.js.blackbird',
     ],
     extras_require={
     'test': 'plone.app.referenceablebehavior',
