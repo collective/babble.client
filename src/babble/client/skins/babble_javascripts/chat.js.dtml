@@ -33,18 +33,12 @@ var sent_since_date = [];
 var timeout = 2000;
 var window_focus = true;
 
-if (!log) {
-var log = {
-    toggle: function() {},
-    move:   function() {},
-    resize: function() {},
-    clear:  function() {},
-    debug:  function() {},
-    info:   function() {},
-    warn:   function() {},
-    error:  function() {},
-    profile: function() {}
-};
+if (typeof console == "undefined") {
+    this.console = {
+        log: function() {},
+        warn: function() {},
+        error: function() {}
+    };
 }
 
 function hash(str) {
@@ -120,7 +114,7 @@ function closeChat(chat_id, audience) {
             new_chats.push(open_chats[i]);
         }
     }
-    log.info('closeChat: cookie \n');
+    console.log('closeChat: cookie \n');
     if (new_chats.length) {
         jQuery.cookie('chats-open-'+username, new_chats.join('|'), {path: '/'});
     }
@@ -134,11 +128,11 @@ function closeChat(chat_id, audience) {
             cache: false,
             data: {audience: audience },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
-                log.error(textStatus);
-                log.error(errorThrown);
+                console.error(textStatus);
+                console.error(errorThrown);
             },
             success: function() {
-                log.info(chat_id + "'s messages succesfully cleared. \n");
+                console.log(chat_id + "'s messages succesfully cleared. \n");
             }
         });
     }
@@ -175,8 +169,8 @@ function createChatBox(chat_id) {
             tzoffset: -(new Date().getTimezoneOffset())
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            log.error(textStatus);
-            log.error(errorThrown);
+            console.error(textStatus);
+            console.error(errorThrown);
             return;
         },
         success: function(data) {
@@ -201,9 +195,9 @@ function createChatBox(chat_id) {
 }
 
 function createChat(chat_id, minimize) {
-    log.info('createChat: chat_id is ' + chat_id);
+    console.log('createChat: chat_id is ' + chat_id);
     var cookie = jQuery.cookie('chats-open-'+username);
-    log.info('createChat: cookie is ' + cookie);
+    console.log('createChat: cookie is ' + cookie);
     var open_chats = [];
     if (cookie) {
         open_chats = cookie.split('|');
@@ -213,7 +207,7 @@ function createChat(chat_id, minimize) {
         open_chats.push(chat_id);
         var new_cookie = open_chats.join('|');
         jQuery.cookie('chats-open-'+username, new_cookie, {path: '/'});
-        log.info('createChat: updated cookie = ' + new_cookie + '\n');
+        console.log('createChat: updated cookie = ' + new_cookie + '\n');
     }
 
     var chatbox = jQuery("#"+hash(chat_id));
@@ -230,7 +224,7 @@ function createChat(chat_id, minimize) {
     }
     chatbox = createChatBox(chat_id);
     if (chatbox.length === 0) {
-        log.error('Could not create chatbox with id: ' + chat_id);
+        console.error('Could not create chatbox with id: ' + chat_id);
         return;
     }
     positionNewChat(chatbox);
@@ -250,7 +244,7 @@ function createChat(chat_id, minimize) {
         chat_content.scrollTop(chat_content[0].scrollHeight);
     }
     else {
-        log.error('createChat: could not get .chat-content');
+        console.error('createChat: could not get .chat-content');
     }
 }
 
@@ -326,15 +320,15 @@ function getUnclearedMessages() {
     /* If poll() times out, then we will have to call this method instead to
      *  get all uncleared messages, to avoid losing messages that were marked as
      *  read during the timed out process. */
-    log.info('getUnclearedMessages');
+    console.log('getUnclearedMessages');
     path = sanitizePath('/@@babblechat/get_uncleared_messages');
     jQuery.ajax({
         url: path,
         cache: false,
         async: true,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            log.error(textStatus);
-            log.error(errorThrown);
+            console.error(textStatus);
+            console.error(errorThrown);
             // This will let doTimout continue, i.e get_uncleared_messages will be called again.
             return true; 
         },
@@ -373,10 +367,14 @@ function poll_server() {
         dataType: "json",
         data: {username: username}, 
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            log.error('poll_server: ' + textStatus);
-            log.error('poll_server: ' + errorThrown);
+            console.error('poll_server: ' + textStatus);
+            console.error('poll_server: ' + errorThrown);
         },
         success: function(data) {
+            if (Number(data.status)  == AUTH_FAIL) {
+                console.warn('poll: AUTH_FAIL');
+                return false;
+            }
             if (Number(data.status)  == TIMEOUT) {
                 // When the server times out while fetching messages, we have
                 // to call init again, to get all uncleared_messages,
@@ -385,7 +383,7 @@ function poll_server() {
 
                 // First, we have to cancel the existing poll, without
                 // executing it's callback
-                log.warn('poll_server: TIMEOUT');
+                console.warn('poll_server: TIMEOUT');
                 jQuery.doTimeout('message_poll');
 
                 // No we start a poll calling getUnclearedMessages.
@@ -417,12 +415,12 @@ function poll_server() {
 function poll() {
     /* The way doTimout works, it will execute the code in the callback
      * function *after* poll_interval has passed. */
-    log.info('poll: poll_interval = '+ poll_interval);
+    console.log('poll: poll_interval = '+ poll_interval);
     jQuery.doTimeout('message_poll', poll_interval, function(){
         poll_server();
         if (messages_found > 0) {
             // Reset the poll
-            log.info('resetting the poll');
+            console.log('resetting the poll');
             messages_found = 0;
             poll_count = 0;
             poll_interval = poll_min;
@@ -461,9 +459,9 @@ function keypressed(event, textarea, audience, hashed_id, chat_type) {
                 dataType: "json",
                 data: {to: audience, message: message, chat_type: chat_type}, 
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    log.error(textStatus);
+                    console.error(textStatus);
                     if (errorThrown) {
-                        log.error(errorThrown);
+                        console.error(errorThrown);
                     }
                     var chat_content = jQuery('#'+hashed_id+' .chat-content');
                     chat_content.append(
@@ -473,7 +471,7 @@ function keypressed(event, textarea, audience, hashed_id, chat_type) {
                     chat_content.scrollTop(chat_content[0].scrollHeight);
                 },
                 success: function(data) { 
-                    log.info("Message succesfully sent. \n");
+                    console.log("Message succesfully sent. \n");
                     sent_since_date = sent_since_date.concat([data.last_msg_date]);
 
                     message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
@@ -566,7 +564,7 @@ function init() {
     }
     var open_chats = [];
     var cookie = jQuery.cookie('chats-open-'+username);
-    log.info('init: cookie = ' + cookie + '\n');
+    console.log('init: cookie = ' + cookie + '\n');
     jQuery.cookie('chats-open-'+username, null, {path: '/'});
     if (cookie) {
         open_chats = cookie.split('|');
@@ -584,22 +582,22 @@ function init() {
         dataType: "json",
         timeout: timeout,
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            log.error('init: ' + textStatus);
-            log.error('init: ' + errorThrown);
+            console.error('init: ' + textStatus);
+            console.error('init: ' + errorThrown);
             // This will let doTimout continue, i.e init will be called again.
             return true; 
         },
         success: function(data) {
             if (Number(data.status) == TIMEOUT) {
                 // This will let doTimout continue, i.e init will be called again.
-                log.warn('init: TIMEOUT');
+                console.warn('init: TIMEOUT');
                 return true; 
             }
             else if (Number(data.status) == AUTH_FAIL) {
-                log.warn('init: AUTH_FAIL');
+                console.warn('init: AUTH_FAIL');
                 return false;
             }
-            log.info('init: Success!');
+            console.log('init: Success!');
             poll_interval = poll_min;
             poll_count = 0;
             poll();
@@ -617,6 +615,7 @@ jQuery(document).ready(function() {
     username = chatdata.attr('username');
     base_url = chatdata.attr('base_url');
     poll_interval = poll_min;   // The initial polling period
+    console.info("chat.js: username: " + username);
 
     if (init()) { 
         jQuery.doTimeout(poll_max, function() {
