@@ -41,7 +41,6 @@ class Chat(BrowserView):
             member = pm.getMemberById(username)
 
         log.debug('initialize called, username: %s' % username)
-        
         server = utils.getConnection(self.context)
         try:
             resp = json.loads(server.isRegistered(username))
@@ -102,7 +101,7 @@ class Chat(BrowserView):
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.warn('get_uncleared__messages: timeout error for  %s' % username)
-            return json.dumps(config.TIMEOUT_RESPONSE)
+            return json.dumps({'status': config.TIMEOUT_RESPONSE})
 
         json_dict = json.loads(resp)
 
@@ -120,7 +119,7 @@ class Chat(BrowserView):
         pm = getToolByName(self.context, 'portal_membership')
         member = pm.getMemberById(username)
         if not member or not hasattr(member, 'chatpass'):
-            return 
+            return json.dumps({'status': config.AUTH_FAIL})
 
         password = getattr(member, 'chatpass') 
         server = utils.getConnection(self.context)
@@ -131,7 +130,7 @@ class Chat(BrowserView):
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.warn('poll: timeout error for  %s' % username)
-            return json.dumps(config.TIMEOUT_RESPONSE)
+            return json.dumps({'status': config.TIMEOUT_RESPONSE})
             
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
