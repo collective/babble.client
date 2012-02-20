@@ -28,7 +28,7 @@ class Chat(BrowserView):
     implements(IChat)
 
     def initialize(self, username=None):
-        """ Check if the user is registered, and register if not... 
+        """ Check if the user is registered, and register if not...
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
@@ -65,7 +65,7 @@ class Chat(BrowserView):
     def get_uncleared_messages(self, audience='*', mark_cleared=False):
         """ Retrieve the uncleared messages from the chat server.
 
-            If audience == '*', messages from all conversation partners are 
+            If audience == '*', messages from all conversation partners are
             returned.
         """
         pm = getToolByName(self.context, 'portal_membership')
@@ -75,7 +75,7 @@ class Chat(BrowserView):
 
         username = member.getId()
         if hasattr(member, 'chatpass'):
-            password = getattr(member, 'chatpass') 
+            password = getattr(member, 'chatpass')
         else:
             log.warn("The member %s is registered in the Chat Service, but "
             "doesn't have his password anymore. This could be because an "
@@ -83,15 +83,15 @@ class Chat(BrowserView):
             "Deleting the user's entry in the Chat Service's acl_users and "
             "folder in 'users' should fix this problem" % username)
             # This will raise an attribute error
-            password = getattr(member, 'chatpass') 
+            password = getattr(member, 'chatpass')
 
         server = utils.getConnection(self.context)
         try:
             # self, username, password, partner, chatrooms, clear
             resp = server.getUnclearedMessages(
-                                    username, 
-                                    password, 
-                                    audience, 
+                                    username,
+                                    password,
+                                    audience,
                                     [],
                                     mark_cleared )
         except xmlrpclib.Fault, e:
@@ -116,12 +116,17 @@ class Chat(BrowserView):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
+        # set the content-type header, so even if there's HTML code
+        # in the message, the HTML postpublish transformations will
+        # leave it alone..
+        self.request.response.setHeader('Content-Type','application/json')
+
         pm = getToolByName(self.context, 'portal_membership')
         member = pm.getMemberById(username)
         if not member or not hasattr(member, 'chatpass'):
             return json.dumps({'status': config.AUTH_FAIL})
 
-        password = getattr(member, 'chatpass') 
+        password = getattr(member, 'chatpass')
         server = utils.getConnection(self.context)
         # pars: username, password
         try:
@@ -131,7 +136,7 @@ class Chat(BrowserView):
             # Catch timeouts so that we can notify the caller
             log.warn('poll: timeout error for  %s' % username)
             return json.dumps({'status': config.TIMEOUT_RESPONSE})
-            
+
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
             log.warn('Error from chat.service: getNewMessages: %s' % err_msg)
@@ -139,7 +144,7 @@ class Chat(BrowserView):
 
 
     def send_message(self, to, message, chat_type='chatbox'):
-        """ Send a chat message 
+        """ Send a chat message
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
@@ -148,11 +153,11 @@ class Chat(BrowserView):
         server = utils.getConnection(self.context)
         member = pm.getAuthenticatedMember()
         if not hasattr(member, 'chatpass'):
-            return 
+            return
 
         message = cgi.escape(message)
-        message = utils.urlize(message, blank=True, auto_escape=False) 
-        password = getattr(member, 'chatpass') 
+        message = utils.urlize(message, blank=True, auto_escape=False)
+        password = getattr(member, 'chatpass')
         username = member.getId()
         fullname = member.getProperty('fullname') or username
         log.debug(u'Chat message from %s sent to %s' % (username, to))
@@ -172,15 +177,16 @@ class Chat(BrowserView):
         if json_dict['status'] != SUCCESS:
             raise BabbleException('sendMessage from %s to %s failed. %s' \
                                         % (username, to, json_dict))
+
         return json.dumps({
-                'status': json_dict['status'], 
+                'status': json_dict['status'],
                 'last_msg_date': json_dict['last_msg_date'],
                 })
 
 
     def clear_messages(self, audience):
-        """ Mark the messages with an audience (i.e user or chatroom) as 
-            cleared. This means that they won't be loaded and displayed again 
+        """ Mark the messages with an audience (i.e user or chatroom) as
+            cleared. This means that they won't be loaded and displayed again
             next time that chat box is opened.
         """
         return self.get_uncleared_messages(audience=audience, mark_cleared=True)
@@ -237,8 +243,8 @@ class ChatBox(BrowserView):
         """ """
         chat_type, audience = chat_id.split('_', 1)
         response = utils.get_last_conversation(
-                                        self.context, 
-                                        audience, 
+                                        self.context,
+                                        audience,
                                         chat_type)
         if response['status'] != config.SUCCESS:
             pm = getToolByName(self.context, 'portal_membership')
@@ -252,9 +258,9 @@ class ChatBox(BrowserView):
 
         messages = self._to_local_timezone(messages, tzoffset)
         return self.template(
-                        messages=messages, 
+                        messages=messages,
                         audience=audience,
-                        box_id=box_id, 
+                        box_id=box_id,
                         chat_type=chat_type,
                         chat_id=chat_id ,)
 

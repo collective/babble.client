@@ -4,7 +4,8 @@ Changelog
 2.0a5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- set the application/json Content-Type header in the poll request so post
+  publish transformations (like diazo) won't mess with the result [huub_bouma]
 
 
 2.0a4 (2011-11-20)
