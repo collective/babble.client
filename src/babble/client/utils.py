@@ -120,6 +120,8 @@ def getConnection(context):
 
 def get_online_usernames(context):
     server = getConnection(context)
+    if server is None:
+        return []
     try:
         resp = server.getOnlineUsers()
     except xmlrpclib.Fault, e:
@@ -178,6 +180,9 @@ def get_last_conversation(context, audience, chat_type='chatbox'):
         return config.AUTH_FAIL_RESPONSE
         
     server = getConnection(context)
+    if server is None:
+        return config.SERVER_ERROR 
+
     member = pm.getAuthenticatedMember()
     username = member.getId()
     if hasattr(member, 'chatpass'):
