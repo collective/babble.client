@@ -3,6 +3,7 @@ import logging
 import xmlrpclib
 
 from zope.interface import implements
+from zope.component.hooks import getSite
 
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
@@ -53,10 +54,16 @@ class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
             'mode':'w',
             'label': _('Service name:'),
          },
+        {   'id':'use_local_service', 
+            'type': 'boolean', 
+            'mode':'w',
+            'label': _('The chat service is on the same machine.'),
+         },
         {   'id':'host', 
             'type': 'string', 
             'mode':'w',
-            'label': _('Host:'),
+            'label': _('Hostname or relative path (relative to Zope root):'),
+            'description': _('Hostname or relative path (if on the same server):'),
         },
         {   'id':'port', 
             'type': 'string', 
@@ -102,14 +109,13 @@ class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
         """ Return a connection to the chat service """
         # If 'self' has no acquisition context, then we can't access
         # portal_url. I don't yet know why this happens :-/
-        if self.use_local_service and getToolByName(self, 'portal_url', None):
-            zope_root = self.portal_url.getPortalObject().aq_parent
-            if hasattr(zope_root, self.service_name):
-                return zope_root[self.service_name]
-            else:
-                log.error("No Chat Service '%s' in the Zope root" % self.service_name)
-                # This will raise KeyError 
-                return zope_root[self.service_name]
+        if self.use_local_service:
+            zope_root = getSite().aq_parent
+            try:
+                return zope_root.unrestrictedTraverse(self.service_name)
+            except KeyError, e:
+                log.warn("KeyError: %s" % e)
+                return
 
         username = self.getProperty('username')
         password = self.getProperty('password')
