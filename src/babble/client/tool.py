@@ -10,7 +10,6 @@ from AccessControl import ClassSecurityInfo
 
 from Products.CMFCore.utils import UniqueObject
 from Products.CMFCore.utils import SimpleItemWithProperties
-from Products.CMFCore.utils import getToolByName
 
 from babble.client import BabbleMessageFactory as _
 from interfaces import IBabbleChatTool
