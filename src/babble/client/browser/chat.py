@@ -8,19 +8,15 @@ import transaction
 from zope.interface import implements
 from zope.component.hooks import getSite
 
-from zExceptions import NotFound
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from Products.Five.browser import BrowserView
 from Products.CMFCore.utils import getToolByName
 
-from babble.client import BabbleException
 from babble.client import config
 from babble.client import iso8601
 from babble.client import utils
 from babble.client.browser.interfaces import IChat
 from babble.client.browser.interfaces import IChatBox
-from babble.client.config import SUCCESS
-from babble.client.config import TIMEOUT
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +38,9 @@ class Chat(BrowserView):
 
         log.debug('initialize called, username: %s' % username)
         server = utils.getConnection(self.context)
+        if server is None:
+            return json.dumps({'status': config.SERVER_ERROR})
+
         try:
             resp = json.loads(server.isRegistered(username))
         except socket.timeout:
@@ -49,7 +48,7 @@ class Chat(BrowserView):
             log.warn('initialize: timeout error for  %s' % username)
             # We return the same output as the poll would have
             # returned...
-            return json.dumps({'status': TIMEOUT})
+            return json.dumps({'status': config.TIMEOUT})
 
         if not resp['is_registered']:
             password = str(random.random())
@@ -59,7 +58,7 @@ class Chat(BrowserView):
             # something fails after this step
             transaction.commit()
 
-        return json.dumps({'status': SUCCESS})
+        return json.dumps({'status': config.SUCCESS})
 
 
     def get_uncleared_messages(self, audience='*', mark_cleared=False):
@@ -86,6 +85,8 @@ class Chat(BrowserView):
             password = getattr(member, 'chatpass')
 
         server = utils.getConnection(self.context)
+        if server is None:
+            return json.dumps({'status': config.SERVER_ERROR})
         try:
             # self, username, password, partner, chatrooms, clear
             resp = server.getUnclearedMessages(
@@ -97,18 +98,13 @@ class Chat(BrowserView):
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
             log.warn('Error from chat.service: getUnclearedMessages: %s' % err_msg)
-            raise BabbleException(err_msg)
+            return json.dumps({'status': config.SERVER_ERROR})
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.warn('get_uncleared__messages: timeout error for  %s' % username)
             return json.dumps({'status': config.TIMEOUT_RESPONSE})
 
         json_dict = json.loads(resp)
-
-        if json_dict['status'] != SUCCESS:
-            raise BabbleException(
-                        'getUnclearedMessages for %s failed. %s' \
-                        % (username, json_dict.get('errmsg','')))
         return resp
 
 
@@ -128,6 +124,8 @@ class Chat(BrowserView):
 
         password = getattr(member, 'chatpass')
         server = utils.getConnection(self.context)
+        if server is None:
+            return json.dumps({'status': config.SERVER_ERROR})
         # pars: username, password
         try:
             server.confirmAsOnline(username)
@@ -140,7 +138,7 @@ class Chat(BrowserView):
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
             log.warn('Error from chat.service: getNewMessages: %s' % err_msg)
-            raise BabbleException(err_msg)
+            return json.dumps({'status': config.SERVER_ERROR})
 
 
     def send_message(self, to, message, chat_type='chatbox'):
@@ -151,6 +149,8 @@ class Chat(BrowserView):
             return
 
         server = utils.getConnection(self.context)
+        if server is None:
+            return json.dumps({'status': config.SERVER_ERROR})
         member = pm.getAuthenticatedMember()
         if not hasattr(member, 'chatpass'):
             return
@@ -162,6 +162,8 @@ class Chat(BrowserView):
         fullname = member.getProperty('fullname') or username
         log.debug(u'Chat message from %s sent to %s' % (username, to))
         server = utils.getConnection(self.context)
+        if server is None:
+            return json.dumps({'status': config.SERVER_ERROR})
 
         if chat_type == 'chatroom':
             func = server.sendChatRoomMessage
@@ -171,16 +173,12 @@ class Chat(BrowserView):
             resp = func(username, password, fullname, to, message)
         except xmlrpclib.Fault, e:
             log.warn('Error from chat.service: sendMessage: %s' % e)
-            raise BabbleException(e)
+            return json.dumps({'status': config.SERVER_ERROR})
 
         json_dict = json.loads(resp)
-        if json_dict['status'] != SUCCESS:
-            raise BabbleException('sendMessage from %s to %s failed. %s' \
-                                        % (username, to, json_dict))
-
         return json.dumps({
                 'status': json_dict['status'],
-                'last_msg_date': json_dict['last_msg_date'],
+                'last_msg_date': json_dict.get('last_msg_date', config.NULL_DATE),
                 })
 
 
