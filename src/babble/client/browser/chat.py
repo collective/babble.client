@@ -43,9 +43,10 @@ class Chat(BrowserView):
 
         try:
             resp = json.loads(server.isRegistered(username))
-        except socket.timeout:
-            # Catch timeouts so that we can notify the caller
-            log.warn('initialize: timeout error for  %s' % username)
+        except socket.error, e:
+            # Catch socket errors: timeouts connection refusede etc. 
+            # so that we can notify the caller
+            log.warn('Socket error for %s %s' % (username, e))
             # We return the same output as the poll would have
             # returned...
             return json.dumps({'status': config.TIMEOUT})
