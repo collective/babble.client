@@ -112,14 +112,16 @@ def urlize(text, url_limit=None, nofollow=False, blank=False, auto_escape=False)
     return out
 
 
-def getConnection(context):
+def get_connection(context):
     """ Returns a connection to the chat service """
     mtool = getToolByName(context, 'portal_chat')
     return mtool.getConnection()
 
+getConnection = get_connection # BBB
+
 
 def get_online_usernames(context):
-    server = getConnection(context)
+    server = get_connection(context)
     if server is None:
         return []
     try:
@@ -179,7 +181,7 @@ def get_last_conversation(context, audience, chat_type='chatbox'):
     if pm.isAnonymousUser():
         return config.AUTH_FAIL_RESPONSE
         
-    server = getConnection(context)
+    server = get_connection(context)
     if server is None:
         return config.SERVER_ERROR 
 
@@ -251,4 +253,22 @@ def get_html_formatted_messages(username, messages):
                 '</div>'
         lines.append(line)
     return ''.join(lines)
+
+
+def get_participants(chatroom):
+    """ Return the ids of all members who have local roles on the chatroom and
+        all members who globally have the manager role.
+    """
+    plone_utils = getToolByName(chatroom, 'plone_utils')
+    roles = plone_utils.getInheritedLocalRoles(chatroom)
+    participants = [r[0] for r in roles]
+    participants += [r[0] for r in chatroom.get_local_roles()]
+
+    # Replace groups with their members
+    portal_groups = getToolByName(chatroom, 'portal_groups')
+    for group in portal_groups.getGroupIds():
+        if group in participants:
+            participants.remove(group)
+            participants += portal_groups.getGroupMembers(group)
+    return participants
 

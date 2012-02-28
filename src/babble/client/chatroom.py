@@ -17,8 +17,9 @@ from Products.CMFCore.utils import getToolByName
 from babble.client import BabbleMessageFactory as _
 from babble.client import config
 from babble.client.events import ILocalRolesModifiedEvent
-from babble.client.utils import getConnection
+from babble.client.utils import get_connection
 from babble.client.utils import get_html_formatted_messages
+from babble.client.utils import get_participants
 
 log = logging.getLogger(__name__)
 
@@ -53,18 +54,14 @@ def handleChatRoomAdded(chatroom, event):
     if password is None:
         return
 
-    plone_utils = getToolByName(chatroom, 'plone_utils')
-    roles = plone_utils.getInheritedLocalRoles(chatroom)
-    participants = [r[0] for r in roles]
-    participants += [r[0] for r in chatroom.get_local_roles()]
-    s = getConnection(chatroom)
+    s = get_connection(chatroom)
     try:
         result = json.loads(s.createChatRoom(
                                     member.getId(), 
                                     password, 
                                     '/'.join(chatroom.getPhysicalPath()), 
-                                    participants)
-                                    )
+                                    get_participants(chatroom),
+                                    ))
     except xmlrpclib.Fault, e:
         log.error('XMLRPC Error from babble.server: createChatRoom: %s' % e)
         return 
@@ -93,7 +90,7 @@ def handleChatRoomRemoved(chatroom, event):
     if password is None:
         return
 
-    s = getConnection(chatroom)
+    s = get_connection(chatroom)
     try:
         result = json.loads(s.removeChatRoom(
                                     member.getId(), 
@@ -112,26 +109,22 @@ def handleChatRoomRemoved(chatroom, event):
 
 
 def _editChatRoom(chatroom):
-    participants = []
     pm = getToolByName(chatroom, 'portal_membership')
     member = pm.getAuthenticatedMember()
     password = _getChatPassword(member)
     if password is None:
         return
-
-    plone_utils = getToolByName(chatroom, 'plone_utils')
-    roles = plone_utils.getInheritedLocalRoles(chatroom)
-    participants = [r[0] for r in roles]
-    participants += [r[0] for r in chatroom.get_local_roles()]
+            
     chatroom_path = '/'.join(chatroom.getPhysicalPath())
-    s = getConnection(chatroom)
+    s = get_connection(chatroom)
+    participants = get_participants(chatroom)
     try:
         resp = json.loads(
                     s.editChatRoom(
                             member.getId(), 
                             password, 
                             chatroom_path, 
-                            participants
+                            participants,
                     ))
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]
@@ -201,7 +194,7 @@ class ChatRoom(dexterity.Container):
             return _("Error fetching the conversation. You do not have chat "
                      "password. Please contact your site administrator.")
 
-        s = getConnection(site)
+        s = get_connection(site)
         try:
             response = json.loads(s.getMessages(
                                     username, 
