@@ -471,28 +471,34 @@ function keypressed(event, textarea, audience, hashed_id, chat_type) {
                     chat_content.scrollTop(chat_content[0].scrollHeight);
                 },
                 success: function(data) { 
-                    console.log("Message succesfully sent. \n");
-                    sent_since_date = sent_since_date.concat([data.last_msg_date]);
-
-                    message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
-                    list = message.match(/\b(http:\/\/www\.\S+\.\w+|www\.\S+\.\w+|http:\/\/(?=[^w]){3}\S+[\.:]\S+)[^ ]+\b/g);
-                    if (list) {
-                        for (i = 0; i < list.length; i++) {
-                            message = message.replace( list[i], "<a target='_blank' href='" + escape( list[i] ) + "'>"+ list[i] + "</a>" );
-                        }
-                    }
-                    var now = new Date();
-                    var minutes = now.getMinutes().toString();
-                    if (minutes.length==1) {minutes = '0'+minutes;}
-                    var time = now.toLocaleTimeString().substring(0,5);
                     var chat_content = jQuery('#'+hashed_id+' .chat-content');
-                    chat_content.append(
-                        '<div class="chat-message">' + 
-                            '<span class="chat-message-me">'+time+' me:&nbsp;&nbsp;</span>' + 
-                            '<span class="chat-message-content">'+message+'</span>' + 
-                        '</div>');
+                    if (data.status == SERVER_FAULT) {
+                        chat_content.append(
+                            '<div class="chat-message">' + 
+                                '<span class="chat-message-error">Connection Error</span>' + 
+                            '</div>');
+                    }
+                    else {
+                        console.log("Message succesfully sent. \n");
+                        sent_since_date = sent_since_date.concat([data.last_msg_date]);
+                        message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
+                        list = message.match(/\b(http:\/\/www\.\S+\.\w+|www\.\S+\.\w+|http:\/\/(?=[^w]){3}\S+[\.:]\S+)[^ ]+\b/g);
+                        if (list) {
+                            for (i = 0; i < list.length; i++) {
+                                message = message.replace( list[i], "<a target='_blank' href='" + escape( list[i] ) + "'>"+ list[i] + "</a>" );
+                            }
+                        }
+                        var now = new Date();
+                        var minutes = now.getMinutes().toString();
+                        if (minutes.length==1) {minutes = '0'+minutes;}
+                        var time = now.toLocaleTimeString().substring(0,5);
+                        chat_content.append(
+                            '<div class="chat-message">' + 
+                                '<span class="chat-message-me">'+time+' me:&nbsp;&nbsp;</span>' + 
+                                '<span class="chat-message-content">'+message+'</span>' + 
+                            '</div>');
+                    }
                     chat_content.scrollTop(chat_content[0].scrollHeight);
-
                     poll_interval = poll_min;
                     poll_count = 0;
                     poll(); // Calling poll, cancels the existing poll and replaces it with a new one 
