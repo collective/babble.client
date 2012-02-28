@@ -70,7 +70,7 @@ class Chat(BrowserView):
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
-            return
+            return json.dumps({'status': config.AUTH_FAIL})
         member = pm.getAuthenticatedMember()
 
         username = member.getId()
@@ -147,14 +147,14 @@ class Chat(BrowserView):
         """
         pm = getToolByName(self.context, 'portal_membership')
         if pm.isAnonymousUser():
-            return
+            return json.dumps({'status': config.AUTH_FAIL})
 
         server = utils.getConnection(self.context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
         member = pm.getAuthenticatedMember()
         if not hasattr(member, 'chatpass'):
-            return
+            return json.dumps({'status': config.AUTH_FAIL})
 
         message = cgi.escape(message)
         message = utils.urlize(message, blank=True, auto_escape=False)

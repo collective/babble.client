@@ -126,11 +126,15 @@ class TestChat(TestCase):
 
         member = self.mtool.getAuthenticatedMember()
         resp = traverse('@@babblechat/poll')(member.getId())
-        self.assertEquals(resp, None)
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
         resp = traverse('@@babblechat/send_message')(username1, 'message')
-        self.assertEquals(resp, None)
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
         resp = traverse('@@babblechat/clear_messages')(username1)
-        self.assertEquals(resp, None)
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
+
         messages = utils.get_last_conversation(portal, username1)
         self.assertEquals(messages['status'], config.AUTH_FAIL)
 
@@ -141,9 +145,12 @@ class TestChat(TestCase):
 
         member = self.mtool.getAuthenticatedMember()
         resp = traverse('@@babblechat/poll')(member.getId())
-        self.assertEquals(resp, None)
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
+
         resp = traverse('@@babblechat/send_message')(username1, 'message')
-        self.assertEquals(resp, None)
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
 
         method = traverse('@@babblechat/clear_messages')
         pars = [username1]
@@ -244,17 +251,16 @@ class TestChat(TestCase):
         member = self.mtool.getAuthenticatedMember()
         member.chatpass = 'wrongpass'
 
-        method = traverse('@@babblechat/send_message')
-        pars = [username2, 'message']
-        self.assertRaises(BabbleException, method, *pars)
+        resp = traverse('@@babblechat/send_message')(username2, 'message')
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
 
-        method = traverse('@@babblechat/clear_messages')
-        pars = [username2]
-        self.assertRaises(BabbleException, method, *pars)
+        resp = traverse('@@babblechat/clear_messages')(username2)
+        resp = json.loads(resp)
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
 
-        method = traverse('@@babblechat/get_uncleared_messages')
-        pars = [username2]
-        self.assertRaises(BabbleException, method, *pars)
+        resp = json.loads(traverse('@@babblechat/get_uncleared_messages')(username2))
+        self.assertEquals(resp['status'], config.AUTH_FAIL)
 
 
     def test_online_users(self):
