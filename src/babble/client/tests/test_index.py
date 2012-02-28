@@ -1,7 +1,9 @@
-from babble.client.tests.base import TestCase
+import transaction
 from plone.dexterity.utils import createContentInContainer
 from plone.uuid.interfaces import IUUID
 from babble.client import index
+from babble.client import utils
+from babble.client.tests.base import TestCase
 
 class TestIndex(TestCase):
     """ Tests the babble/client/browser/chat.py module
@@ -67,7 +69,55 @@ class TestIndex(TestCase):
         ps = catalog(participants='user2')
         self.assertEquals(len(ps), 0)
 
+        catalog.unindexObject(chatroom)
+        portal.manage_delObjects(['babble.client.chatroom'])
+        transaction.commit()
 
+
+    def test_utils(self):
+        portal = self.portal
+        catalog = self.portal.portal_catalog
+
+        # Creat new use and log in
+        self.create_user('user1', 'secret')
+        self.login(name='user1')
+
+        # Create some chatrooms (of which user1 will be owner) 
+        for i in range(0, 3):
+            chatroom = createContentInContainer(
+                            portal, 
+                            'babble.client.chatroom',
+                            checkConstraints=False,
+                            title='Chatroom %d' % i,
+                            )
+
+        rooms = utils.get_chat_rooms(portal)
+        self.assertEquals(len(rooms), 3)
+
+        # Create new user
+        self.loginAsPortalOwner()
+        self.create_user('user2', 'secret')
+        self.login(name='user2')
+
+        # This user doesn't have local roles so should not get the rooms
+        rooms = utils.get_chat_rooms(portal)
+        self.assertEquals(len(rooms), 0)
+
+        # Even if this user is a site Administrators they should not
+        self.loginAsPortalOwner()
+        portal_groups = portal.portal_groups
+        portal_groups.addPrincipalToGroup('user2', "Administrators")
+        self.login(name='user2')
+
+        rooms = utils.get_chat_rooms(portal)
+        self.assertEquals(len(rooms), 0)
+
+        # Check that they do if a local role is added.
+        chatroom = portal['chatroom-1']
+        chatroom.manage_addLocalRoles('user2', ('Reader',))
+        chatroom.reindexObject()
+        rooms = utils.get_chat_rooms(portal)
+        self.assertEquals(len(rooms), 1)
 
 
 def test_suite():
