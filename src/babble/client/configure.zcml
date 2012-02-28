@@ -25,6 +25,8 @@
         <include package="collective.js.blackbird" />
     </configure>
 
+    <adapter factory=".index.participants" name="participants" />
+
     <genericsetup:registerProfile
         name="default"
         title="babble.client"

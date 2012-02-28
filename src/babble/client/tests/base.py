@@ -1,4 +1,7 @@
 from zope import component
+from zope.interface import alsoProvides
+
+from OFS.Folder import Folder
 
 from Products.Five import zcml
 from Products.Five import fiveconfigure
@@ -43,4 +46,29 @@ class TestCase(ptc.PloneTestCase):
     """
     layer = BabbleClientLayer
 
+    def create_user(self, username, password, roles=['member'], domains=[]):
+        uf = self.folder.acl_users
+        uf.userFolderAddUser(username, password, roles, domains)
+        self.mtool.createMemberarea(username)
+        member = self.mtool.getMemberById(username)
+        member.setMemberProperties({'fullname': username.split('@')[0].capitalize(),
+                                    'email': '%s@example.com' % username, })
+
+    def afterSetUp(self):
+        self.loginAsPortalOwner()
+        view = self.app.unrestrictedTraverse('+/addChatService.html')
+        view(add_input_name='chatservice', title='Chat Service', submit_add=1)
+        self.portal.portal_chat.use_local_service = True
+
+        # The 'temp_folder' is not created for some reason, so do it here...
+        self.app._setOb('temp_folder', Folder('temp_folder'))
+
+        self.mtool = self.portal.portal_membership
+        self.create_user('member1', 'secret')
+        self.create_user('member2', 'secret')
+
+        # Merely registering babble.client's browserlayer doesn't set it on the
+        # request. This happens during IBeforeTraverseEvent, so we have to do 
+        # it here manually
+        alsoProvides(self.portal.REQUEST, IBabbleClientLayer)
 
