@@ -231,7 +231,7 @@ def get_chat_rooms(context):
     catalog = getToolByName(context, 'portal_catalog')
     return catalog(
                 portal_type='babble.client.chatroom',
-                allowedRolesAndUsers=member.getId())
+                participants=member.getId())
     	
 
 def get_html_formatted_messages(username, messages):
