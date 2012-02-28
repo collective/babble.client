@@ -23,6 +23,7 @@ class BabbleChatXMLAdapter(XMLAdapterBase, PropertyManagerHelpers):
         self.context.host = str(node.getAttribute('host'))
         self.context.port = str(node.getAttribute('port'))
         self.context.service_name = str(node.getAttribute('service_name'))
+        self.context.use_local_service = bool(node.getAttribute('use_local_service'))
         self.context.username = str(node.getAttribute('username'))
         self.context.password = str(node.getAttribute('password'))
         self.context.poll_max = str(node.getAttribute('poll_max'))

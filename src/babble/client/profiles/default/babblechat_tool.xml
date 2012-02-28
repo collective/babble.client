@@ -4,6 +4,7 @@
         host="localhost"
         port="8080"
         service_name="chatservice"
+        use_local_service="False"
         username="admin"
         password="admin"
         poll_max="20000"
