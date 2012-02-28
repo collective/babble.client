@@ -2,10 +2,10 @@ import logging
 import simplejson as json
 
 from zope.component import getMultiAdapter
+from zope.component.interfaces import IObjectEvent
 from zope.component.interfaces import ObjectEvent
 from zope.interface import Interface
 from zope.interface import implements
-from zope.lifecycleevent.interfaces import IObjectModifiedEvent
 
 from zope.app.component.hooks import getSite
 
@@ -20,7 +20,7 @@ from babble.client.interfaces import IBabbleClientLayer
 log = logging.getLogger(__name__)
 
 
-class ILocalRolesModifiedEvent(IObjectModifiedEvent):
+class ILocalRolesModifiedEvent(IObjectEvent):
     """The local roles on an event have been modified via the @@sharing page
     """
 
