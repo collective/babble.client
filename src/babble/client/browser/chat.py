@@ -246,11 +246,9 @@ class ChatBox(BrowserView):
                                         audience,
                                         chat_type)
         if response['status'] != config.SUCCESS:
-            pm = getToolByName(self.context, 'portal_membership')
-            member = pm.getAuthenticatedMember()
-            log.warn("Could not find %s's last chat conversation!")
-            messages = []
-        if chat_type == 'chatroom':
+            log.warn(response['errmsg'])
+            messages = {}
+        elif chat_type == 'chatroom':
             messages = response['chatroom_messages']
         else:
             messages = response['messages']
