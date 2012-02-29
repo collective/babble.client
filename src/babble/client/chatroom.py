@@ -152,6 +152,7 @@ def handleChatRoomEdited(chatroom, event):
 def handleChatRoomLocalRolesModified(chatroom, event):
     """ """
     _editChatRoom(chatroom)
+    chatroom.reindexObject()
 
 
 @indexer(IChatRoom)
