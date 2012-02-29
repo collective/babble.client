@@ -210,6 +210,7 @@ def get_last_conversation(context, audience, chat_type='chatbox'):
                                 password, 
                                 partner, 
                                 chatrooms,
+                                None,
                                 False, ))
     except xmlrpclib.Fault, e:
         err_msg = e.faultString.strip('\n').split('\n')[-1]

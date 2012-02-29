@@ -23,6 +23,9 @@ class TestChat(TestCase):
         """
         portal = self.portal
         traverse = portal.restrictedTraverse
+
+        # First clear the UAD
+        portal._v_user_access_dict = {}
     
         online_users = utils.get_online_usernames(portal)
         self.assertEquals(online_users, [])
@@ -97,13 +100,13 @@ class TestChat(TestCase):
         self.assertEquals(resp['status'], config.AUTH_FAIL)
 
         member = self.mtool.getAuthenticatedMember()
-        resp = traverse('@@babblechat/poll')(member.getId())
+        resp = traverse('@@babblechat/poll')(member.getId(), config.NULL_DATE)
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.AUTH_FAIL)
         resp = traverse('@@babblechat/send_message')(username1, 'message')
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.AUTH_FAIL)
-        resp = traverse('@@babblechat/clear_messages')(username1)
+        resp = traverse('@@babblechat/clear_messages')(username1, 'chatbox', datetime.datetime.now(utc).isoformat())
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.AUTH_FAIL)
 
@@ -116,7 +119,7 @@ class TestChat(TestCase):
         self.loginAsPortalOwner()
 
         member = self.mtool.getAuthenticatedMember()
-        resp = traverse('@@babblechat/poll')(member.getId())
+        resp = traverse('@@babblechat/poll')(member.getId(), config.NULL_DATE)
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.AUTH_FAIL)
 
@@ -125,7 +128,7 @@ class TestChat(TestCase):
         self.assertEquals(resp['status'], config.AUTH_FAIL)
 
         method = traverse('@@babblechat/clear_messages')
-        pars = [username1]
+        pars = [username1, 'chatbox', datetime.datetime.now(utc)]
         self.assertRaises(AttributeError, method, *pars)
 
         messages = utils.get_last_conversation(portal, username1)
@@ -149,7 +152,7 @@ class TestChat(TestCase):
 
         # Poll for username1 and see if we got our message
         self.login(name=username1)
-        resp = traverse('@@babblechat/poll')(username1)
+        resp = traverse('@@babblechat/poll')(username1, config.NULL_DATE)
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
         self.assertEquals(resp['last_msg_date'], message_timestamp)
@@ -174,7 +177,7 @@ class TestChat(TestCase):
         self.assertEqual(resp['messages'][username2][0][2], message_timestamp)
 
         # Check that the next poll (with new timestamp) returns no new messages
-        resp = traverse('@@babblechat/poll')(username1)
+        resp = traverse('@@babblechat/poll')(username1, message_timestamp)
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
         self.assertEquals(resp['messages'], {})
@@ -202,13 +205,13 @@ class TestChat(TestCase):
         self.assertEqual(resp['messages'][username2][0][2], message_timestamp)
 
         # Now we clear the messages
-        resp = traverse('@@babblechat/clear_messages')(username2)
+        resp = traverse('@@babblechat/clear_messages')(username2, 'chatbox', datetime.datetime.now(utc).isoformat())
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.SUCCESS)
 
         messages = utils.get_last_conversation(portal, username2)
 
-        check = {'status': config.SUCCESS, 'last_msg_date': config.NULL_DATE, 'messages':{}, 'chatroom_messages': {}}
+        check = {'status': config.SUCCESS, 'last_msg_date': message_timestamp, 'messages':{}, 'chatroom_messages': {}}
         self.assertEquals(messages, check)
 
         resp = json.loads(traverse('@@babblechat/get_uncleared_messages')())
@@ -227,7 +230,7 @@ class TestChat(TestCase):
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.AUTH_FAIL)
 
-        resp = traverse('@@babblechat/clear_messages')(username2)
+        resp = traverse('@@babblechat/clear_messages')(username2, 'chatbox', datetime.datetime.now(utc).isoformat())
         resp = json.loads(resp)
         self.assertEquals(resp['status'], config.AUTH_FAIL)
 

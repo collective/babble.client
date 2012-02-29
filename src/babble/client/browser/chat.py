@@ -37,7 +37,7 @@ class Chat(BrowserView):
             member = pm.getMemberById(username)
 
         log.debug('initialize called, username: %s' % username)
-        server = utils.getConnection(self.context)
+        server = utils.get_connection(self.context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
 
@@ -62,7 +62,7 @@ class Chat(BrowserView):
         return json.dumps({'status': config.SUCCESS})
 
 
-    def get_uncleared_messages(self, audience='*', mark_cleared=False):
+    def get_uncleared_messages(self, audience='*', chatrooms='*', until=None, mark_cleared=False):
         """ Retrieve the uncleared messages from the chat server.
 
             If audience == '*', messages from all conversation partners are
@@ -85,7 +85,7 @@ class Chat(BrowserView):
             # This will raise an attribute error
             password = getattr(member, 'chatpass')
 
-        server = utils.getConnection(self.context)
+        server = utils.get_connection(self.context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
         try:
@@ -94,7 +94,8 @@ class Chat(BrowserView):
                                     username,
                                     password,
                                     audience,
-                                    [],
+                                    chatrooms,
+                                    until,
                                     mark_cleared )
         except xmlrpclib.Fault, e:
             err_msg = e.faultString.strip('\n').split('\n')[-1]
@@ -109,14 +110,17 @@ class Chat(BrowserView):
         return resp
 
 
-    def poll(self, username):
+    def poll(self, username, since):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
+        if not isinstance(username, str) and not isinstance(username, unicode):
+            return json.dumps({'status': config.AUTH_FAIL})
+
         context = self.context
         password = None
         cache = getattr(self, '_v_user_password_dict', {})
-        password = getattr(cache, username, None)
+        password = getattr(cache, username.encode('utf-8'), None)
         if password is None:
             pm = getToolByName(context, 'portal_membership')
             member = pm.getMemberById(username)
@@ -124,14 +128,14 @@ class Chat(BrowserView):
                 return json.dumps({'status': config.AUTH_FAIL})
 
             password = getattr(member, 'chatpass')
-            cache[username] = password
+            cache[username.encode('utf-8')] = password
 
-        server = utils.getConnection(context)
+        server = utils.get_connection(context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
         try:
             server.confirmAsOnline(username)
-            return server.getNewMessages(username, password)
+            return server.getNewMessages(username, password, since)
         except socket.timeout:
             # Catch timeouts so that we can notify the caller
             log.warn('poll: timeout error for  %s' % username)
@@ -149,7 +153,7 @@ class Chat(BrowserView):
         if pm.isAnonymousUser():
             return json.dumps({'status': config.AUTH_FAIL})
 
-        server = utils.getConnection(self.context)
+        server = utils.get_connection(self.context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
         member = pm.getAuthenticatedMember()
@@ -162,7 +166,7 @@ class Chat(BrowserView):
         username = member.getId()
         fullname = member.getProperty('fullname') or username
         log.debug(u'Chat message from %s sent to %s' % (username, to))
-        server = utils.getConnection(self.context)
+        server = utils.get_connection(self.context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
 
@@ -183,12 +187,21 @@ class Chat(BrowserView):
                 })
 
 
-    def clear_messages(self, audience):
+    def clear_messages(self, audience, chat_type, until):
         """ Mark the messages with an audience (i.e user or chatroom) as
             cleared. This means that they won't be loaded and displayed again
             next time that chat box is opened.
         """
-        return self.get_uncleared_messages(audience=audience, mark_cleared=True)
+        if chat_type == 'chatroom':
+            return self.get_uncleared_messages(
+                                    chatrooms=audience,
+                                    mark_cleared=True, 
+                                    until=until)
+        else:
+            return self.get_uncleared_messages(
+                                    audience=audience,
+                                    mark_cleared=True, 
+                                    until=until)
 
 
 class ChatBox(BrowserView):

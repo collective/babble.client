@@ -100,7 +100,7 @@ function positionNewChat(chatbox) {
     }
 }
 
-function closeChat(chat_id, audience) {
+function closeChat(chat_id, chat_type, audience) {
     jQuery('#'+hash(chat_id)).css('display','none');
     reorderChats();
     var cookie = jQuery.cookie('chats-open-'+username);
@@ -126,7 +126,7 @@ function closeChat(chat_id, audience) {
         jQuery.ajax({
             url: path,
             cache: false,
-            data: {audience: audience },
+            data: {audience: audience, chat_type: chat_type, until: global_received_date },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 console.error(textStatus);
                 console.error(errorThrown);
@@ -365,7 +365,7 @@ function poll_server() {
         async: true,
         timeout: timeout,
         dataType: "json",
-        data: {username: username}, 
+        data: {username: username, since: global_received_date}, 
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             console.error('poll_server: ' + textStatus);
             console.error('poll_server: ' + errorThrown);
