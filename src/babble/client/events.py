@@ -56,7 +56,7 @@ def registerUserForChatRooms(user, event):
 
     catalog = getToolByName(site, 'portal_catalog')
     chatrooms = catalog(portal_type='babble.client.chatroom',
-                        allowedRolesAndUsers=username ) 
+                        participants=username ) 
 
     s = getConnection(site)
     for c in chatrooms:
