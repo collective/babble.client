@@ -113,10 +113,10 @@ class Chat(BrowserView):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
-        # set the content-type header, so even if there's HTML code
-        # in the message, the HTML postpublish transformations will
-        # leave it alone..
-        self.request.response.setHeader('Content-Type','application/json')
+        # # set the content-type header, so even if there's HTML code
+        # # in the message, the HTML postpublish transformations will
+        # # leave it alone..
+        # self.request.response.setHeader('Content-Type','application/json')
 
         pm = getToolByName(self.context, 'portal_membership')
         member = pm.getMemberById(username)
@@ -127,7 +127,6 @@ class Chat(BrowserView):
         server = utils.getConnection(self.context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
-        # pars: username, password
         try:
             server.confirmAsOnline(username)
             return server.getNewMessages(username, password)
@@ -135,7 +134,6 @@ class Chat(BrowserView):
             # Catch timeouts so that we can notify the caller
             log.warn('poll: timeout error for  %s' % username)
             return json.dumps({'status': config.TIMEOUT_RESPONSE})
-
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
             log.warn('Error from chat.service: getNewMessages: %s' % err_msg)
