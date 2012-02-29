@@ -117,14 +117,15 @@ class Chat(BrowserView):
         # # in the message, the HTML postpublish transformations will
         # # leave it alone..
         # self.request.response.setHeader('Content-Type','application/json')
+	context = self.context
 
-        pm = getToolByName(self.context, 'portal_membership')
+        pm = getToolByName(context, 'portal_membership')
         member = pm.getMemberById(username)
         if not member or not hasattr(member, 'chatpass'):
             return json.dumps({'status': config.AUTH_FAIL})
 
         password = getattr(member, 'chatpass')
-        server = utils.getConnection(self.context)
+        server = utils.getConnection(context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
         try:
