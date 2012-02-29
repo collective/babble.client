@@ -113,18 +113,19 @@ class Chat(BrowserView):
         """ Poll the chat server to retrieve new online users and chat
             messages
         """
-        # # set the content-type header, so even if there's HTML code
-        # # in the message, the HTML postpublish transformations will
-        # # leave it alone..
-        # self.request.response.setHeader('Content-Type','application/json')
-	context = self.context
+        context = self.context
+        password = None
+        cache = getattr(self, '_v_user_password_dict', {})
+        password = getattr(cache, username, None)
+        if password is None:
+            pm = getToolByName(context, 'portal_membership')
+            member = pm.getMemberById(username)
+            if not member or not hasattr(member, 'chatpass'):
+                return json.dumps({'status': config.AUTH_FAIL})
 
-        pm = getToolByName(context, 'portal_membership')
-        member = pm.getMemberById(username)
-        if not member or not hasattr(member, 'chatpass'):
-            return json.dumps({'status': config.AUTH_FAIL})
+            password = getattr(member, 'chatpass')
+            cache[username] = password
 
-        password = getattr(member, 'chatpass')
         server = utils.getConnection(context)
         if server is None:
             return json.dumps({'status': config.SERVER_ERROR})
