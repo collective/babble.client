@@ -258,10 +258,14 @@ class ChatBox(BrowserView):
                                         self.context,
                                         audience,
                                         chat_type)
-        if response['status'] != config.SUCCESS:
+
+        if response['status'] != config.AUTH_FAIL:
+            return
+        elif response['status'] != config.SUCCESS:
             if response.get('errmsg'):
                 log.warn(response['errmsg'])
             messages = {}
+            return
         elif chat_type == 'chatroom':
             messages = response['chatroom_messages']
         else:
