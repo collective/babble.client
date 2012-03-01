@@ -169,7 +169,6 @@ def get_online_members(context):
             continue
         online_members.append(member)
 
-    log.debug('get_online_members: %s' % str(online_members))
     return online_members
 
 

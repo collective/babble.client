@@ -22,10 +22,10 @@ class TestChat(TestCase):
             get_online_members methods
         """
         portal = self.portal
-        traverse = portal.restrictedTraverse
 
         # First clear the UAD
-        portal._v_user_access_dict = {}
+        server = utils.getConnection(self.portal)
+        server._v_user_access_dict = {}
     
         online_users = utils.get_online_usernames(portal)
         self.assertEquals(online_users, [])
@@ -34,13 +34,11 @@ class TestChat(TestCase):
         self.assertEquals(online_members, [])
 
         self.logout()
-        server = utils.getConnection(self.portal)
         resp = json.loads(server.confirmAsOnline(None))
         self.assertEquals(resp['status'], config.ERROR)
 
         self.login(name=username1)
 
-        # resp = traverse('@@babblechat/confirm_as_online')()
         server = utils.getConnection(self.portal)
         resp = json.loads(server.confirmAsOnline(username1))
         self.assertEquals(resp['status'], config.SUCCESS)
@@ -291,13 +289,6 @@ class TestChat(TestCase):
         test_url = u'<a href="http://www.someadress.com/here_is_a_very_long-addres?par=LKhase976asg" rel="nofollow" target="_blank">ht...</a>'
         self.assertEquals(urlized, test_url)
 
-
-    # def test_render_chat_box(self):
-    #     """ """
-    #     self.login(name='member1')
-    #     traverse = self.portal.restrictedTraverse
-    #     resp = traverse('@@render_chat_box')('member1', 'member1', '+2')
-    #     self.assertEquals(type(resp), unicode)
 
 
 class TestEmailLoginChat(TestChat):
