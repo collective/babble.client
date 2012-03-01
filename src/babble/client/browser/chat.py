@@ -259,7 +259,8 @@ class ChatBox(BrowserView):
                                         audience,
                                         chat_type)
         if response['status'] != config.SUCCESS:
-            log.warn(response['errmsg'])
+            if response.get('errmsg'):
+                log.warn(response['errmsg'])
             messages = {}
         elif chat_type == 'chatroom':
             messages = response['chatroom_messages']
