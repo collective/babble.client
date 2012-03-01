@@ -121,21 +121,22 @@ function closeChat(chat_id, chat_type, audience) {
     else {
         jQuery.cookie('chats-open-'+username, null, {path: '/'});
     }
-    path = sanitizePath('/@@babblechat/clear_messages');
-    if (audience !== null) {
-        jQuery.ajax({
-            url: path,
-            cache: false,
-            data: {audience: audience, chat_type: chat_type, until: global_received_date },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                console.error(textStatus);
-                console.error(errorThrown);
-            },
-            success: function() {
-                console.log(chat_id + "'s messages succesfully cleared. \n");
-            }
-        });
+    if (chat_type === undefined) {
+        return;
     }
+    path = sanitizePath('/@@babblechat/clear_messages');
+    jQuery.ajax({
+        url: path,
+        cache: false,
+        data: {audience: audience, chat_type: chat_type, until: global_received_date },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            console.error(textStatus);
+            console.error(errorThrown);
+        },
+        success: function() {
+            console.log(chat_id + "'s messages succesfully cleared. \n");
+        }
+    });
 }
 
 function handleChatEvents(chat_id) {
@@ -479,7 +480,7 @@ function keypressed(event, textarea, audience, hashed_id, chat_type) {
                             '</div>');
                     }
                     else {
-                        console.log("Message succesfully sent. \n");
+                        console.log("Message succesfully sent.");
                         sent_since_date = sent_since_date.concat([data.last_msg_date]);
                         message = message.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");
                         list = message.match(/\b(http:\/\/www\.\S+\.\w+|www\.\S+\.\w+|http:\/\/(?=[^w]){3}\S+[\.:]\S+)[^ ]+\b/g);
