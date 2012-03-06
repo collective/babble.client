@@ -50,6 +50,11 @@ class Chat(BrowserView):
             # We return the same output as the poll would have
             # returned...
             return json.dumps({'status': config.TIMEOUT})
+        except xmlrpclib.ProtocolError, e:
+            # Handle errors such as Unauthorized
+            log.warn('xmlrpclib.ProtocolError error for %s: %s %s' % (
+                    username, e.errcode, e.errmsg))
+            return json.dumps({'status': config.TIMEOUT})
 
         if not resp['is_registered']:
             password = str(random.random())
