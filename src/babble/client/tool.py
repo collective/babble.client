@@ -109,7 +109,8 @@ class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
         # If 'self' has no acquisition context, then we can't access
         # portal_url. I don't yet know why this happens :-/
         if self.use_local_service:
-            zope_root = getSite().aq_parent
+            site = getSite()
+            zope_root = site.unrestrictedTraverse('/')
             try:
                 return zope_root.unrestrictedTraverse(self.service_name)
             except KeyError, e:
