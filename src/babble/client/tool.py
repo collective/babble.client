@@ -110,6 +110,9 @@ class BabbleChatTool(UniqueObject, SimpleItemWithProperties):
         # portal_url. I don't yet know why this happens :-/
         if self.use_local_service:
             site = getSite()
+            if not site:
+                log.warn("No Site present. ZMI?")
+                return
             zope_root = site.unrestrictedTraverse('/')
             try:
                 return zope_root.unrestrictedTraverse(self.service_name)
