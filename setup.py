@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '2.0a5dev'
+version = '2.0b1'
 
 setup(
     name='babble.client',

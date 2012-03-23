@@ -1,7 +1,7 @@
 Changelog
 =========
 
-2.0a5 (unreleased)
+2.0b1 (2012-03-23)
 ------------------
 
 - Keep track of the timestamp of the last received message in the client
