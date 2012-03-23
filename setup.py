@@ -28,7 +28,7 @@ setup(
     install_requires=[
         'setuptools',
         'simplejson',
-        'babble.server >= 1.0b4',
+        'babble.server >= 1.0b5',
         'Products.CMFPlone',
         'five.grok',
         'plone.app.dexterity',
