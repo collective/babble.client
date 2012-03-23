@@ -4,9 +4,9 @@ Changelog
 2.0a5 (unreleased)
 ------------------
 
-- set the application/json Content-Type header in the poll request so post
-  publish transformations (like diazo) won't mess with the result [huub_bouma]
-
+- Keep track of the timestamp of the last received message in the client
+  (javascript). [jcbrand]
+- Various improvements to minimize write conflicts. [jcbrand]
 
 2.0a4 (2011-11-20)
 ------------------
