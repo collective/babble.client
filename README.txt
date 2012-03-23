@@ -66,12 +66,16 @@ currently available and to open and participate in them.
 Note: Chatting in a chat room happens the same was as the two-way chatboxes. The view
 of the chat room object only serves as a static record of the conversation.
 
-
-
 Compatibility:
 --------------
 
 Tested to work with Plone 4
+
+
+Dependencies:
+-------------
+
+Requires babble.server 1.0b5 or higher!
 
 
 Documentation:
@@ -79,12 +83,4 @@ Documentation:
 
 Full documentation for the **Babble** project can be found at
 http://babblechat.org
-
-
-TODO:
------
-
-- Remove the DTML variables by getting them from the DOM. Then we can use jUnit
-  for unit testing the js.
-
 
