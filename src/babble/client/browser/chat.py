@@ -280,6 +280,7 @@ class ChatBox(BrowserView):
         return self.template(
                         messages=messages,
                         audience=audience,
+                        last_msg_date=response['last_msg_date'],
                         box_id=box_id,
                         chat_type=chat_type,
                         chat_id=chat_id ,)

@@ -160,13 +160,14 @@ function handleChatEvents(chat_id) {
 
 function createChatBox(chat_id) {
     var path = sanitizePath('/@@render_chat_box');
+    var box_id = hash(chat_id);
     jQuery.ajax({
         url: path,
         cache: false,
         async: false,
         data: {
             chat_id: chat_id,
-            box_id: hash(chat_id),
+            box_id: box_id,
             tzoffset: -(new Date().getTimezoneOffset())
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -185,7 +186,7 @@ function createChatBox(chat_id) {
                 date.setMinutes(minutes);
                 jthis.replaceWith(date.toLocaleTimeString().substring(0,5));
             });
-            var last_msg_date = jQuery('div#'+chat_id).attr('last_msg_date');
+            var last_msg_date = jQuery('div#'+box_id).attr('last_msg_date');
             if ((last_msg_date !== undefined)&&(last_msg_date > global_received_date)) {
                 global_received_date = last_msg_date;
                 sent_since_date = [];
