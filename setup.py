@@ -36,7 +36,7 @@ setup(
         'plone.app.portlets',
     ],
     extras_require={
-    'test': 'plone.app.referenceablebehavior',
+    'test': ['plone.app.referenceablebehavior', 'Products.PloneTestCase',],
     },
     entry_points="""
     [z3c.autoinclude.plugin]
