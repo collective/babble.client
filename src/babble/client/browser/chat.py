@@ -1,3 +1,4 @@
+import sys
 import cgi
 import logging
 import random
@@ -148,6 +149,9 @@ class Chat(BrowserView):
         except xmlrpclib.Fault, e:
             err_msg = e.faultString
             log.warn('Error from chat.service: getNewMessages: %s' % err_msg)
+            return json.dumps({'status': config.SERVER_ERROR})
+        except:
+            log.warn("Unexpected error: %s", sys.exc_info()[0])
             return json.dumps({'status': config.SERVER_ERROR})
 
 
