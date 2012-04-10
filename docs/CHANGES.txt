@@ -1,10 +1,10 @@
 Changelog
 =========
 
-2.0b2 (unreleased)
+2.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Log an error when the deleted chatroom is not found on the server. [jcbrand] 
 
 
 2.0b1 (2012-03-23)
