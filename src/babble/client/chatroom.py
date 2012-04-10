@@ -106,6 +106,9 @@ def handleChatRoomRemoved(chatroom, event):
 
     if result['status'] == config.AUTH_FAIL:
         raise Unauthorized
+    elif result['status'] == config.NOT_FOUND:
+        log.error("The chatroom '%s' was not found on the chat server and "
+                "could not be deleted." % chatroom.Title())
 
 
 def _editChatRoom(chatroom):
